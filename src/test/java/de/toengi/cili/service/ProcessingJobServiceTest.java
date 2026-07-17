@@ -116,4 +116,25 @@ class ProcessingJobServiceTest {
 
         verify(repo, never()).save(any());
     }
+
+    @Test
+    void createSystemJob_withSource_persistsSource() {
+        when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ProcessingJob result = service.createSystemJob(
+            ProcessingJobType.TELEGRAM_IMPORT, "telegram-tiere", null);
+
+        assertThat(result.getSource()).isEqualTo("telegram-tiere");
+        assertThat(result.getType()).isEqualTo(ProcessingJobType.TELEGRAM_IMPORT);
+    }
+
+    @Test
+    void createSystemJob_withoutSource_leavesSourceNull() {
+        when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ProcessingJob result = service.createSystemJob(ProcessingJobType.THUMBNAIL, "info");
+
+        assertThat(result.getSource()).isNull();
+        assertThat(result.getResult()).isEqualTo("info");
+    }
 }

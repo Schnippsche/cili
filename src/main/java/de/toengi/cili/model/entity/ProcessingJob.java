@@ -25,6 +25,9 @@ public class ProcessingJob {
     @Column(nullable = false)
     private ProcessingJobType type;
 
+    @Column(length = 100)
+    private String source;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

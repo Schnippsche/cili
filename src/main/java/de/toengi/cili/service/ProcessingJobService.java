@@ -46,8 +46,14 @@ public class ProcessingJobService {
 
     @Transactional
     public ProcessingJob createSystemJob(ProcessingJobType type, String initialResult) {
+        return createSystemJob(type, null, initialResult);
+    }
+
+    @Transactional
+    public ProcessingJob createSystemJob(ProcessingJobType type, String source, String initialResult) {
         ProcessingJob job = ProcessingJob.builder()
             .type(type)
+            .source(source)
             .status(ProcessingJobStatus.PENDING)
             .maxAttempts(1)
             .result(initialResult)
