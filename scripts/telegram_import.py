@@ -80,6 +80,10 @@ WEBINAR_MAX_HEIGHT = int(os.getenv("WEBINAR_MAX_HEIGHT", "720"))
 
 TG_SOURCE   = os.getenv("TG_SOURCE", "")   # eindeutiger Bezeichner dieser Quelle, z.B. "telegram-tiere"
 
+# Bewusst NICHT pro Quelle aufgeteilt — alle Telegram-Quellen nutzen denselben Account
+# und damit dieselbe Telethon-Session. Zwei Prozesse dürfen diese Datei nie gleichzeitig
+# öffnen (SQLite "database is locked"), daher serialisiert AsyncConfig.telegramExecutor()
+# (maxPoolSize=1) alle Importe java-seitig auf einen Prozess zur selben Zeit.
 SESSION_FILE = str(Path(__file__).parent / "telegram_session")
 _STATE_FILE_SUFFIX = re.sub(r"[^a-zA-Z0-9_-]", "_", TG_SOURCE) if TG_SOURCE else "default"
 _STATE_FILE = Path(__file__).parent / f"telegram_import_{_STATE_FILE_SUFFIX}.state"

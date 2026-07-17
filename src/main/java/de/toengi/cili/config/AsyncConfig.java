@@ -86,10 +86,16 @@ public class AsyncConfig {
 
     @Bean(name = "telegramExecutor")
     public Executor telegramExecutor() {
+        // maxPoolSize bleibt bei 1: alle Telegram-Quellen teilen sich eine einzige
+        // Telethon-Session-Datei (scripts/telegram_import.py: SESSION_FILE), die nicht
+        // gleichzeitig aus mehreren Prozessen geöffnet werden darf. queueCapacity muss
+        // aber über der Quellenzahl liegen, sonst wird ein Trigger bei gleichzeitiger
+        // Auslastung mit TaskRejectedException verworfen, nachdem der ProcessingJob
+        // schon als PENDING gespeichert wurde — der Job bliebe dann für immer hängen.
         ThreadPoolTaskExecutor exec = new ThreadPoolTaskExecutor();
         exec.setCorePoolSize(1);
         exec.setMaxPoolSize(1);
-        exec.setQueueCapacity(1);
+        exec.setQueueCapacity(16);
         exec.setThreadNamePrefix("telegram-import-");
         exec.setWaitForTasksToCompleteOnShutdown(true);
         exec.setAwaitTerminationSeconds(120);
