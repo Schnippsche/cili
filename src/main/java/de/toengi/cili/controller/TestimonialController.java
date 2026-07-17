@@ -25,9 +25,10 @@ public class TestimonialController {
     @PreAuthorize("isAuthenticated()")
     public Page<TestimonialDto> list(
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) String source,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return service.list(q, PageRequest.of(page, Math.min(size, 50)));
+        return service.list(q, source, PageRequest.of(page, Math.min(size, 50)));
     }
 
     @GetMapping("/{id}")

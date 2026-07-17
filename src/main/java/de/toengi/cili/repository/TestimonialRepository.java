@@ -13,6 +13,8 @@ public interface TestimonialRepository extends JpaRepository<Testimonial, Long>,
 
     Page<Testimonial> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
+    Page<Testimonial> findBySourceOrderByCreatedAtDesc(String source, Pageable pageable);
+
     List<Testimonial> findAllByOrderByCreatedAtDesc();
 
     @Query(value = "SELECT * FROM testimonials ORDER BY created_at DESC LIMIT :max",

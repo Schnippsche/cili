@@ -56,10 +56,13 @@ public class TestimonialService {
 
     @PreAuthorize("isAuthenticated()")
     @Transactional(readOnly = true)
-    public Page<TestimonialDto> list(String q, Pageable pageable) {
+    public Page<TestimonialDto> list(String q, String source, Pageable pageable) {
         CiliUserDetails user = currentUser();
         if (!aclService.hasTestimonialsPermission(user.getUserId(), AclPermission.READ)) {
             throw new AccessDeniedException("Kein Zugriff auf Erfahrungsberichte");
+        }
+        if (source != null && !source.isBlank()) {
+            return repository.findBySourceOrderByCreatedAtDesc(source, pageable).map(this::toDto);
         }
         if (q != null && !q.isBlank()) {
             log.info("Erfahrungsberichte-Suche: user='{}' query='{}'", user.getUsername(), q.trim());

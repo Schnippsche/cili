@@ -30,4 +30,12 @@ class TestimonialRepositoryQueryTest {
             .getMethod("searchLike", List.class, org.springframework.data.domain.Pageable.class);
         assertThat(m).isNotNull();
     }
+
+    @Test
+    void findBySourceOrderByCreatedAtDesc_method_exists() throws NoSuchMethodException {
+        Method m = TestimonialRepository.class
+            .getMethod("findBySourceOrderByCreatedAtDesc", String.class,
+                org.springframework.data.domain.Pageable.class);
+        assertThat(m.getReturnType()).isEqualTo(org.springframework.data.domain.Page.class);
+    }
 }

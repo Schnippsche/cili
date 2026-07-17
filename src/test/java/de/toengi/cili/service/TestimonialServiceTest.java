@@ -185,7 +185,7 @@ class TestimonialServiceTest {
     void list_withQuery_callsSearchLike() {
         when(repository.searchLike(anyList(), any(Pageable.class))).thenReturn(Page.empty());
 
-        service.list("testsuche", PageRequest.of(0, 10));
+        service.list("testsuche", null, PageRequest.of(0, 10));
 
         verify(repository).searchLike(eq(List.of("testsuche")), any(Pageable.class));
         verify(repository, never()).findAllByOrderByCreatedAtDesc(any());
@@ -196,8 +196,31 @@ class TestimonialServiceTest {
         mockAuthenticatedUser(10L, UserRole.USER);
         when(aclService.hasTestimonialsPermission(10L, AclPermission.READ)).thenReturn(false);
 
-        assertThatThrownBy(() -> service.list(null, PageRequest.of(0, 10)))
+        assertThatThrownBy(() -> service.list(null, null, PageRequest.of(0, 10)))
             .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    void list_withSource_delegatesToFindBySource() {
+        Pageable pageable = PageRequest.of(0, 1);
+        when(repository.findBySourceOrderByCreatedAtDesc(eq("telegram-tiere"), eq(pageable)))
+            .thenReturn(Page.empty());
+
+        service.list(null, "telegram-tiere", pageable);
+
+        verify(repository).findBySourceOrderByCreatedAtDesc("telegram-tiere", pageable);
+        verify(repository, never()).findAllByOrderByCreatedAtDesc(any(Pageable.class));
+    }
+
+    @Test
+    void list_withoutSourceOrQuery_usesFindAll() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(repository.findAllByOrderByCreatedAtDesc(pageable)).thenReturn(Page.empty());
+
+        service.list(null, null, pageable);
+
+        verify(repository).findAllByOrderByCreatedAtDesc(pageable);
+        verify(repository, never()).findBySourceOrderByCreatedAtDesc(any(), any());
     }
 
     @Test
