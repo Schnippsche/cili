@@ -74,7 +74,6 @@ resize_videos.ps1
 ### Planning docs ###
 docs/superpowers/
 /scripts/youtube-cookies.txt
-.worktrees/
 
 ### Secrets & personal data ###
 scripts/telegram_import*.env
@@ -91,4 +90,4 @@ testimonials_import.sql
 images_import.sql
 zusammengefuhrt.csv
 /graphify-out/
-/graphify-out/
+/nginx/

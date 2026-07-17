@@ -15,8 +15,8 @@ class TelegramImportConfigTest {
     void setUp() {
         config = new TelegramImportConfig();
         TelegramImportConfig.Source lifestyle = new TelegramImportConfig.Source();
-        lifestyle.setName("telegram-lifestyle");
-        lifestyle.setLabel("Lifestyle");
+        lifestyle.setName("telegram-menschen");
+        lifestyle.setLabel("Menschen");
         lifestyle.setEnvName("telegram_import.env");
         lifestyle.setCron("0 0 1 * * *");
 
