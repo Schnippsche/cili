@@ -21,6 +21,9 @@ public class Testimonial {
     @Column(length = 500)
     private String tags;
 
+    @Column(length = 100)
+    private String source;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String text;
 
