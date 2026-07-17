@@ -90,7 +90,7 @@ export default function DocumentTranslationSection({
     try {
       const { jobId } = await requestDocumentTranslation(resourceId, sourceLang, targetLang);
       const placeholder: ProcessingJobDto = {
-        id: jobId, resourceId, type: 'DOCUMENT_TRANSLATE', status: 'PENDING',
+        id: jobId, resourceId, type: 'DOCUMENT_TRANSLATE', source: null, status: 'PENDING',
         attempts: 0, maxAttempts: 3, errorMessage: null, result: null,
         startedAt: null, finishedAt: null,
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),

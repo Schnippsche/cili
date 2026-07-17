@@ -123,7 +123,7 @@ export default function TranslationSection({
       );
       // Create a local placeholder job until first poll updates it
       const placeholder: ProcessingJobDto = {
-        id: jobId, resourceId, type: 'SUBTITLE_TRANSLATE', status: 'PENDING',
+        id: jobId, resourceId, type: 'SUBTITLE_TRANSLATE', source: null, status: 'PENDING',
         attempts: 0, maxAttempts: 3, errorMessage: null, result: null,
         startedAt: null, finishedAt: null,
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),

@@ -64,7 +64,8 @@ export interface ShareInfoDto  { originalName: string; mimeType: string; subtitl
 // ── Jobs ─────────────────────────────────────────────────────────────────
 export type JobStatus = 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED' | 'CANCELLED';
 export type JobType = 'THUMBNAIL' | 'TRANSCODE' | 'VIDEO_TRANSCODE' | 'WAV_EXTRACT' | 'WHISPER_TRANSCRIBE' | 'OCR' | 'PREVIEW' | 'VIDEO_ANALYSIS' | 'SUBTITLE_TRANSLATE' | 'DOCUMENT_TRANSLATE' | 'VIDEO_URL_IMPORT';
-export interface ProcessingJobDto { id: number; resourceId: number; type: JobType; status: JobStatus; attempts: number; maxAttempts: number; errorMessage: string | null; result: string | null; startedAt: string | null; finishedAt: string | null; createdAt: string; updatedAt: string; }
+export interface ProcessingJobDto { id: number; resourceId: number; type: JobType; source: string | null; status: JobStatus; attempts: number; maxAttempts: number; errorMessage: string | null; result: string | null; startedAt: string | null; finishedAt: string | null; createdAt: string; updatedAt: string; }
+export interface TelegramSourceDto { name: string; label: string; }
 
 // ── Language ─────────────────────────────────────────────────────────────
 export interface LanguageOptionDto { code: string; label: string; translationSupported: boolean; }

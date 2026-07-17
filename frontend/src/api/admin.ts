@@ -1,5 +1,5 @@
 import axiosClient from './axiosClient';
-import type { AclEntryDto, CreateGroupRequest, CreateUserRequest, GroupDto, JobStatus, LogResponse, PageResponse, ProcessingJobDto, UpdateGroupRequest, UpdateUserRequest, UserDto } from '../types/api';
+import type { AclEntryDto, CreateGroupRequest, CreateUserRequest, GroupDto, JobStatus, LogResponse, PageResponse, ProcessingJobDto, TelegramSourceDto, UpdateGroupRequest, UpdateUserRequest, UserDto } from '../types/api';
 
 export interface FolderItem { id: number; name: string; path: string; }
 
@@ -130,8 +130,13 @@ export async function deleteCompletedJobs(): Promise<void> {
   await axiosClient.delete('/admin/jobs/completed');
 }
 
-export async function triggerTelegramImport(): Promise<ProcessingJobDto> {
-  const { data } = await axiosClient.post<ProcessingJobDto>('/admin/jobs/telegram-import/trigger');
+export async function listTelegramSources(): Promise<TelegramSourceDto[]> {
+  const { data } = await axiosClient.get<TelegramSourceDto[]>('/admin/jobs/telegram-import/sources');
+  return data;
+}
+
+export async function triggerTelegramImport(source: string): Promise<ProcessingJobDto> {
+  const { data } = await axiosClient.post<ProcessingJobDto>(`/admin/jobs/telegram-import/trigger/${source}`);
   return data;
 }
 
