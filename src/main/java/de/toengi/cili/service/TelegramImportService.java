@@ -34,32 +34,39 @@ public class TelegramImportService {
     @Autowired @Lazy
     private TelegramImportService self;
 
-    public boolean isRunning() {
-        return jobRepository.existsByTypeAndStatusIn(
-            ProcessingJobType.TELEGRAM_IMPORT,
+    public boolean isRunning(String source) {
+        return jobRepository.existsByTypeAndSourceAndStatusIn(
+            ProcessingJobType.TELEGRAM_IMPORT, source,
             List.of(ProcessingJobStatus.PENDING, ProcessingJobStatus.RUNNING));
     }
 
+    public List<TelegramImportConfig.Source> listSources() {
+        return config.getSources();
+    }
+
     /**
-     * Erstellt einen Job-Eintrag und startet das Python-Skript asynchron.
-     * Wirft IllegalStateException wenn bereits ein Import läuft.
+     * Erstellt einen Job-Eintrag für die angegebene Quelle und startet das
+     * Python-Skript asynchron. Wirft IllegalArgumentException bei unbekannter
+     * Quelle, IllegalStateException wenn für diese Quelle bereits ein Import läuft.
      */
-    public ProcessingJob triggerAndRun() {
-        if (isRunning()) {
-            throw new IllegalStateException("Ein Telegram-Import-Job läuft bereits");
+    public ProcessingJob triggerAndRun(String source) {
+        TelegramImportConfig.Source cfg = config.findSource(source)
+            .orElseThrow(() -> new IllegalArgumentException("Unbekannte Telegram-Quelle: " + source));
+        if (isRunning(source)) {
+            throw new IllegalStateException("Ein Telegram-Import-Job für '" + source + "' läuft bereits");
         }
-        ProcessingJob job = jobService.createSystemJob(ProcessingJobType.TELEGRAM_IMPORT);
-        self.executeAsync(job.getId());
+        ProcessingJob job = jobService.createSystemJob(ProcessingJobType.TELEGRAM_IMPORT, source, null);
+        self.executeAsync(job.getId(), cfg);
         return job;
     }
 
     @Async("telegramExecutor")
-    public void executeAsync(Long jobId) {
+    public void executeAsync(Long jobId, TelegramImportConfig.Source source) {
         ProcessingJob job = jobService.reloadJob(jobId);
         jobService.markRunning(job, "telegram-import");
-        log.info("Telegram-Import gestartet (Job {})", jobId);
+        log.info("Telegram-Import gestartet (Job {}, Quelle {})", jobId, source.getName());
 
-        List<String> cmd = buildCommand();
+        List<String> cmd = buildCommand(source);
         ProcessBuilder pb = PythonProcessUtils.forScript(cmd, global.resolve(config.getScriptName()));
         pb.redirectErrorStream(true);
 
@@ -68,7 +75,7 @@ public class TelegramImportService {
 
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-                reader.lines().forEach(line -> log.info("[telegram-import] {}", line));
+                reader.lines().forEach(line -> log.info("[telegram-import:{}] {}", source.getName(), line));
             }
 
             boolean finished = process.waitFor(config.getTimeoutMinutes(), TimeUnit.MINUTES);
@@ -77,16 +84,17 @@ public class TelegramImportService {
             if (!finished) {
                 process.destroyForcibly();
                 jobService.markFailed(job, "Timeout nach " + config.getTimeoutMinutes() + " Minuten");
-                log.warn("Telegram-Import abgebrochen: Timeout (Job {})", jobId);
+                log.warn("Telegram-Import ({}) abgebrochen: Timeout (Job {})", source.getName(), jobId);
             } else if (process.exitValue() == 0) {
                 jobService.markDone(job, null);
-                log.info("Telegram-Import erfolgreich abgeschlossen (Job {})", jobId);
+                log.info("Telegram-Import ({}) erfolgreich abgeschlossen (Job {})", source.getName(), jobId);
             } else {
                 jobService.markFailed(job, "Skript beendet mit Exit-Code " + process.exitValue());
-                log.error("Telegram-Import fehlgeschlagen: Exit-Code {} (Job {})", process.exitValue(), jobId);
+                log.error("Telegram-Import ({}) fehlgeschlagen: Exit-Code {} (Job {})",
+                    source.getName(), process.exitValue(), jobId);
             }
         } catch (Exception e) {
-            log.error("Telegram-Import: unerwarteter Fehler (Job {})", jobId, e);
+            log.error("Telegram-Import ({}): unerwarteter Fehler (Job {})", source.getName(), jobId, e);
             try {
                 job = jobService.reloadJob(jobId);
                 jobService.markFailed(job, e.getMessage());
@@ -94,11 +102,11 @@ public class TelegramImportService {
         }
     }
 
-    private List<String> buildCommand() {
+    private List<String> buildCommand(TelegramImportConfig.Source source) {
         List<String> cmd = new ArrayList<>();
         cmd.add(global.getPythonPath());
         cmd.add(global.resolve(config.getScriptName()));
-        String envPath = global.resolve(config.getEnvName());
+        String envPath = global.resolve(source.getEnvName());
         if (envPath != null) {
             cmd.add("--env");
             cmd.add(envPath);
