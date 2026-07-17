@@ -1,0 +1,82 @@
+########### Vorschlag 1:
+
+"format": (
+    f"bv*[height<={max_height}]+ba/"
+    f"b[height<={max_height}]/"
+    f"best"
+)
+
+############## Vorschlag 2:
+ydl_opts = {
+    "outtmpl": str(tmp_dir / "%(id)s.%(ext)s"),
+    "format": "bv*+ba/b",
+    "merge_output_format": "mp4",
+    "postprocessors": [{
+        "key": "FFmpegVideoConvertor",
+        "preferedformat": "mp4"
+    }],
+    "cookiefile": cookies_file,
+    "postprocessor_hooks": [_pp_progress_hook],
+}
+
+Pfad anpassen:
+statt:
+ upload_name = f"{resolved_title}.mp4"
+ final_file  = tmp_dir / upload_name
+ tmp_file.rename(final_file)
+nimm:
+final_file = tmp_dir / f"{resolved_title}{tmp_file.suffix}"
+tmp_file.rename(final_file)
+
+Immer nach mp4 konvertieren:
+if tmp_file.suffix.lower() != ".mp4":
+    # mit ffmpeg nach mp4 konvertieren
+
+
+youtube spezifisch:
+ydl_opts = {
+    "outtmpl": str(tmp_dir / "%(id)s.%(ext)s"),
+
+    # Beste Qualität, unabhängig von der Plattform
+    "format": "bv*+ba/b",
+
+    # Möglichst MP4 erzeugen
+    "merge_output_format": "mp4",
+
+    # Robuster gegen Netzwerkprobleme
+    "retries": 10,
+    "fragment_retries": 10,
+    "extractor_retries": 5,
+
+    "quiet": True,
+    "no_warnings": True,
+
+    "postprocessor_hooks": [_pp_progress_hook],
+}
+
+
+ffrom urllib.parse import urlparse
+
+ def is_youtube_url(url: str) -> bool:
+     host = (urlparse(url).hostname or "").lower()
+     return host.endswith("youtube.com") or host.endswith("youtu.be")
+
+if is_youtube_url(url):
+    ydl_opts.update({
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android", "web"]
+            }
+        }
+    })
+
+    if cookies_file:
+        ydl_opts["cookiefile"] = cookies_file
+
+    if password:
+    ydl_opts["videopassword"] = password
+
+
+####################################
+
+Erfahrungsberichte import: Es wurde einer importiert der nur zwei Wörter hat! Fixen!

@@ -1,0 +1,29 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:h2:mem:cili_test;DB_CLOSE_DELAY=-1;MODE=MySQL;NON_KEYWORDS=VALUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+logging:
+  level:
+    org.hibernate.orm.jdbc.error: ERROR
+
+cili:
+  search:
+    use-fulltext: false   # H2 does not support MATCH() AGAINST()
+  jwt:
+    secret: testSecretKeyThatMustBeAtLeast256BitsLongForHS256AlgorithmToWork000
+    access-token-expiry: 900000
+    refresh-token-expiry: 604800000
+  storage:
+    base-path: /tmp/cili-test

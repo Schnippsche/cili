@@ -1,0 +1,7 @@
+package de.toengi.cili.model.enums;
+
+public enum AclPermission {
+    READ, WRITE, DELETE, DOWNLOAD, UPLOAD,
+    SHARE, MANAGE_METADATA, MANAGE_SUBTITLES, TRANSLATE_SUBTITLES, ADMIN,
+    MANAGE_TEMPLATES
+}

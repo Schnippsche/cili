@@ -1,0 +1,63 @@
+[Unit]
+Description=CILI Media Manager
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+User=cili
+Group=cili
+WorkingDirectory=/opt/cili
+
+# Environment variables
+EnvironmentFile=-/opt/cili/cili.env
+Environment="JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64"
+Environment="LANG=de_DE.UTF-8"
+Environment="LC_ALL=de_DE.UTF-8"
+
+# JVM-Parameter — Richtwerte für verschiedene RAM-Größen:
+#   8 GB RAM (empfohlen): -Xmx3g  → lässt ~5 GB für Whisper (~1,5 GB), MySQL (~400 MB), OS
+#   4 GB RAM (minimal):   -Xmx2g  → eng; Whisper medium kann OOM-gekillt werden
+# WICHTIG: Xmx bezieht sich nur auf den Java-Heap. Whisper/NLLB laufen als externe
+# Python-Prozesse und brauchen zusätzlichen RAM außerhalb der JVM.
+# -Xms1g: initial heap (schnellerer Start, wächst bei Bedarf bis Xmx)
+# -XX:+UseG1GC: G1 Garbage Collector (empfohlen ab 2 GB Heap)
+# -XX:MaxGCPauseMillis=200: angestrebte maximale GC-Pause
+# -XX:+AlwaysPreTouch: Speicher sofort reservieren (verhindert Latenzen später)
+ExecStart=/usr/lib/jvm/java-21-openjdk-amd64/bin/java \
+  -Xmx3g \
+  -Xms1g \
+  -XX:+UseG1GC \
+  -XX:MaxGCPauseMillis=200 \
+  -XX:+AlwaysPreTouch \
+  -XX:G1NewCollectionPercentThreshold=35 \
+  -Dfile.encoding=UTF-8 \
+  -Dstdout.encoding=UTF-8 \
+  -Dstderr.encoding=UTF-8 \
+  -Dspring.profiles.active=prod \
+  -Dspring.config.location=file:/opt/cili/application-prod.properties \
+  -Dlogging.config=file:/opt/cili/logback-spring.xml \
+  -jar /opt/cili/cili-app.war
+
+# Auto-restart bei Fehler
+Restart=on-failure
+RestartSec=15
+
+# Limits
+LimitNOFILE=65535
+LimitNPROC=65535
+
+# Security
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+NoNewPrivileges=true
+ReadWritePaths=/var/cili/data /var/log/cili
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cili
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,132 @@
+CSV-Erfahrungsberichte verarbeiten
+
+Verarbeite CSV-Datensätze aus der Datei "erfahrungsberichte_01.csv" mit Erfahrungsberichten nach folgenden Regeln.
+
+CSV-Struktur
+
+| Spalte | Inhalt |
+|--------|--------|
+| 1 | Autor (ggf. korrigieren) |
+| 2 | Datum |
+| 3 | Erfahrungsbericht-Text |
+| 4 | Hashtags (kommagetrennt) |
+| 5 | Bilder (kommagetrennte Dateien/URLs) |
+| 6 | UUID (nur bei Bildern, sonst leer) |
+
+Verarbeitungsschritte
+Datum normalisieren
+
+Konvertiere alle Datumsformate zu YYYY-MM-DD vor allen weiteren Schritten.
+
+Beispiele:
+• 01.02.2024 → 2024-02-01
+• 1.2.24 → 2024-02-01
+• Feb 1, 2024 → 2024-02-01
+
+Nicht erkennbare Datumsangaben unverändert übernehmen. Das normalisierte Datum für UUID-Erzeugung und Ausgabe verwenden.
+
+Irrelevante Einträge entfernen
+
+Entfernen:
+• Werbung, reine Fragen, Diskussionen ohne Erfahrung
+• Automatisch generierte oder inhaltsleere Texte
+• Reine Bildbeschreibungen, allgemeine Aussagen ohne konkrete Beobachtung
+• Zu kurze Texte, mindestens 50 Zeichen lang
+
+Als Erfahrungsbericht gilt (mindestens ein Merkmal):
+• Persönliche Erfahrung oder Beobachtung
+• Beschreibung eines Ereignisses, Verlaufs, Symptoms
+• Bewertung aufgrund eigener Erfahrung
+
+Berichte über Tiere (Symptome, Verhalten, Behandlung) zählen als Erfahrungsberichte.
+Ich-Form nicht erforderlich.
+
+Bei Unsicherheit: behalten.
+
+Text bereinigen
+• Rechtschreibung und Grammatik korrigieren
+• Emojis, störende Sonderzeichen, URLs, Signaturen entfernen
+• Wiederholungen kürzen, Fragmente vervollständigen
+• Zeichensetzung und Absätze verbessern
+• Umgangssprache nur bei deutlicher Lesbarkeitsverbesserung anpassen
+
+Nicht: Inhalte verfälschen, Informationen hinzufügen, interpretieren oder diagnostizieren.
+
+Autor korrigieren und anonymisieren
+• Tatsächlichen Verfasser ermitteln (bei Tierberichten: Halter, nicht Tier)
+• Format: Vorname + Anfangsbuchstabe Nachname (Max Mustermann → Max M.)
+• Bei unklarer Zuordnung: vorhandenen Autor übernehmen
+• Vollständige Namen anderer Personen im Text anonymisieren
+• Namensnennung am Textanfang entfernen oder neutral formulieren
+
+Lange Texte kürzen
+
+Ziel: ~1.500 Zeichen, sofern wesentliche Informationen erhalten bleiben.
+
+• Kernaussagen und wichtige Beobachtungen beibehalten
+• Wiederholungen und Nebensächliches kürzen
+• Stil und Aussage erhalten
+
+Hashtags verarbeiten
+Alle Hashtags im Text erkennen
+In Hashtag-Spalte übernehmen (# entfernen)
+Im Text nur das Wort belassen (ohne #)
+Mit bestehenden Hashtags zusammenführen
+Duplikate entfernen, Schreibweise vereinheitlichen
+
+Keine neuen Hashtags erfinden.
+
+Beispiel:
+
+| | Vorher | Nachher |
+|---|--------|---------|
+| Text | Ich hatte #Husten und #Schlafprobleme. | Ich hatte Husten und Schlafprobleme. |
+| Hashtags | Erfahrung | Erfahrung,Husten,Schlafprobleme |
+
+Bilder und UUID
+
+Bilder: Unverändert übernehmen.
+
+UUID-Regeln:
+• Bilder vorhanden → UUID erforderlich
+• Keine Bilder → UUID-Spalte leer
+• Bestehende gültige UUIDv5 übernehmen
+• Neue UUIDv5 nur erzeugen, wenn Bilder vorhanden und keine UUID existiert
+
+UUIDv5-Eingabe:
+
+``
+Autor|Datum|Bereinigter_Text
+`
+
+Beispiel:
+`
+Max M.|2024-01-15|Ich hatte Husten und Schlafprobleme.
+`
+
+Die UUID ist deterministisch: identische Eingabe → identische UUID.
+
+Datenschutz
+
+Entfernen oder anonymisieren:
+• Vollständige Namen (außer Autor-Feld)
+• Telefonnummern, E-Mails, Adressen, Kundennummern
+
+Medizinische und tierbezogene Inhalte im Bericht behalten.
+
+Ausgabe
+
+CSV mit identischer Spaltenstruktur:
+
+`
+Autor,Datum,Erfahrungsbericht,Hashtags,Bilder,UUID
+``
+
+Anforderungen:
+• UTF-8-Kodierung
+• Nur bereinigte Erfahrungsberichte
+• Reihenfolge beibehalten
+• Zeilenumbrüche und Anführungszeichen korrekt escapen
+• Keine leeren Zeilen, keine zusätzlichen Spalten
+
+Hier sind die Daten:

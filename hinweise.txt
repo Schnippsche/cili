@@ -1,0 +1,594 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    CILI PRODUCTION DEPLOYMENT - HINWEISE                     ║
+║                                                                              ║
+║  Deployment Setup:                                                           ║
+║  - Ubuntu Server 24.04 LTS (Container in Proxmox)                           ║
+║  - Java 24 + Tomcat 11 + MySQL 8.4                                          ║
+║  - Nginx Reverse Proxy (extern auf 192.168.178.110)                         ║
+║  - Cloudflare SSL + interner HTTP-Zugriff                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+1. NETZWERK-KONFIGURATION
+═══════════════════════════════════════════════════════════════════════════════
+
+Nginx Server (extern):
+  IP: 192.168.178.110
+  Port 80: HTTP (intern)
+  Port 443: HTTPS (extern via Cloudflare)
+  OS: beliebig (mit nginx)
+
+CILI Container (Proxmox):
+  IP: 192.168.178.120
+  Hostname: cili-prod
+  Port 8080: Tomcat (intern für Nginx)
+  OS: Ubuntu 24.04 LTS
+  RAM: 4GB
+  Cores: 2
+  Storage: 20GB Root + 1TB Data (/var/cili/data)
+
+Cloudflare:
+  Domain: cili.example.com
+  DNS A-Record: 192.168.178.110
+  Proxy: ✅ Proxied (orange cloud)
+  SSL: Full oder Full (strict)
+
+Interner Zugriff:
+  HTTP: http://192.168.178.110
+  Hostname: cili.local oder cili (via Hosts-Datei)
+
+Externer Zugriff:
+  HTTPS: https://cili.example.com (über Cloudflare)
+
+═══════════════════════════════════════════════════════════════════════════════
+2. CONTAINER ERSTELLEN (Proxmox)
+═══════════════════════════════════════════════════════════════════════════════
+
+Option A: CLI (schneller)
+  pct create 100 local:vztmpl/ubuntu-24.04-standard_24.04-1_amd64.tar.zst \
+    --hostname cili-prod \
+    --cores 2 \
+    --memory 4096 \
+    --storage local-lvm \
+    --rootfs local-lvm:20 \
+    --net0 name=eth0,bridge=vmbr0,ip=192.168.178.120/24,gw=192.168.178.1
+
+  pct start 100
+  pct shell 100
+
+Option B: Proxmox Web UI
+  - Create CT
+  - Template: Ubuntu 24.04 LTS
+  - Hostname: cili-prod
+  - Resources: 4GB RAM, 2 Cores, 20GB Root
+  - Network: Static IP 192.168.178.120/24
+
+═══════════════════════════════════════════════════════════════════════════════
+3. SETUP-SCRIPT IM CONTAINER AUSFÜHREN
+═══════════════════════════════════════════════════════════════════════════════
+
+# Im Container (nach pct shell 100):
+
+# Setup Script downloaden
+curl -o setup.sh https://raw.githubusercontent.com/dein-repo/cili/master/setup-ubuntu-24.04-no-nginx.sh
+chmod +x setup.sh
+
+# Setup mit DB-Passwort ausführen
+bash setup.sh "MySecurePassword123!"
+
+# Das Script installiert:
+  ✓ Java 24
+  ✓ MySQL 8.4 (mit cili-Datenbank)
+  ✓ Tomcat 11 (Port 8080)
+  ✓ FFmpeg & LibreOffice
+  ✓ Monitoring & Backup-Scripts
+  ✓ Log-Rotation
+  ✓ Firewall (SSH + 8080)
+
+# Abmelden
+exit
+
+# IP überprüfen
+pct exec 100 hostname -I
+# Sollte: 192.168.178.120
+
+═══════════════════════════════════════════════════════════════════════════════
+4. NGINX KONFIGURATION (auf 192.168.178.110)
+═══════════════════════════════════════════════════════════════════════════════
+
+# SSH auf Nginx-Server
+ssh user@192.168.178.110
+
+# Datei erstellen: /etc/nginx/sites-available/cili
+sudo nano /etc/nginx/sites-available/cili
+
+# INHALT (siehe nginx-config unten in diesem File)
+# ...
+
+# Aktivieren
+sudo ln -s /etc/nginx/sites-available/cili /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+
+# Status prüfen
+sudo systemctl status nginx
+
+# Logs anschauen
+sudo tail -f /var/log/nginx/cili_local.log
+sudo tail -f /var/log/nginx/cili_external.log
+
+═══════════════════════════════════════════════════════════════════════════════
+5. LOKALE HOSTS-DATEI KONFIGURIEREN
+═══════════════════════════════════════════════════════════════════════════════
+
+# Windows: C:\Windows\System32\drivers\etc\hosts
+# Linux/Mac: /etc/hosts
+
+# Hinzufügen:
+192.168.178.110  cili.local
+192.168.178.110  cili
+
+# Speichern und neu laden
+# Windows: ipconfig /flushdns
+# Linux: sudo systemctl restart systemd-resolved
+# Mac: sudo dscacheutil -flushcache
+
+═══════════════════════════════════════════════════════════════════════════════
+6. WAR BAUEN UND DEPLOYEN
+═══════════════════════════════════════════════════════════════════════════════
+
+# Lokal (auf Windows):
+.\mvnw.cmd clean package -DskipTests -q
+
+# Zum Container kopieren:
+scp target/cili-app.war root@192.168.178.120:/opt/cili/
+
+# Im Container ausführen:
+ssh root@192.168.178.120
+
+  chown tomcat:tomcat /opt/cili/cili-app.war
+  chmod 640 /opt/cili/cili-app.war
+  systemctl restart tomcat11
+  sleep 5
+  curl http://localhost:8080/api/actuator/health | jq .
+
+# Abmelden
+exit
+
+═══════════════════════════════════════════════════════════════════════════════
+7. TESTING
+═══════════════════════════════════════════════════════════════════════════════
+
+# 1. Container-Konnektivität
+ping 192.168.178.120
+# → sollte antworten
+
+# 2. Tomcat direkt
+curl http://192.168.178.120:8080/api/actuator/health
+# → {"status":"UP",...}
+
+# 3. Nginx Intern (HTTP)
+curl http://192.168.178.110/api/actuator/health
+# → {"status":"UP",...}
+
+# 4. Intern mit Hostname
+curl http://cili.local/api/actuator/health
+# → {"status":"UP",...}
+
+# 5. Extern (HTTPS via Cloudflare)
+curl https://cili.example.com/api/actuator/health
+# → {"status":"UP",...}
+
+# 6. Nginx Logs prüfen
+ssh user@192.168.178.110
+tail -f /var/log/nginx/cili_local.log
+
+# 7. Container Logs
+ssh root@192.168.178.120
+tail -f /var/log/cili/cili.log
+journalctl -u tomcat11 -f
+
+═══════════════════════════════════════════════════════════════════════════════
+8. DATENBANK-CREDENTIALS
+═══════════════════════════════════════════════════════════════════════════════
+
+Database: cili
+User: cili@localhost
+Password: MySecurePassword123!  (aus Setup-Script)
+Host: 192.168.178.120:3306
+
+# Credentials sind auch gespeichert in:
+/opt/cili/cili.env  (DB_PASSWORD)
+
+# Datenbank testen:
+ssh root@192.168.178.120
+mysql -u cili -p$(grep DB_PASSWORD /opt/cili/cili.env | cut -d= -f2) cili -e "SELECT 1;"
+
+═══════════════════════════════════════════════════════════════════════════════
+9. WICHTIGE PFADE IM CONTAINER
+═══════════════════════════════════════════════════════════════════════════════
+
+/opt/cili/
+  └─ cili-app.war              # Application WAR
+  └─ cili.env                  # Environment Variables
+  └─ application-prod.properties
+  └─ logback-spring.xml
+  └─ health-check.sh           # Health Check Script
+  └─ backup-db.sh              # DB Backup Script
+  └─ backup-data.sh            # Data Backup Script
+  └─ backups/
+      └─ mysql/                # DB Backups
+      └─ data/                 # Data Backups
+
+/var/cili/data/                # Datei-Speicher (1TB)
+  └─ resources/                # Hochgeladene Dateien
+  └─ uploads/                  # Chunk-Uploads in Arbeit
+
+/var/log/cili/
+  └─ cili.log                  # Application Log
+  └─ cili-error.log            # Error Log
+  └─ health-check.log          # Health Check Log
+  └─ backup.log                # Backup Log
+  └─ access.log                # (Nginx Access im Container, falls installiert)
+
+/etc/mysql/mysql.conf.d/cili.cnf
+/etc/default/tomcat11          # Tomcat JVM Config
+/etc/logrotate.d/cili          # Log Rotation
+/etc/cron.d/cili-monitoring    # Cron Jobs
+
+═══════════════════════════════════════════════════════════════════════════════
+10. TÄGLICHE BEFEHLE
+═══════════════════════════════════════════════════════════════════════════════
+
+# Container in Proxmox starten/stoppen
+pct start 100
+pct stop 100
+pct reboot 100
+
+# In Container gehen
+pct shell 100
+
+# SSH zum Container
+ssh root@192.168.178.120
+
+# Service Status
+systemctl status tomcat11
+systemctl status mysql
+systemctl status nginx       # (auf Nginx Server)
+
+# Service Restart
+systemctl restart tomcat11
+systemctl restart mysql
+systemctl restart nginx      # (auf Nginx Server)
+
+# Logs anschauen
+tail -f /var/log/cili/cili.log
+tail -f /var/log/cili/cili-error.log
+journalctl -u tomcat11 -f
+
+# Health Check
+curl http://cili.local/api/actuator/health | jq .
+
+# Backup manuell ausführen
+/opt/cili/backup-db.sh
+/opt/cili/backup-data.sh
+
+# Monitoring Dashboard (im Container)
+/opt/cili/monitor.sh
+
+# Disk-Speicher prüfen
+df -h /var/cili/data
+du -sh /var/cili/data
+
+# Backup Status anschauen
+ls -lah /opt/cili/backups/mysql/
+ls -lah /opt/cili/backups/data/
+
+═══════════════════════════════════════════════════════════════════════════════
+11. CLOUDFLARE DNS SETUP
+═══════════════════════════════════════════════════════════════════════════════
+
+Im Cloudflare Dashboard:
+
+1. DNS Records:
+   Name: cili (oder @)
+   Type: A
+   IP: 192.168.178.110
+   TTL: Auto
+   Proxy: ✅ Proxied (orange cloud)
+
+2. SSL/TLS Settings:
+   Encryption mode: "Full (strict)" oder "Full"
+
+3. Security:
+   DDoS Protection: ✅ Default
+   Bot Management: ✅ Default
+
+4. Cache Rules:
+   /api/* → Cache Level: Bypass (wichtig für dynamische Inhalte)
+   /api/actuator/* → Cache Level: Bypass
+
+═══════════════════════════════════════════════════════════════════════════════
+12. MONITORING & HEALTH CHECKS
+═══════════════════════════════════════════════════════════════════════════════
+
+CONTAINER HEALTH CHECK (auf 192.168.178.120):
+  ✓ Alle 5 Minuten via Cron (/etc/cron.d/cili-monitoring)
+  ✓ Prüft: Tomcat, MySQL, Disk (nur lokale Services)
+  ✓ Auto-Restart: Tomcat, MySQL wenn down
+  ✓ Log: /var/log/cili/health-check.log
+
+NGINX HEALTH CHECK (auf 192.168.178.110):
+  ✓ Alle 5 Minuten via Cron (/etc/cron.d/cili-monitoring)
+  ✓ Prüft: Nginx, SSL-Zertifikat, Disk (nur lokale Services)
+  ✓ Auto-Restart: Nginx wenn down
+  ✓ Log: /var/log/cili/health-check-nginx.log
+
+Prinzip:
+  ✓ Jeder Server prüft nur seine eigenen Services
+  ✓ Keine Abhängigkeiten zwischen den Checks
+  ✓ Container-Check kennt Nginx nicht
+  ✓ Nginx-Check kennt CILI-Details nicht
+
+Automatische Backups:
+  ✓ Täglich um 2 Uhr: MySQL Backup
+  ✓ Sonntag um 1 Uhr: Data Backup
+  ✓ Aufbewahrung: MySQL 30 Tage, Data 7 Tage
+
+Health Endpoint:
+  http://cili.local/api/actuator/health
+  http://192.168.178.110/api/actuator/health
+
+Metriken (Prometheus):
+  http://cili.local/api/actuator/prometheus
+
+═══════════════════════════════════════════════════════════════════════════════
+13. TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+Problem: Container nicht erreichbar
+  → Ping: ping 192.168.178.120
+  → SSH: ssh root@192.168.178.120
+  → Proxmox Status prüfen: pct status 100
+
+Problem: Tomcat läuft nicht
+  ssh root@192.168.178.120
+  systemctl status tomcat11
+  systemctl restart tomcat11
+  tail -f /var/log/cili/cili.log
+
+Problem: MySQL Connection Error
+  ssh root@192.168.178.120
+  systemctl status mysql
+  mysql -u cili -p$(grep DB_PASSWORD /opt/cili/cili.env | cut -d= -f2) cili -e "SELECT 1;"
+
+Problem: Nginx zeigt 502 Bad Gateway
+  ssh user@192.168.178.110
+  curl http://192.168.178.120:8080/api/actuator/health
+  tail -f /var/log/nginx/cili_local_error.log
+
+Problem: Große Uploads fehlgeschlagen
+  Prüfe Nginx Timeouts (client_body_timeout, proxy_send_timeout)
+  Prüfe Tomcat Buffer (max-http-post-size)
+  Logs: tail -f /var/log/cili/cili.log
+
+Problem: Disk full (>90%)
+  → Health-Check schlägt fehl
+  → Alte Backups löschen: rm -rf /opt/cili/backups/mysql/*.sql.gz (älter 30 Tage)
+  → Alte Logs löschen: rm -rf /var/log/cili/*.log.gz (älter 30 Tage)
+
+═══════════════════════════════════════════════════════════════════════════════
+14. FIREWALL-REGELN
+═══════════════════════════════════════════════════════════════════════════════
+
+CILI Container (192.168.178.120):
+  ✓ SSH (22) - nur lokal nötig
+  ✓ Tomcat (8080) - von Nginx Server (192.168.178.110)
+  ✗ MySQL (3306) - nur localhost
+  ✗ Alles andere geschlossen
+
+Nginx Server (192.168.178.110):
+  ✓ SSH (22) - nach Bedarf
+  ✓ HTTP (80) - von überall (Cloudflare)
+  ✓ HTTPS (443) - von überall (Cloudflare)
+  ✓ Port 8080 - nach 192.168.178.120 erlaubt
+
+═══════════════════════════════════════════════════════════════════════════════
+15. NGINX KONFIGURATION (KOMPLETTE DATEI)
+═══════════════════════════════════════════════════════════════════════════════
+
+Datei: /etc/nginx/sites-available/cili
+
+---BEGIN---
+
+upstream cili_tomcat {
+  server 192.168.178.120:8080 fail_timeout=0 max_fails=3;
+}
+
+# ===== INTERN (HTTP) =====
+server {
+  listen 80;
+  server_name cili.local cili cili.192.168.178.110;
+
+  client_max_body_size 2G;
+  client_body_buffer_size 128m;
+  client_body_timeout 600s;
+  proxy_send_timeout 600s;
+  proxy_read_timeout 600s;
+
+  location / {
+    proxy_pass http://cili_tomcat;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto http;
+    proxy_buffering off;
+    proxy_request_buffering off;
+  }
+
+  access_log /var/log/nginx/cili_local.log combined;
+  error_log /var/log/nginx/cili_local_error.log warn;
+}
+
+# ===== EXTERN (HTTPS via Cloudflare) =====
+server {
+  listen 80;
+  server_name cili.example.com;
+  return 301 https://$server_name$request_uri;
+}
+
+server {
+  listen 443 ssl http2;
+  server_name cili.example.com www.cili.example.com;
+
+  ssl_certificate /etc/ssl/certs/cloudflare-origin.crt;
+  ssl_certificate_key /etc/ssl/private/cloudflare-origin.key;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_ciphers HIGH:!aNULL:!MD5;
+  ssl_prefer_server_ciphers on;
+
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header X-Frame-Options "SAMEORIGIN" always;
+
+  client_max_body_size 2G;
+  client_body_buffer_size 128m;
+  client_body_timeout 600s;
+  proxy_connect_timeout 60s;
+  proxy_send_timeout 600s;
+  proxy_read_timeout 600s;
+
+  location / {
+    proxy_pass http://cili_tomcat;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Host $server_name;
+    proxy_buffering off;
+    proxy_request_buffering off;
+    proxy_set_header Connection "";
+  }
+
+  access_log /var/log/nginx/cili_external.log combined;
+  error_log /var/log/nginx/cili_external_error.log warn;
+}
+
+---END---
+
+═══════════════════════════════════════════════════════════════════════════════
+16. CHECKLISTE VOR GO-LIVE
+═══════════════════════════════════════════════════════════════════════════════
+
+CONTAINER & SERVICES:
+  ☐ Ubuntu 24.04 LTS auf IP 192.168.178.120
+  ☐ Java 24 installiert (java -version)
+  ☐ MySQL 8.4 läuft (systemctl status mysql)
+  ☐ Tomcat 11 läuft (systemctl status tomcat11)
+  ☐ FFmpeg & LibreOffice installiert
+  ☐ Firewall konfiguriert (ufw status)
+  ☐ SSH funktioniert (ssh root@192.168.178.120)
+
+KONFIGURATION:
+  ☐ /opt/cili/cili.env mit Passwort
+  ☐ application-prod.properties vorhanden
+  ☐ logback-spring.xml vorhanden
+  ☐ WAR-Datei deployed (/opt/cili/cili-app.war)
+
+NGINX SETUP:
+  ☐ Nginx läuft auf 192.168.178.110
+  ☐ /etc/nginx/sites-available/cili konfiguriert
+  ☐ upstream zeigt auf 192.168.178.120:8080
+  ☐ nginx -t erfolgreich
+  ☐ systemctl reload nginx ausgeführt
+
+DNS/HOSTS:
+  ☐ Cloudflare DNS A-Record: 192.168.178.110
+  ☐ Cloudflare Proxy: ✅ Proxied
+  ☐ Hosts-Datei: 192.168.178.110  cili.local
+  ☐ SSL-Zertifikat konfiguriert
+
+KONNEKTIVITÄT:
+  ☐ ping 192.168.178.120 → OK
+  ☐ curl http://192.168.178.120:8080/api/actuator/health → UP
+  ☐ curl http://192.168.178.110/api/actuator/health → UP
+  ☐ curl http://cili.local/api/actuator/health → UP
+  ☐ curl https://cili.example.com/api/actuator/health → UP
+
+MONITORING:
+  ☐ Health-Check Cron aktiv (/etc/cron.d/cili-monitoring)
+  ☐ /var/log/cili/ existiert und ist beschreibbar
+  ☐ Log-Rotation konfiguriert (/etc/logrotate.d/cili)
+  ☐ Backup-Scripts erstellt (/opt/cili/backup-*.sh)
+
+SICHERHEIT:
+  ☐ Default-Admin-Passwort geändert
+  ☐ DB-Passwort sicher gespeichert
+  ☐ SSH nur mit Key-Auth (falls möglich)
+  ☐ Firewall aktiv (ufw status)
+  ☐ Cloudflare SSL "Full (strict)" oder "Full"
+
+═══════════════════════════════════════════════════════════════════════════════
+17. SCHNELL-REFERENZ
+═══════════════════════════════════════════════════════════════════════════════
+
+Container-Management:
+  pct start 100                          # Starten
+  pct stop 100                           # Stoppen
+  pct shell 100                          # Shell
+  ssh root@192.168.178.120               # SSH
+
+Service Management:
+  systemctl status tomcat11              # Status
+  systemctl restart tomcat11             # Restart
+  systemctl logs tomcat11 -f             # Logs
+
+Health Check:
+  curl http://cili.local/api/actuator/health    # Intern
+  curl https://cili.example.com/api/actuator/health  # Extern
+
+Logs:
+  tail -f /var/log/cili/cili.log         # App Log
+  tail -f /var/log/cili/cili-error.log   # Error Log
+  tail -f /var/log/nginx/cili_local.log  # Nginx Access
+
+Database:
+  mysql -u cili -p$(grep DB_PASSWORD /opt/cili/cili.env | cut -d= -f2) cili
+  SELECT 1;  # Test Connection
+
+Backup:
+  /opt/cili/backup-db.sh                 # DB Backup
+  /opt/cili/backup-data.sh               # Data Backup
+  ls -la /opt/cili/backups/              # Backup Status
+
+═══════════════════════════════════════════════════════════════════════════════
+
+WICHTIGE NUMMERN:
+
+Nginx Server IP:        192.168.178.110
+CILI Container IP:      192.168.178.120
+Tomcat Port:            8080
+MySQL Port:             3306 (nur lokal)
+
+Intern erreichbar unter:
+  HTTP: http://192.168.178.110
+  HTTP: http://cili.local
+  HTTP: http://cili
+
+Extern erreichbar unter:
+  HTTPS: https://cili.example.com (via Cloudflare)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+  Nginx Proxy Manager:
+    - Proxy-Host: Domain → http://<server-ip>:8080, Websockets + Block Exploits an
+    - Advanced-Tab:
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header Host              $host;
+
+    Cloudflare:
+    - SSL/TLS-Modus: Full (nicht Flexible, nicht Full strict)

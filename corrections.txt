@@ -1,0 +1,61 @@
+# Transkriptions-Korrekturen für CILI
+# Format: Korrekt: Falsch1, Falsch2, Falsch3
+# Leerzeilen und Zeilen mit # werden ignoriert
+
+# Produktname
+Ashwagandha: Aschbarkanda
+CBD: cbd, CPD
+CBG: cbg, CPG, TBD
+Spray: Spree, Spee
+Sprays: Spräße, Spräs, Spräß, Späße
+Spermidin: Spermethin, Spermintin
+Resveratrol: Rastavirol, Resveratol
+Ageless: Agile, Agel
+Swish: Swisch, Zwisch, Tzwisch, Swiss, Switsch
+Cili by Design: Cili bei Design, Silipa Design, Siliba Design, Sili by Design, Silly by Design, Seele by Design
+Cili Kompakt: SillyKompakt, Silikompakt
+Cili Swish: Siliswisch, Cili Swiss, Silwisch, City Swish
+Cili: Silly, Sili, Silli, Sealy, Zili, Zilli, Schüle, Silje, Cilly, Cilli, Silik, SELI, Sil
+Facial Mist: Fresche Mist, Fashion List, freische Mist, Fäschel mit
+Sleep-Spray: Fiepspray
+Trim-Spray: Trimmspray, Trillen
+Boost-Spray: Busspray, Boostspray
+Baldrian: Baltejan, Baltejahn, Baldian
+Johanniskraut: Johannisbrau, Johannes Kraut, Johannisgrau
+Allergien: Alerien, Alergien
+Teufelskralle: Teufelskale
+Schüssler-Salze: Schüsselersalze, Schüsselsalze
+Schüssler-Salz: Schüsselsalz
+Mikronährstoffe: Mikronaststoffe
+Carbonat: Karbonat
+Hanfplanze: Rampflanze, Handpflanze
+Pocketspray: Pocketpray
+Hanfextrakten: Handfextrakten
+Cili-Produkt: Siliprodukt, Silipprodukt
+balinesisches: palänesisches
+balinesisch: palänesisch
+Autoship: Autoschipp, Autoschip, Autochip
+Autoships: Autochips, Autoschippe, Autoschips
+
+# Personen
+Bridget Hlatky: Brigitte Lattke
+Hlatky: Lattke
+Prisca: Priska, Pusca, Puska
+Brad Hager: Brett Hager, Brett Heger, Brad Heger
+Brad und: Brighton
+Brad und Marcia: Brett und Marcia, Breit und Marcia
+Graack: Frak, Grake, Graag, Kraag, Kraack
+Sara Smus: Saras Mas, Sarah Smas, Sara Smas
+Schlee-Poll: Stepoll
+# Medizin / Fachbegriffe
+Wirbelsäule: wilbersäule
+Ekzem: Eczem
+Ekzeme: Eczeme
+Gelenke: Belenke
+Mitochondrien: Mütterchondrien, Mythokondrien
+Endocannabinoidsystem: Endocanabinoidsystem
+Endocannabinoide: Endokannabinoide
+Endocannabinoid: Endokannabinoid
+
+# Sonstiges
+ToDos: DoDos, Do -Do's, Dudus

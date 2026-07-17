@@ -1,0 +1,83 @@
+# docker-compose.yml — full production-like stack
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: cili-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: cili
+      MYSQL_USER: cili
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-cili}
+    volumes:
+      - cili-mysql-data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: cili-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - cili-es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: cili-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - cili-minio-data:/data
+    ports:
+      - "9001:9001"
+
+  app:
+    build: .
+    container_name: cili-app
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cili?useUnicode=true&characterEncoding=utf8mb4
+      SPRING_DATASOURCE_USERNAME: cili
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-cili}
+      CILI_JWT_SECRET: ${CILI_JWT_SECRET:?CILI_JWT_SECRET environment variable is required}
+      CILI_STORAGE_BASE_PATH: /var/cili/data
+    volumes:
+      - cili-storage:/var/cili/data
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    container_name: cili-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  cili-mysql-data:
+  cili-es-data:
+  cili-minio-data:
+  cili-storage:

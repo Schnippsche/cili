@@ -1,0 +1,18 @@
+# docker-compose.dev.yml — MySQL only for local development
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: cili-mysql-dev
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cili_dev
+      MYSQL_USER: cili
+      MYSQL_PASSWORD: cili
+    ports:
+      - "3306:3306"
+    volumes:
+      - cili-mysql-dev-data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+volumes:
+  cili-mysql-dev-data:

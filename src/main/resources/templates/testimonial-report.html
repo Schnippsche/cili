@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Erfahrungsbericht</title>
+  <style>
+    :root {
+      --primary-color: #2c7a7b;
+      --bg-color: #f7fafc;
+      --card-bg: #ffffff;
+      --text-main: #2d3748;
+      --text-muted: #718096;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+      font-size: 11pt;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 30px 20px;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* ── Report-Header ── */
+    .report-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .report-header h1 {
+      color: var(--primary-color);
+      font-size: 22pt;
+      margin-bottom: 6px;
+    }
+    .report-meta { font-size: 9pt; color: var(--text-muted); }
+
+    .truncated-warning {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 6px 12px;
+      margin-bottom: 20px;
+      font-size: 9pt;
+      border-radius: 4px;
+    }
+
+    .no-results { color: #888; font-style: italic; margin-top: 20px; }
+
+    /* ── Kachel-Grid ── */
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+      gap: 25px;
+    }
+
+    /* ── Einzelne Kachel ── */
+    .card {
+      background: var(--card-bg);
+      border-left: 5px solid var(--primary-color);
+      border-radius: 8px;
+      padding: 22px 25px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* Meta-Zeile: Name links, Datum rechts */
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+      border-bottom: 1px solid #edf2f7;
+      padding-bottom: 10px;
+    }
+    .card-meta .username {
+      font-weight: bold;
+      color: var(--primary-color);
+      font-size: 14px;
+    }
+    .card-meta .date { font-style: italic; }
+
+    /* Bildergalerie */
+    .universal-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .universal-gallery img {
+      flex: 1 1 140px;
+      min-width: 0;
+      max-width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #edf2f7;
+      border: 1px solid #e2e8f0;
+    }
+    .universal-gallery img:only-child {
+      flex: 1 1 100%;
+      min-width: 0;
+      height: 280px;
+    }
+
+    /* Zitat-Text */
+    .content {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 14px;
+      white-space: pre-wrap;
+      flex: 1;
+    }
+
+    /* Tag-Zeile unten */
+    .footer-row {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      background: #edf2f7;
+      color: var(--text-main);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* ── Print / PDF ── */
+    @media print {
+      body {
+        background-color: #ffffff;
+        padding: 15mm 15mm 12mm 15mm;
+      }
+      .container { max-width: 100%; }
+      .testimonial-grid { display: block; }
+      .card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 5px solid var(--primary-color);
+        box-shadow: none;
+        margin-bottom: 22px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .universal-gallery {
+        display: flex !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .universal-gallery img {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="report-header">
+    <h1>Erfahrungsberichte<th:block th:if="${!#strings.isEmpty(query)}">
+      <span th:text="' zu: ' + ${query}"></span>
+    </th:block></h1>
+    <div class="report-meta">
+      Generiert am <span th:text="${#temporals.format(generatedAt, 'dd.MM.yyyy')}"></span>
+      &nbsp;·&nbsp;
+      <span th:text="${totalCount}"></span> Einträge
+    </div>
+  </div>
+
+  <div class="truncated-warning" th:if="${truncated}">
+    Das Ergebnis wurde auf <span th:text="${maxResults}"></span> Einträge begrenzt.
+  </div>
+
+  <div th:if="${#lists.isEmpty(testimonials)}" class="no-results">
+    Keine Erfahrungsberichte gefunden.
+    <th:block th:if="${!#strings.isEmpty(query)}">
+      (Hinweis: Suchbegriffe unter 4 Zeichen werden von der Volltextsuche ignoriert.)
+    </th:block>
+  </div>
+
+  <div class="testimonial-grid">
+    <div th:each="t : ${testimonials}" class="card">
+
+      <!-- Name links, Datum rechts -->
+      <div class="card-meta">
+        <span class="username" th:text="${t.authorName}"></span>
+        <span class="date" th:text="${#temporals.format(t.createdAt, 'dd.MM.yyyy')}"></span>
+      </div>
+
+      <!-- Bilder (falls vorhanden) -->
+      <div class="universal-gallery" th:if="${!#lists.isEmpty(t.images)}">
+        <th:block th:each="img : ${t.images}">
+          <img th:src="'data:' + ${img.mimeType} + ';base64,' + ${img.base64Data}"
+               th:alt="${img.originalName}"/>
+        </th:block>
+      </div>
+
+      <!-- Text in Anführungszeichen -->
+      <div class="content">„<span th:text="${t.text}"></span>"</div>
+
+      <!-- Tags -->
+      <div class="footer-row" th:if="${!#strings.isEmpty(t.tags)}">
+        <th:block th:each="tag : ${#strings.arraySplit(t.tags, ',')}">
+          <span class="tag" th:text="${#strings.trim(tag)}"></span>
+        </th:block>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
