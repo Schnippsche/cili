@@ -8,5 +8,6 @@ public record CreateTestimonialRequest(
     @NotBlank @Size(max = 200) String authorName,
     @Size(max = 500) String tags,
     @NotBlank @Size(min = 10, max = 50000) String text,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    @Size(max = 100) String source
 ) {}

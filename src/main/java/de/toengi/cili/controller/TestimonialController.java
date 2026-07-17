@@ -44,8 +44,9 @@ public class TestimonialController {
             @RequestParam(required = false) String tags,
             @RequestParam String text,
             @RequestParam(required = false) LocalDateTime createdAt,
+            @RequestParam(required = false) String source,
             @RequestPart(value = "images", required = false) List<MultipartFile> images) {
-        return service.create(new CreateTestimonialRequest(authorName, tags, text, createdAt), images);
+        return service.create(new CreateTestimonialRequest(authorName, tags, text, createdAt, source), images);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

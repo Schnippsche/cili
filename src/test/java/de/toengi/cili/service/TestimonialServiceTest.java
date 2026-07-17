@@ -84,7 +84,7 @@ class TestimonialServiceTest {
 
     @Test
     void create_savesWithCurrentUserId() {
-        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", null);
+        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", null, null);
         var saved = Testimonial.builder()
             .id(1L).authorName("Max Mustermann").text("Sehr gute Erfahrung, gerne wieder.")
             .userId(1L).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
@@ -172,7 +172,7 @@ class TestimonialServiceTest {
         when(aclService.hasTestimonialsPermission(10L, AclPermission.WRITE)).thenReturn(false);
 
         assertThatThrownBy(() -> service.create(
-            new CreateTestimonialRequest("Name", null, "Text that is long enough", null), null))
+            new CreateTestimonialRequest("Name", null, "Text that is long enough", null, null), null))
             .isInstanceOf(AccessDeniedException.class);
     }
 
