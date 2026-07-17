@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
+import org.springframework.util.Assert;
 
 @Configuration
 @RequiredArgsConstructor
@@ -22,12 +23,19 @@ public class TelegramImportSchedulerConfig implements SchedulingConfigurer {
             log.debug("Telegram-Import deaktiviert (cili.telegram.enabled=false) — kein Scheduling");
             return;
         }
+        if (config.getSources().isEmpty()) {
+            log.warn("Telegram-Import aktiviert (cili.telegram.enabled=true), aber keine Quellen konfiguriert "
+                + "(cili.telegram.sources ist leer) — es wird kein Scheduling registriert. "
+                + "Vermutlich fehlerhafte YAML-Konfiguration.");
+            return;
+        }
         for (TelegramImportConfig.Source source : config.getSources()) {
             String name = source.getName();
-            registrar.addTriggerTask(
-                () -> runSource(name),
-                ctx -> new CronTrigger(source.getCron()).nextExecution(ctx));
+            Assert.hasText(source.getCron(),
+                () -> "cili.telegram.sources: cron fehlt für Quelle '" + name + "'");
+            registrar.addTriggerTask(() -> runSource(name), new CronTrigger(source.getCron()));
         }
+        log.info("Telegram-Import: {} Quelle(n) für Scheduling registriert", config.getSources().size());
     }
 
     private void runSource(String name) {
