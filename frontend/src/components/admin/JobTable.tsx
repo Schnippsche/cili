@@ -68,6 +68,12 @@ export default function JobTable() {
     refetchInterval: 5000,
   });
 
+  const { data: sources } = useQuery({
+    queryKey: ['telegram-sources'],
+    queryFn:  adminApi.listTelegramSources,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const deleteOne = useMutation({
     mutationFn: (id: number) => adminApi.deleteJob(id),
     onSuccess:  () => void qc.invalidateQueries({ queryKey: ['admin-jobs'] }),
@@ -79,10 +85,11 @@ export default function JobTable() {
   });
 
   const triggerTelegram = useMutation({
-    mutationFn: adminApi.triggerTelegramImport,
-    onSuccess: () => {
+    mutationFn: (source: string) => adminApi.triggerTelegramImport(source),
+    onSuccess: (_data, source) => {
       void qc.invalidateQueries({ queryKey: ['admin-jobs'] });
-      setSnack({ open: true, msg: 'Telegram-Import gestartet', severity: 'success' });
+      const label = sources?.find(s => s.name === source)?.label ?? source;
+      setSnack({ open: true, msg: `Telegram-Import (${label}) gestartet`, severity: 'success' });
     },
     onError: (err: unknown) => {
       const msg = (err as { response?: { data?: { message?: string } } })
@@ -126,15 +133,18 @@ export default function JobTable() {
           </IconButton>
         </Tooltip>
 
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<TelegramIcon fontSize="small" />}
-          disabled={triggerTelegram.isPending}
-          onClick={() => triggerTelegram.mutate()}
-        >
-          Telegram Import
-        </Button>
+        {(sources ?? []).map(source => (
+          <Button
+            key={source.name}
+            variant="outlined"
+            size="small"
+            startIcon={<TelegramIcon fontSize="small" />}
+            disabled={triggerTelegram.isPending}
+            onClick={() => triggerTelegram.mutate(source.name)}
+          >
+            {source.label}
+          </Button>
+        ))}
 
         <Button
           variant="outlined"
@@ -165,6 +175,7 @@ export default function JobTable() {
             <TableRow sx={{ '& th': { fontWeight: 600 } }}>
               <TableCell>ID</TableCell>
               <TableCell>Typ</TableCell>
+              <TableCell>Quelle</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Resource</TableCell>
               <TableCell>Versuche</TableCell>
@@ -178,14 +189,14 @@ export default function JobTable() {
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={11} align="center" sx={{ py: 4 }}>
                   <CircularProgress size={24} />
                 </TableCell>
               </TableRow>
             )}
             {!isLoading && jobs.length === 0 && (
               <TableRow>
-                <TableCell colSpan={10} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                <TableCell colSpan={11} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                   Keine Jobs gefunden
                 </TableCell>
               </TableRow>
@@ -194,6 +205,9 @@ export default function JobTable() {
               <TableRow key={job.id} hover>
                 <TableCell sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>{job.id}</TableCell>
                 <TableCell>{TYPE_LABEL[job.type] ?? job.type}</TableCell>
+                <TableCell sx={{ color: 'text.secondary' }}>
+                  {sources?.find(s => s.name === job.source)?.label ?? job.source ?? '—'}
+                </TableCell>
                 <TableCell>
                   <Chip
                     label={STATUS_LABEL[job.status]}
