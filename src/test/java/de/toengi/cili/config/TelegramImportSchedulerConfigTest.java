@@ -12,6 +12,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -76,12 +77,9 @@ class TelegramImportSchedulerConfigTest {
         when(config.isEnabled()).thenReturn(true);
         when(config.getSources()).thenReturn(List.of(source("telegram-lifestyle", " ")));
 
-        try {
-            scheduler.configureTasks(registrar);
-            org.junit.jupiter.api.Assertions.fail("expected IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-            org.assertj.core.api.Assertions.assertThat(e.getMessage()).contains("telegram-lifestyle");
-        }
+        assertThatThrownBy(() -> scheduler.configureTasks(registrar))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("telegram-lifestyle");
     }
 
     @Test
