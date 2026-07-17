@@ -5,7 +5,8 @@ Telegram → CILI Erfahrungsberichte Importer
 Einrichtung:
   1. pip install telethon requests python-dotenv
   2. Telegram API-Zugangsdaten holen: https://my.telegram.org/apps
-  3. .env-Datei anlegen (Vorlage: scripts/telegram_import.env.example)
+  3. .env-Datei anlegen (Vorlage: scripts/telegram_import.env.example) —
+     TG_SOURCE muss pro Telegram-Quelle eindeutig sein.
   4. Beim ersten Start: Telefonnummer + Code eingeben (Session wird danach gespeichert)
 
 Verwendung:
@@ -77,8 +78,11 @@ MIN_CONFIDENCE = float(os.getenv("MIN_CONFIDENCE", "0.75"))
 WEBINAR_FOLDER_ID  = os.getenv("WEBINAR_FOLDER_ID", "")
 WEBINAR_MAX_HEIGHT = int(os.getenv("WEBINAR_MAX_HEIGHT", "720"))
 
+TG_SOURCE   = os.getenv("TG_SOURCE", "")   # eindeutiger Bezeichner dieser Quelle, z.B. "telegram-tiere"
+
 SESSION_FILE = str(Path(__file__).parent / "telegram_session")
-_STATE_FILE  = Path(__file__).parent / "telegram_import.state"
+_STATE_FILE_SUFFIX = re.sub(r"[^a-zA-Z0-9_-]", "_", TG_SOURCE) if TG_SOURCE else "default"
+_STATE_FILE = Path(__file__).parent / f"telegram_import_{_STATE_FILE_SUFFIX}.state"
 
 
 def _load_state_date() -> datetime | None:
@@ -321,7 +325,7 @@ def get_last_cili_date(token: str) -> datetime | None:
     resp = _http_get_with_retry(
         f"{CILI_URL}/api/testimonials",
         headers={"Authorization": f"Bearer {token}"},
-        params={"page": 0, "size": 1},
+        params={"page": 0, "size": 1, "source": TG_SOURCE},
         timeout=15,
     )
     content = resp.json().get("content", [])
@@ -338,6 +342,7 @@ def post_testimonial(token: str, author: str, text: str, tags: str,
         "authorName": author[:200],
         "text": text[:50000],
         "createdAt": created_at.strftime("%Y-%m-%dT%H:%M:%S"),
+        "source": TG_SOURCE,
     }
     if tags:
         data["tags"] = tags[:500]
@@ -376,6 +381,8 @@ def _validate_config() -> None:
         )
     if not TG_GROUP:
         sys.exit("Fehler: TG_GROUP muss gesetzt sein (Gruppenname, -link oder numerische ID).")
+    if not TG_SOURCE:
+        sys.exit("Fehler: TG_SOURCE muss gesetzt sein (eindeutiger Bezeichner dieser Quelle, z.B. 'telegram-tiere').")
 
 
 async def _resolve_group(client: TelegramClient):
