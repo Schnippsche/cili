@@ -10,6 +10,7 @@ public record ProcessingJobDto(
     Long id,
     Long resourceId,
     ProcessingJobType type,
+    String source,
     ProcessingJobStatus status,
     Integer attempts,
     Integer maxAttempts,
@@ -22,7 +23,7 @@ public record ProcessingJobDto(
 ) {
     public static ProcessingJobDto from(ProcessingJob j) {
         return new ProcessingJobDto(
-            j.getId(), j.getResourceId(), j.getType(), j.getStatus(),
+            j.getId(), j.getResourceId(), j.getType(), j.getSource(), j.getStatus(),
             j.getAttempts(), j.getMaxAttempts(), j.getErrorMessage(),
             j.getResult(),
             j.getStartedAt(), j.getFinishedAt(), j.getCreatedAt(), j.getUpdatedAt()

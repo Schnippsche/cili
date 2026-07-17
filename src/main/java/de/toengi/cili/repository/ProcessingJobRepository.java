@@ -76,6 +76,9 @@ public interface ProcessingJobRepository extends JpaRepository<ProcessingJob, Lo
 
     boolean existsByTypeAndStatusIn(ProcessingJobType type, List<ProcessingJobStatus> statuses);
 
+    boolean existsByTypeAndSourceAndStatusIn(
+        ProcessingJobType type, String source, List<ProcessingJobStatus> statuses);
+
     @Query("""
         SELECT COUNT(j) > 0 FROM ProcessingJob j
         WHERE j.type IN :types
