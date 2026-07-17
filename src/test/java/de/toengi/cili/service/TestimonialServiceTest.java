@@ -98,6 +98,40 @@ class TestimonialServiceTest {
     }
 
     @Test
+    void create_withSource_persistsSourceOnEntity() {
+        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", null, "telegram-tiere");
+        var captor = org.mockito.ArgumentCaptor.forClass(Testimonial.class);
+        when(repository.save(captor.capture())).thenAnswer(inv -> {
+            Testimonial t = inv.getArgument(0);
+            t.setId(1L);
+            t.setCreatedAt(LocalDateTime.now());
+            t.setUpdatedAt(LocalDateTime.now());
+            return t;
+        });
+
+        service.create(req, List.of());
+
+        assertThat(captor.getValue().getSource()).isEqualTo("telegram-tiere");
+    }
+
+    @Test
+    void create_withoutSource_leavesSourceNull() {
+        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", null, null);
+        var captor = org.mockito.ArgumentCaptor.forClass(Testimonial.class);
+        when(repository.save(captor.capture())).thenAnswer(inv -> {
+            Testimonial t = inv.getArgument(0);
+            t.setId(1L);
+            t.setCreatedAt(LocalDateTime.now());
+            t.setUpdatedAt(LocalDateTime.now());
+            return t;
+        });
+
+        service.create(req, List.of());
+
+        assertThat(captor.getValue().getSource()).isNull();
+    }
+
+    @Test
     void delete_byOwner_callsRepositoryDelete() {
         var t = Testimonial.builder().id(1L).userId(1L).build();
         when(repository.findById(1L)).thenReturn(Optional.of(t));

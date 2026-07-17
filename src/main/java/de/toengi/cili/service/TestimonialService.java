@@ -90,6 +90,7 @@ public class TestimonialService {
             .authorName(req.authorName().trim())
             .tags(req.tags() != null && !req.tags().isBlank() ? req.tags().trim() : null)
             .text(req.text().trim())
+            .source(req.source())
             .userId(user.getUserId())
             .createdAt(req.createdAt())
             .build();
