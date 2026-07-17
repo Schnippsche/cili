@@ -5,6 +5,10 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @Configuration
 @ConfigurationProperties(prefix = "cili.telegram")
 @Getter @Setter
@@ -14,12 +18,28 @@ public class TelegramImportConfig {
 
     private String scriptName = "telegram_import.py";
 
-    /** Dateiname der .env-Datei im scriptsDir; null → Skript sucht selbst nach .env im Arbeitsverzeichnis */
-    private String envName;
-
-    /** Cron-Ausdruck für den nächtlichen Lauf (Standard: 01:00 Uhr täglich) */
-    private String cron = "0 0 1 * * *";
-
     /** Timeout in Minuten; danach wird der Python-Prozess abgebrochen */
     private int timeoutMinutes = 60;
+
+    /** Konfigurierte Telegram-Quellen (eine pro Gruppe/.env-Datei). */
+    private List<Source> sources = new ArrayList<>();
+
+    public Optional<Source> findSource(String name) {
+        return sources.stream().filter(s -> name.equals(s.getName())).findFirst();
+    }
+
+    @Getter @Setter
+    public static class Source {
+        /** Stabiler Bezeichner — identisch zu TG_SOURCE im Skript und ProcessingJob.source/Testimonial.source */
+        private String name;
+
+        /** Anzeige-Label fürs Admin-Frontend */
+        private String label;
+
+        /** Dateiname der .env-Datei im scriptsDir */
+        private String envName;
+
+        /** Cron-Ausdruck für den nächtlichen Lauf dieser Quelle */
+        private String cron;
+    }
 }

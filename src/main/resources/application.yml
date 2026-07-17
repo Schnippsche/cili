@@ -122,5 +122,13 @@ cili:
   telegram:
     enabled: true                              # true → nächtlicher Cron läuft
     script-name: telegram_import.py
-    cron: "0 0 1 * * *"                        # täglich 01:00 Uhr
     timeout-minutes: 60
+    sources:
+      - name: telegram-lifestyle
+        label: Lifestyle
+        env-name: telegram_import.env
+        cron: "0 0 1 * * *"                    # täglich 01:00 Uhr
+      - name: telegram-tiere
+        label: Tiere
+        env-name: telegram_import_tiere.env
+        cron: "0 30 1 * * *"                   # täglich 01:30 Uhr
