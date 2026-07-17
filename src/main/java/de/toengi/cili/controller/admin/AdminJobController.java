@@ -2,6 +2,7 @@ package de.toengi.cili.controller.admin;
 
 import de.toengi.cili.dto.common.PageResponse;
 import de.toengi.cili.dto.job.ProcessingJobDto;
+import de.toengi.cili.dto.job.TelegramSourceDto;
 import de.toengi.cili.model.enums.ProcessingJobStatus;
 import de.toengi.cili.repository.ProcessingJobRepository;
 import de.toengi.cili.service.TelegramImportService;
@@ -58,11 +59,21 @@ public class AdminJobController {
         repo.deleteByStatusIn(List.of(ProcessingJobStatus.DONE, ProcessingJobStatus.CANCELLED));
     }
 
-    @PostMapping("/telegram-import/trigger")
-    public ResponseEntity<?> triggerTelegramImport() {
+    @GetMapping("/telegram-import/sources")
+    public List<TelegramSourceDto> listSources() {
+        return telegramImportService.listSources().stream()
+            .map(s -> new TelegramSourceDto(s.getName(), s.getLabel()))
+            .toList();
+    }
+
+    @PostMapping("/telegram-import/trigger/{source}")
+    public ResponseEntity<?> triggerTelegramImport(@PathVariable String source) {
         try {
-            ProcessingJobDto job = ProcessingJobDto.from(telegramImportService.triggerAndRun());
+            ProcessingJobDto job = ProcessingJobDto.from(telegramImportService.triggerAndRun(source));
             return ResponseEntity.ok(job);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", e.getMessage()));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("message", e.getMessage()));
