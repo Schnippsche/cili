@@ -13,6 +13,7 @@ const mockTestimonial: TestimonialDto = {
   tags: null,
   text: 'Das war eine tolle Erfahrung.',
   userId: 1,
+  source: 'Mensch',
   createdAt: '2026-05-31T10:00:00',
   updatedAt: '2026-05-31T10:00:00',
   images: [],

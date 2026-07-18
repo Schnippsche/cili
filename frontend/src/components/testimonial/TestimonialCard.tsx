@@ -3,6 +3,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import BookmarkRemoveOutlinedIcon from '@mui/icons-material/BookmarkRemoveOutlined';
+import PersonIcon from '@mui/icons-material/Person';
+import PetsIcon from '@mui/icons-material/Pets';
 import { useState } from 'react';
 import type { TestimonialDto, TestimonialImageDto } from '../../types/api';
 import { getThumbnailUrl } from '../../api/resources';
@@ -60,7 +62,14 @@ export default function TestimonialCard({ testimonial, currentUserId, isAdmin, c
       <CardContent>
         {/* Zeile 1: Author links, Aktionsbuttons rechts */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="subtitle1" fontWeight="bold">{testimonial.authorName}</Typography>
+          <Stack direction="row" alignItems="center" gap={1}>
+            {testimonial.source === 'Tier' ? (
+              <Chip icon={<PetsIcon />} label="Tier" size="small" color="success" />
+            ) : (
+              <Chip icon={<PersonIcon />} label="Mensch" size="small" color="primary" />
+            )}
+            <Typography variant="subtitle1" fontWeight="bold">{testimonial.authorName}</Typography>
+          </Stack>
           <Box sx={{ flexShrink: 0, ml: 1 }}>
             {showEdit && (
               <Tooltip title="Bearbeiten">

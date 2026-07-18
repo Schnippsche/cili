@@ -1,6 +1,6 @@
 import {
   Alert, Box, Button, CircularProgress, InputAdornment,
-  Pagination, TextField, Tooltip, Typography,
+  Pagination, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
@@ -47,14 +47,20 @@ export default function TestimonialList({ canWrite, canDelete, highlightId }: Re
   const [q, setQ] = useState('');
   const deferredQ = useDeferredValue(q);
   const [page, setPage] = useState(0);
+  const [sourceFilter, setSourceFilter] = useState<'Mensch' | 'Tier' | ''>('');
   const [formOpen, setFormOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<TestimonialDto | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['testimonials', deferredQ, page],
-    queryFn: () => listTestimonials({ q: deferredQ || undefined, page, size: 25 }),
+    queryKey: ['testimonials', deferredQ, sourceFilter, page],
+    queryFn: () => listTestimonials({
+      q: deferredQ || undefined,
+      source: sourceFilter || undefined,
+      page,
+      size: 25
+    }),
   });
 
   const createMut = useMutation({
@@ -138,8 +144,21 @@ export default function TestimonialList({ canWrite, canDelete, highlightId }: Re
         </Box>
       )}
 
+      <ToggleButtonGroup
+        value={sourceFilter}
+        exclusive
+        onChange={(_, val) => { setSourceFilter(val ?? ''); setPage(0); }}
+        size="small"
+        sx={{ mb: 2 }}
+      >
+        <ToggleButton value="">Beide</ToggleButton>
+        <ToggleButton value="Mensch">Mensch</ToggleButton>
+        <ToggleButton value="Tier">Tier</ToggleButton>
+      </ToggleButtonGroup>
+
       <Alert severity="info" sx={{ mb: 2 }}>
         Hier werden ausschließlich textuelle Erfahrungsberichte ggf. mit Bildern angezeigt und durchsucht.
+        Über die Auswahl oben lässt sich zusätzlich nach Mensch- oder Tier-Erfahrungsberichten filtern.
         Zusätzlich kann ein Suchergebnis als Bericht zur Weitergabe exportiert werden.
         Die <strong>globale Suche</strong> erfasst zusätzlich Dateien wie Videos, Dokumente und Videountertitel.
       </Alert>
