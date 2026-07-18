@@ -42,7 +42,7 @@ async function openPermissionsDialog() {
   vi.mocked(adminApi.listAllFolders).mockResolvedValue(mockFolders);
   renderGroupTable();
   await screen.findByText('Testgruppe');
-  await userEvent.click(screen.getByTitle('Rechte'));
+  await userEvent.click(screen.getByLabelText('Rechte'));
   await screen.findByText(/Apple/);
 }
 
