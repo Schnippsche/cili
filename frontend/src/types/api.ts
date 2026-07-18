@@ -103,6 +103,7 @@ export interface TestimonialDto {
   authorName: string;
   tags: string | null;
   text: string;
+  source: string;
   userId: number;
   createdAt: string;
   updatedAt: string;
@@ -114,6 +115,7 @@ export interface PublicTestimonialDto {
   authorName: string;
   tags: string | null;
   text: string;
+  source: string;
   createdAt: string;
   updatedAt: string;
   images: TestimonialImageDto[];
@@ -123,12 +125,14 @@ export interface CreateTestimonialRequest {
   authorName: string;
   tags: string | null;
   text: string;
+  source: string;
 }
 
 export interface UpdateTestimonialRequest {
   authorName: string;
   tags: string | null;
   text: string;
+  source: string;
 }
 
 export interface TestimonialSearchHitDto {

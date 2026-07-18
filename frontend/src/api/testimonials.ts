@@ -8,12 +8,14 @@ export interface TestimonialFormData {
   authorName: string;
   tags: string | null;
   text: string;
+  source: 'Mensch' | 'Tier';
   images?: File[];
   deleteImageIds?: number[];
 }
 
 export async function listTestimonials(params?: {
   q?: string;
+  source?: 'Mensch' | 'Tier';
   page?: number;
   size?: number;
 }): Promise<SpringPage<TestimonialDto>> {
@@ -29,6 +31,7 @@ function buildFormData(form: TestimonialFormData): FormData {
   fd.append('authorName', form.authorName);
   if (form.tags) fd.append('tags', form.tags);
   fd.append('text', form.text);
+  fd.append('source', form.source);
   form.images?.forEach(f => fd.append('images', f));
   form.deleteImageIds?.forEach(id => fd.append('deleteImageIds', String(id)));
   return fd;

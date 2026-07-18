@@ -1,9 +1,14 @@
 import axiosClient from './axiosClient';
-import type { PublicTestimonialDto } from '../types/api';
+import type { PublicTestimonialDto, SpringPage } from '../types/api';
 
-export function listPublicTestimonials(): Promise<PublicTestimonialDto[]> {
+export function listPublicTestimonials(params?: {
+  q?: string;
+  source?: 'Mensch' | 'Tier';
+  page?: number;
+  size?: number;
+}): Promise<SpringPage<PublicTestimonialDto>> {
   return axiosClient
-    .get<PublicTestimonialDto[]>('/public/testimonials')
+    .get<SpringPage<PublicTestimonialDto>>('/public/testimonials', { params })
     .then(r => r.data);
 }
 

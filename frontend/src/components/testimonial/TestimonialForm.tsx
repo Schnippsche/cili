@@ -9,6 +9,8 @@ import {
   IconButton,
   Stack,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -67,11 +69,12 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
   const [authorName, setAuthorName] = useState('');
   const [tags, setTags] = useState('');
   const [text, setText] = useState('');
+  const [source, setSource] = useState<'Mensch' | 'Tier' | ''>('');
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
   const [deleteImageIds, setDeleteImageIds] = useState<number[]>([]);
   const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState<{ authorName?: string; tags?: string; text?: string }>({});
+  const [errors, setErrors] = useState<{ authorName?: string; tags?: string; text?: string; source?: string }>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -80,6 +83,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
       setAuthorName(initial?.authorName ?? '');
       setTags(initial?.tags ?? '');
       setText(initial?.text ?? '');
+      setSource((initial?.source as 'Mensch' | 'Tier' | undefined) ?? '');
       setNewFiles([]);
       setNewPreviews([]);
       setDeleteImageIds([]);
@@ -103,6 +107,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
     if (tags.trim().length > 500) e.tags = 'Maximal 500 Zeichen';
     if (!text.trim() || text.trim().length < 10) e.text = 'Mindestens 10 Zeichen';
     else if (text.trim().length > 5000) e.text = 'Maximal 5000 Zeichen';
+    if (!source) e.source = 'Bitte Mensch oder Tier auswählen';
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -116,6 +121,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
         authorName: authorName.trim(),
         tags: tags.trim() || null,
         text: text.trim(),
+        source: source as 'Mensch' | 'Tier',
         images: newFiles,
         deleteImageIds,
       });
@@ -153,6 +159,22 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
               error={!!errors.authorName} helperText={errors.authorName}
               fullWidth sx={{mt: 1, mb: 2}}
           />
+          <ToggleButtonGroup
+              value={source}
+              exclusive
+              onChange={(_, val) => val && setSource(val)}
+              size="small"
+              sx={{mb: 2}}
+          >
+            <ToggleButton value="Mensch">Mensch</ToggleButton>
+            <ToggleButton value="Tier">Tier</ToggleButton>
+          </ToggleButtonGroup>
+          {errors.source && (
+              <Typography color="error" variant="caption" sx={{display: 'block', mt: -1.5, mb: 1.5}}>
+                {errors.source}
+              </Typography>
+          )}
+
           <TextField
               label="Tags (kommagetrennt)" value={tags} onChange={e => setTags(e.target.value)}
               error={!!errors.tags}
