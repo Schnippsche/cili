@@ -1,5 +1,7 @@
 import { Box, Card, CardContent, Chip, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
+import PersonIcon from '@mui/icons-material/Person';
+import PetsIcon from '@mui/icons-material/Pets';
 import type { PublicTestimonialDto } from '../../types/api';
 import { publicImageUrl } from '../../api/publicTestimonials';
 import PublicTestimonialLightbox from './PublicTestimonialLightbox';
@@ -17,7 +19,14 @@ export default function PublicTestimonialCard({ testimonial }: Readonly<Props>) 
   return (
     <Card variant="outlined" sx={{ mb: 2 }}>
       <CardContent>
-        <Typography variant="subtitle1" fontWeight="bold">{testimonial.authorName}</Typography>
+        <Stack direction="row" alignItems="center" gap={1}>
+          {testimonial.source === 'Tier' ? (
+            <Chip icon={<PetsIcon />} label="Tier" size="small" color="success" />
+          ) : (
+            <Chip icon={<PersonIcon />} label="Mensch" size="small" color="primary" />
+          )}
+          <Typography variant="subtitle1" fontWeight="bold">{testimonial.authorName}</Typography>
+        </Stack>
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
           <Typography variant="caption" color="text.secondary">
