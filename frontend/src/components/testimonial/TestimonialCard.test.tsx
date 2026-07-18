@@ -1,9 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import TestimonialCard from './TestimonialCard';
 import type { TestimonialDto } from '../../types/api';
 import * as collectionsApi from '../../api/collections';
+import authReducer, { setCredentials } from '../../store/authSlice';
+import themeReducer from '../../store/themeSlice';
 
 vi.mock('../../api/collections');
 
@@ -22,19 +26,26 @@ const mockTestimonial: TestimonialDto = {
 function renderCard(props: Partial<Parameters<typeof TestimonialCard>[0]> = {}) {
   vi.mocked(collectionsApi.getCollections).mockResolvedValue([]);
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const store = configureStore({ reducer: { auth: authReducer, theme: themeReducer } });
+  store.dispatch(setCredentials({
+    user: { id: 1, username: 'max', displayName: 'Max Mustermann', role: 'USER' },
+    accessToken: 'at', refreshToken: 'rt',
+  }));
   return render(
-    <QueryClientProvider client={qc}>
-      <TestimonialCard
-        testimonial={mockTestimonial}
-        currentUserId={1}
-        isAdmin={false}
-        canWrite={true}
-        canDelete={true}
-        onEdit={vi.fn()}
-        onDelete={vi.fn()}
-        {...props}
-      />
-    </QueryClientProvider>
+    <Provider store={store}>
+      <QueryClientProvider client={qc}>
+        <TestimonialCard
+          testimonial={mockTestimonial}
+          currentUserId={1}
+          isAdmin={false}
+          canWrite={true}
+          canDelete={true}
+          onEdit={vi.fn()}
+          onDelete={vi.fn()}
+          {...props}
+        />
+      </QueryClientProvider>
+    </Provider>
   );
 }
 
