@@ -8,6 +8,7 @@ public record TestimonialDto(
     String authorName,
     String tags,
     String text,
+    String source,
     Long userId,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,

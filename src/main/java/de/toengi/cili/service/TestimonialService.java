@@ -269,7 +269,7 @@ public class TestimonialService {
             .findByTestimonialIdOrderByCreatedAtAsc(t.getId())
             .stream().map(this::toImageDto).toList();
         return new TestimonialDto(
-            t.getId(), t.getAuthorName(), t.getTags(), t.getText(),
+            t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.getSource(),
             t.getUserId(), t.getCreatedAt(), t.getUpdatedAt(), images);
     }
 
@@ -314,7 +314,7 @@ public class TestimonialService {
             .findByTestimonialIdOrderByCreatedAtAsc(t.getId())
             .stream().map(this::toImageDto).toList();
         return new PublicTestimonialDto(
-            t.getId(), t.getAuthorName(), t.getTags(), t.getText(),
+            t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.getSource(),
             t.getCreatedAt(), t.getUpdatedAt(), images);
     }
 

@@ -8,6 +8,7 @@ public record PublicTestimonialDto(
     String authorName,
     String tags,
     String text,
+    String source,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
     List<TestimonialImageDto> images
