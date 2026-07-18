@@ -44,10 +44,10 @@ public class TestimonialController {
             @RequestParam String authorName,
             @RequestParam(required = false) String tags,
             @RequestParam String text,
-            @RequestParam(required = false) LocalDateTime createdAt,
             @RequestParam(required = false) String source,
+            @RequestParam(required = false) LocalDateTime createdAt,
             @RequestPart(value = "images", required = false) List<MultipartFile> images) {
-        return service.create(new CreateTestimonialRequest(authorName, tags, text, createdAt, source), images);
+        return service.create(new CreateTestimonialRequest(authorName, tags, text, source, createdAt), images);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -57,9 +57,10 @@ public class TestimonialController {
             @RequestParam String authorName,
             @RequestParam(required = false) String tags,
             @RequestParam String text,
+            @RequestParam(required = false) String source,
             @RequestPart(value = "images", required = false) List<MultipartFile> newImages,
             @RequestParam(value = "deleteImageIds", required = false) List<Long> deleteImageIds) {
-        return service.update(id, new UpdateTestimonialRequest(authorName, tags, text), newImages, deleteImageIds);
+        return service.update(id, new UpdateTestimonialRequest(authorName, tags, text, source), newImages, deleteImageIds);
     }
 
     @DeleteMapping("/{id}")

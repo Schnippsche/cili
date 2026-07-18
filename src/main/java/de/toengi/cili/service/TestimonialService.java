@@ -46,6 +46,7 @@ public class TestimonialService {
     private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
         "image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp"
     );
+    private static final Set<String> VALID_SOURCES = Set.of("Mensch", "Tier");
 
     private final TestimonialRepository repository;
     private final ResourceRepository resourceRepository;
@@ -89,6 +90,7 @@ public class TestimonialService {
             throw new AccessDeniedException("Keine Berechtigung zum Erstellen");
         }
         validate(req.authorName(), req.text());
+        validateSource(req.source());
         Testimonial t = Testimonial.builder()
             .authorName(req.authorName().trim())
             .tags(req.tags() != null && !req.tags().isBlank() ? req.tags().trim() : null)
@@ -111,11 +113,13 @@ public class TestimonialService {
             throw new AccessDeniedException("Keine Berechtigung zum Bearbeiten");
         }
         validate(req.authorName(), req.text());
+        validateSource(req.source());
         Testimonial t = findOrThrow(id);
         checkOwnerOrAdmin(t);
         t.setAuthorName(req.authorName().trim());
         t.setTags(req.tags() != null && !req.tags().isBlank() ? req.tags().trim() : null);
         t.setText(req.text().trim());
+        t.setSource(req.source());
         if (deleteResourceIds != null) {
             deleteResourceIds.forEach(resourceId ->
                 resourceRepository.findById(resourceId)
@@ -233,6 +237,13 @@ public class TestimonialService {
             throw new CiliException("Name darf maximal 200 Zeichen lang sein", HttpStatus.BAD_REQUEST);
         if (text == null || text.trim().length() < 10)
             throw new CiliException("Text muss mindestens 10 Zeichen lang sein", HttpStatus.BAD_REQUEST);
+    }
+
+    private void validateSource(String source) {
+        if (source == null || source.isBlank())
+            throw new CiliException("source ist erforderlich; muss 'Mensch' oder 'Tier' sein", HttpStatus.BAD_REQUEST);
+        if (!VALID_SOURCES.contains(source))
+            throw new CiliException("source muss 'Mensch' oder 'Tier' sein", HttpStatus.BAD_REQUEST);
     }
 
     private Testimonial findOrThrow(Long id) {
