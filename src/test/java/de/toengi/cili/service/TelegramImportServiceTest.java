@@ -6,10 +6,12 @@ import de.toengi.cili.model.entity.ProcessingJob;
 import de.toengi.cili.model.enums.ProcessingJobStatus;
 import de.toengi.cili.model.enums.ProcessingJobType;
 import de.toengi.cili.repository.ProcessingJobRepository;
+import de.toengi.cili.security.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
@@ -25,6 +27,8 @@ class TelegramImportServiceTest {
     @Mock CiliGlobalConfig global;
     @Mock ProcessingJobService jobService;
     @Mock ProcessingJobRepository jobRepository;
+    @Mock JwtTokenProvider jwtTokenProvider;
+    @Mock UserDetailsService userDetailsService;
     @Mock TelegramImportService self;
 
     TelegramImportService service;
@@ -41,7 +45,7 @@ class TelegramImportServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        service = new TelegramImportService(config, global, jobService, jobRepository);
+        service = new TelegramImportService(config, global, jobService, jobRepository, jwtTokenProvider, userDetailsService);
         ReflectionTestUtils.setField(service, "self", self);
     }
 

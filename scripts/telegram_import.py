@@ -75,6 +75,13 @@ CILI_PASS   = os.getenv("CILI_PASS", "admin")
 
 MIN_CONFIDENCE = float(os.getenv("MIN_CONFIDENCE", "0.75"))
 
+# Begrenzung pro Lauf: bei großen Backlogs (z.B. Erstimport einer Gruppe mit 700+ Nachrichten)
+# nicht alles in einem Rutsch verarbeiten, sondern über mehrere Läufe strecken. Welches Limit
+# zuerst greift, beendet den Lauf — der Rest folgt beim nächsten Mal (State wird pro Nachricht
+# gespeichert, siehe _save_state_date-Aufruf in der Hauptschleife).
+MAX_MESSAGES_PER_RUN = int(os.getenv("MAX_MESSAGES_PER_RUN", "50"))
+MAX_RUNTIME_MINUTES  = float(os.getenv("MAX_RUNTIME_MINUTES", "45"))
+
 WEBINAR_FOLDER_ID  = os.getenv("WEBINAR_FOLDER_ID", "")
 WEBINAR_MAX_HEIGHT = int(os.getenv("WEBINAR_MAX_HEIGHT", "720"))
 
@@ -316,6 +323,12 @@ def _upload_webinar(url: str, folder_id: int, token: str, msg_date: datetime) ->
 
 
 def get_cili_token() -> str:
+    """Nutzt ein von TelegramImportService injiziertes Job-Token (CILI_TOKEN, 4h gültig),
+    falls vorhanden — sonst Login per Username/Passwort (15-Min-Token, nur für manuellen
+    CLI-Aufruf gedacht; reicht bei langen Webinar-Downloads/-Uploads nicht aus)."""
+    env_token = os.getenv("CILI_TOKEN")
+    if env_token:
+        return env_token
     resp = _http_post_with_retry(
         f"{CILI_URL}/api/auth/login",
         json={"username": CILI_USER, "password": CILI_PASS},
@@ -467,13 +480,18 @@ def _is_webinar(text: str) -> bool:
     return re.search(r"lifestyle\s+#?webinar", text, re.IGNORECASE) is not None
 
 
-def _try_import_webinar(text: str, token: str, msg_utc: datetime) -> None:
-    """Lädt das im Text verlinkte Webinar-Video hoch (falls URL + Zielordner vorhanden)."""
+def _try_import_webinar(text: str, msg_utc: datetime) -> None:
+    """Lädt das im Text verlinkte Webinar-Video hoch (falls URL + Zielordner vorhanden).
+
+    Holt unmittelbar vor dem Upload ein frisches Token: Video-Downloads dauern oft
+    länger als die 15-minütige Token-TTL, ein zu Laufbeginn geholtes Token wäre beim
+    tatsächlichen Upload (POST /api/uploads/init) sonst bereits abgelaufen (401)."""
     video_url = extract_video_url(text)
     if not (video_url and WEBINAR_FOLDER_ID):
         return
     try:
-        _upload_webinar(video_url, int(WEBINAR_FOLDER_ID), token, msg_utc)
+        upload_token = get_cili_token()
+        _upload_webinar(video_url, int(WEBINAR_FOLDER_ID), upload_token, msg_utc)
     except Exception as exc:
         print(f"  Webinar-Video fehlgeschlagen: {exc}")
 
@@ -550,7 +568,7 @@ async def _process_message(client: TelegramClient, message, album_map: dict,
     msg_utc = _to_utc_naive(message.date)
 
     if _is_webinar(text):
-        _try_import_webinar(text, token, msg_utc)
+        _try_import_webinar(text, msg_utc)
         return "skipped"
 
     sender_name = await _resolve_sender_name(message)
@@ -611,23 +629,38 @@ async def main():
 
         print(f"{len(new_messages)} neue Nachricht(en) gefunden — verarbeite älteste zuerst.\n")
 
-        # Neuesten Zeitstempel vor der Verarbeitung merken (new_messages ist neueste-zuerst)
-        newest_date = _to_utc_naive(new_messages[0].date)
-
         album_map = _group_albums(new_messages)
         processed_group_ids: set = set()
         counts = {"imported": 0, "skipped": 0}
+        run_started = time.monotonic()
+        processed = 0
+        limit_hit = None
 
         # Umkehren: älteste zuerst → chronologische Reihenfolge in CILI
         for message in reversed(new_messages):
+            if processed >= MAX_MESSAGES_PER_RUN:
+                limit_hit = f"{MAX_MESSAGES_PER_RUN} Nachrichten"
+                break
+            if (time.monotonic() - run_started) / 60 >= MAX_RUNTIME_MINUTES:
+                limit_hit = f"{MAX_RUNTIME_MINUTES:.0f} Minuten Laufzeit"
+                break
+
             status = await _process_message(
                 client, message, album_map, processed_group_ids, token
             )
+            processed += 1
             if status in counts:
                 counts[status] += 1
+            # Nach jeder Nachricht speichern (nicht erst am Lauf-Ende): große Webinar-Videos
+            # können den 60-Min-Prozess-Timeout überschreiten und den Import hart abbrechen
+            # (process.destroyForcibly() in TelegramImportService). Ohne Zwischenstand würde
+            # der nächste Lauf bereits erfolgreich hochgeladene Videos erneut importieren.
+            _save_state_date(_to_utc_naive(message.date))
 
-        # State speichern: beim nächsten Lauf nicht erneut verarbeiten (verhindert Webinar-Duplikate)
-        _save_state_date(newest_date)
+        if limit_hit:
+            print(f"Limit erreicht ({limit_hit}) — {len(new_messages) - processed} "
+                  f"verbleibende Nachricht(en) folgen im nächsten Lauf.\n")
+
         print(f"Fertig: {counts['imported']} importiert, {counts['skipped']} übersprungen.")
 
 

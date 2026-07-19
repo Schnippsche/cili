@@ -2,6 +2,8 @@ package de.toengi.cili.service;
 
 import de.toengi.cili.config.CiliGlobalConfig;
 import de.toengi.cili.config.TelegramImportConfig;
+import de.toengi.cili.security.CiliUserDetails;
+import de.toengi.cili.security.JwtTokenProvider;
 import de.toengi.cili.util.PythonProcessUtils;
 import de.toengi.cili.model.entity.ProcessingJob;
 import de.toengi.cili.model.enums.ProcessingJobStatus;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -26,10 +29,16 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class TelegramImportService {
 
+    /** Deutlich über cili.telegram.timeout-minutes hinaus gültig — Downloads großer Webinar-Videos
+     *  können 15+ Minuten dauern, ein knapp bemessenes Token liefe mitten im Lauf ab (401). */
+    private static final long JOB_TOKEN_EXPIRY_MS = 4 * 60 * 60 * 1000L; // 4 Stunden
+
     private final TelegramImportConfig config;
     private final CiliGlobalConfig global;
     private final ProcessingJobService jobService;
     private final ProcessingJobRepository jobRepository;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserDetailsService userDetailsService;
 
     @Autowired @Lazy
     private TelegramImportService self;
@@ -69,6 +78,16 @@ public class TelegramImportService {
         List<String> cmd = buildCommand(source);
         ProcessBuilder pb = PythonProcessUtils.forScript(cmd, global.resolve(config.getScriptName()));
         pb.redirectErrorStream(true);
+
+        try {
+            CiliUserDetails jobUser = (CiliUserDetails) userDetailsService.loadUserByUsername(config.getCiliUser());
+            String jobToken = jwtTokenProvider.generateJobToken(jobUser, JOB_TOKEN_EXPIRY_MS);
+            pb.environment().put("CILI_TOKEN", jobToken);
+        } catch (Exception e) {
+            log.warn("Telegram-Import ({}): konnte kein Job-Token für Benutzer '{}' generieren, "
+                + "Skript fällt auf CILI_USER/CILI_PASS-Login aus der .env-Datei zurück: {}",
+                source.getName(), config.getCiliUser(), e.getMessage());
+        }
 
         try {
             Process process = pb.start();

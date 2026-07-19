@@ -21,6 +21,9 @@ public class TelegramImportConfig {
     /** Timeout in Minuten; danach wird der Python-Prozess abgebrochen */
     private int timeoutMinutes = 60;
 
+    /** CILI-Benutzer, für den das Job-Token (CILI_TOKEN) generiert wird — muss in allen Quellen-.env-Dateien als CILI_USER hinterlegt sein. */
+    private String ciliUser = "admin";
+
     /** Konfigurierte Telegram-Quellen (eine pro Gruppe/.env-Datei). */
     private List<Source> sources = new ArrayList<>();
 
