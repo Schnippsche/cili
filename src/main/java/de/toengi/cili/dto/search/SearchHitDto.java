@@ -13,5 +13,7 @@ public record SearchHitDto(
     String folderPath,
     LocalDateTime uploadedAt,
     float score,
-    List<SnippetDto> snippets
+    List<SnippetDto> snippets,
+    String thumbnailStatus,
+    String storedName
 ) {}

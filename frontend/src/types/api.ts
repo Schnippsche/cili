@@ -51,7 +51,11 @@ export interface CreateBulkImportResponse { jobId: string; items: BulkImportItem
 
 // ── Search ───────────────────────────────────────────────────────────────
 export interface SnippetDto { text: string; timestamp: string | null; timestampSeconds: number | null; language: string; }
-export interface SearchHitDto { resourceId: number; name: string; title: string | null; mimeType: string; size: number; folderId: number; folderPath: string | null; uploadedAt: string; score: number; snippets: SnippetDto[]; }
+export interface SearchHitDto {
+  resourceId: number; name: string; title: string | null; mimeType: string; size: number; folderId: number;
+  folderPath: string | null; uploadedAt: string; score: number; snippets: SnippetDto[];
+  thumbnailStatus: string | null; storedName: string;
+}
 export interface SearchResponse {
   hits: SearchHitDto[]; totalHits: number; page: number; size: number;
   testimonialHits: TestimonialSearchHitDto[]; testimonialTotalHits: number; testimonialPage: number; testimonialSize: number;

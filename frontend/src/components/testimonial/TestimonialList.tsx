@@ -232,6 +232,7 @@ export default function TestimonialList({ canWrite, canDelete, highlightId }: Re
           resourceIds={[]}
           testimonialIds={data?.content.map(t => t.id) ?? []}
           onClose={() => setBulkDialogOpen(false)}
+          defaultName={deferredQ ? `Erfahrungsberichte zu ${deferredQ}` : undefined}
         />
       )}
 

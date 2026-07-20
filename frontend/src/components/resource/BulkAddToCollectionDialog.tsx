@@ -16,16 +16,17 @@ interface Props {
   resourceIds: number[];
   testimonialIds: number[];
   onClose: () => void;
+  defaultName?: string;
 }
 
-export default function BulkAddToCollectionDialog({ open, resourceIds, testimonialIds, onClose }: Readonly<Props>) {
+export default function BulkAddToCollectionDialog({ open, resourceIds, testimonialIds, onClose, defaultName }: Readonly<Props>) {
   const isAdmin = useSelector((s: RootState) => s.auth.user?.role === 'ADMIN');
   const { data: collectionsPerms } = useCollectionsPermissions();
   const canMarkTemplate = isAdmin || (collectionsPerms?.permissions.includes('MANAGE_TEMPLATES') ?? false);
   const qc = useQueryClient();
   const { data: collections = [] } = useCollections();
   const createMutation = useCreateCollection();
-  const [newName, setNewName]           = useState('');
+  const [newName, setNewName]           = useState(defaultName ?? '');
   const [showCreate, setShowCreate]     = useState(false);
   const [loading, setLoading]           = useState(false);
   const [markAsTemplate, setMarkAsTemplate] = useState(false);

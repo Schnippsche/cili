@@ -18,6 +18,7 @@ import de.toengi.cili.model.enums.AclResourceType;
 import de.toengi.cili.repository.ResourceMetadataRepository;
 import de.toengi.cili.repository.ResourceRepository;
 import de.toengi.cili.repository.SubtitleTrackRepository;
+import de.toengi.cili.repository.ThumbnailRepository;
 import de.toengi.cili.security.CiliUserDetails;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +45,8 @@ class SearchServicePermissionTest {
   ResourceMetadataRepository metadataRepository;
   @Mock
   SubtitleTrackRepository subtitleTrackRepository;
+  @Mock
+  ThumbnailRepository thumbnailRepository;
   @Mock
   AclService aclService;
   @Mock

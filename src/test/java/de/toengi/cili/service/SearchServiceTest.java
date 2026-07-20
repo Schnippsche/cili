@@ -8,6 +8,7 @@ import de.toengi.cili.repository.ResourceMetadataRepository;
 import de.toengi.cili.repository.ResourceRepository;
 import de.toengi.cili.repository.SubtitleTrackRepository;
 import de.toengi.cili.repository.TestimonialRepository;
+import de.toengi.cili.repository.ThumbnailRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,7 @@ class SearchServiceTest {
     @Mock ResourceRepository resourceRepository;
     @Mock ResourceMetadataRepository metadataRepository;
     @Mock SubtitleTrackRepository subtitleTrackRepository;
+    @Mock ThumbnailRepository thumbnailRepository;
     @Mock TestimonialRepository testimonialRepository;
     @Mock AclService aclService;
     @Mock EntityManager entityManager;

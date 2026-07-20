@@ -2,6 +2,7 @@ package de.toengi.cili.service;
 
 import de.toengi.cili.dto.search.*;
 import de.toengi.cili.model.entity.Resource;
+import de.toengi.cili.model.entity.Thumbnail;
 import de.toengi.cili.repository.TestimonialRepository;
 import de.toengi.cili.model.entity.ResourceMetadata;
 import de.toengi.cili.model.entity.SubtitleTrack;
@@ -10,6 +11,7 @@ import de.toengi.cili.model.enums.AclResourceType;
 import de.toengi.cili.repository.ResourceMetadataRepository;
 import de.toengi.cili.repository.ResourceRepository;
 import de.toengi.cili.repository.SubtitleTrackRepository;
+import de.toengi.cili.repository.ThumbnailRepository;
 import de.toengi.cili.security.CiliUserDetails;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -37,6 +39,7 @@ public class SearchService {
     private final ResourceRepository resourceRepository;
     private final ResourceMetadataRepository metadataRepository;
     private final SubtitleTrackRepository subtitleTrackRepository;
+    private final ThumbnailRepository thumbnailRepository;
     private final AclService aclService;
 
     private final TestimonialRepository testimonialRepository;
@@ -132,10 +135,13 @@ public class SearchService {
         List<Long> ids = page.getContent().stream().map(Resource::getId).toList();
         Map<Long, ResourceMetadata> metaById = metadataRepository.findByResourceIdIn(ids)
                 .stream().collect(Collectors.toMap(ResourceMetadata::getResourceId, m -> m));
+        Map<Long, String> thumbStatusById = thumbnailRepository.findByResourceIdIn(ids)
+                .stream().collect(Collectors.toMap(Thumbnail::getResourceId, t -> t.getStatus().name()));
         Map<Long, List<SnippetDto>> snippets = terms.isEmpty() || ids.isEmpty() ? Map.of()
                 : extractSnippets(ids, terms.getFirst().toLowerCase());
         List<SearchHitDto> dtos = page.getContent().stream()
-                .map(r -> toDto(r, metaById.get(r.getId()), snippets.getOrDefault(r.getId(), List.of())))
+                .map(r -> toDto(r, metaById.get(r.getId()), snippets.getOrDefault(r.getId(), List.of()),
+                        thumbStatusById.get(r.getId())))
                 .toList();
         Page<TestimonialSearchHitDto> testimonials = fetchTestimonialHits(terms, folderId, testimonialPage);
         return new SearchResponse(dtos, page.getTotalElements(), pageable.getPageNumber(), pageable.getPageSize(),
@@ -303,7 +309,7 @@ public class SearchService {
         return new PageImpl<>(dataQ.getResultList(), pageable, total);
     }
 
-    private SearchHitDto toDto(Resource resource, ResourceMetadata meta, List<SnippetDto> snippets) {
+    private SearchHitDto toDto(Resource resource, ResourceMetadata meta, List<SnippetDto> snippets, String thumbnailStatus) {
         return new SearchHitDto(
                 resource.getId(),
                 resource.getOriginalName(),
@@ -314,7 +320,9 @@ public class SearchService {
                 null,
                 resource.getCreatedAt(),
                 1.0f,
-                snippets
+                snippets,
+                thumbnailStatus,
+                resource.getStoredName()
         );
     }
 

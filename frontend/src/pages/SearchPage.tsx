@@ -5,13 +5,22 @@ import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import PersonIcon from '@mui/icons-material/Person';
 import PetsIcon from '@mui/icons-material/Pets';
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import VideoFileOutlinedIcon from '@mui/icons-material/VideoFileOutlined';
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
+import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
+import AudioFileOutlinedIcon from '@mui/icons-material/AudioFileOutlined';
 import AppShell from '../components/layout/AppShell';
 import SearchBar from '../components/search/SearchBar';
 import AddToCollectionDialog from '../components/resource/AddToCollectionDialog';
 import BulkAddToCollectionDialog from '../components/resource/BulkAddToCollectionDialog';
 import { useSearch } from '../hooks/useSearch';
 import { useNavigate } from 'react-router-dom';
-import type { TestimonialSearchHitDto } from '../types/api';
+import type { SearchHitDto, TestimonialSearchHitDto } from '../types/api';
+import { getThumbnailUrl } from '../api/resources';
+import { useAuthenticatedUrl } from '../hooks/useAuthenticatedUrl';
 
 function viewerType(mimeType: string): string | null {
   if (mimeType.startsWith('video/')) return 'video';
@@ -23,6 +32,46 @@ function viewerType(mimeType: string): string | null {
       mimeType.startsWith('application/vnd.oasis')) return 'pdf';
   if (mimeType.startsWith('text/') || mimeType === 'application/json') return 'text';
   return null;
+}
+
+function MimeIcon({ mimeType }: Readonly<{ mimeType: string }>) {
+  const sx = { fontSize: 24, color: 'text.disabled' };
+  const type = viewerType(mimeType);
+  if (type === 'video')  return <VideoFileOutlinedIcon sx={sx} />;
+  if (type === 'audio')  return <AudioFileOutlinedIcon sx={sx} />;
+  if (type === 'image')  return <ImageOutlinedIcon sx={sx} />;
+  if (type === 'pdf')    return mimeType === 'application/pdf'
+    ? <PictureAsPdfOutlinedIcon sx={sx} />
+    : <DescriptionOutlinedIcon sx={sx} />;
+  if (type === 'text')   return <CodeOutlinedIcon sx={sx} />;
+  return <InsertDriveFileOutlinedIcon sx={sx} />;
+}
+
+function ResourceHitThumbnail({ hit }: Readonly<{ hit: SearchHitDto }>) {
+  const isImage = hit.mimeType.startsWith('image/');
+  const thumbSrc = hit.thumbnailStatus === 'DONE' || isImage
+    ? getThumbnailUrl(hit.resourceId, 'small', hit.thumbnailStatus === 'DONE' ? hit.storedName : undefined)
+    : null;
+  const thumbUrl = useAuthenticatedUrl(thumbSrc, isImage ? 3 : 0);
+
+  if (thumbUrl) {
+    return (
+      <Box
+        component="img"
+        src={thumbUrl}
+        alt=""
+        sx={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 1, flexShrink: 0, bgcolor: 'action.hover' }}
+      />
+    );
+  }
+  return (
+    <Box sx={{
+      width: 48, height: 48, borderRadius: 1, flexShrink: 0, bgcolor: 'action.hover',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <MimeIcon mimeType={hit.mimeType} />
+    </Box>
+  );
 }
 
 export default function SearchPage() {
@@ -90,43 +139,46 @@ export default function SearchPage() {
                         : `/folders/${hit.folderId}`;
                       navigate(target);
                     }}>
-                      <ListItemText
-                        primary={hit.name}
-                        secondary={
-                          <>
-                            <span>{hit.mimeType} · {(hit.size / 1024).toFixed(1)} KB · {hit.folderPath ?? ''}</span>
-                            {hit.snippets.map((s, i) => {
-                              const type = viewerType(hit.mimeType);
-                              const tParam = s.timestampSeconds == null ? '' : `&t=${s.timestampSeconds}`;
-                              const langParam = s.language ? `&lang=${encodeURIComponent(s.language)}` : '';
-                              const qParam = query ? `&q=${encodeURIComponent(query)}` : '';
-                              const snippetTarget = type === 'text'
-                                ? `/resources/${hit.resourceId}/edit`
-                                : type
-                                ? `/folders/${hit.folderId}?view=${hit.resourceId}&type=${type}${qParam}${langParam}${tParam}`
-                                : null;
-                              return (
-                                <span
-                                  key={i}
-                                  onClick={snippetTarget ? (e) => { e.stopPropagation(); navigate(snippetTarget); } : undefined}
-                                  style={{
-                                    display: 'block', marginTop: 2, fontStyle: 'italic',
-                                    cursor: snippetTarget ? 'pointer' : 'default',
-                                    textDecoration: snippetTarget ? 'underline dotted' : 'none',
-                                  }}
-                                >
-                                  {s.timestamp && (
-                                    <span style={{ fontStyle: 'normal', fontWeight: 600, marginRight: 6 }}>
-                                      [{s.timestamp}]
-                                    </span>
-                                  )}
-                                  {s.text}
-                                </span>
-                              );
-                            })}
-                          </>
-                        }
-                      />
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, width: '100%' }}>
+                        <ResourceHitThumbnail hit={hit} />
+                        <ListItemText
+                          primary={hit.name}
+                          secondary={
+                            <>
+                              <span>{hit.mimeType} · {(hit.size / 1024).toFixed(1)} KB · {hit.folderPath ?? ''}</span>
+                              {hit.snippets.map((s, i) => {
+                                const type = viewerType(hit.mimeType);
+                                const tParam = s.timestampSeconds == null ? '' : `&t=${s.timestampSeconds}`;
+                                const langParam = s.language ? `&lang=${encodeURIComponent(s.language)}` : '';
+                                const qParam = query ? `&q=${encodeURIComponent(query)}` : '';
+                                const snippetTarget = type === 'text'
+                                  ? `/resources/${hit.resourceId}/edit`
+                                  : type
+                                  ? `/folders/${hit.folderId}?view=${hit.resourceId}&type=${type}${qParam}${langParam}${tParam}`
+                                  : null;
+                                return (
+                                  <span
+                                    key={i}
+                                    onClick={snippetTarget ? (e) => { e.stopPropagation(); navigate(snippetTarget); } : undefined}
+                                    style={{
+                                      display: 'block', marginTop: 2, fontStyle: 'italic',
+                                      cursor: snippetTarget ? 'pointer' : 'default',
+                                      textDecoration: snippetTarget ? 'underline dotted' : 'none',
+                                    }}
+                                  >
+                                    {s.timestamp && (
+                                      <span style={{ fontStyle: 'normal', fontWeight: 600, marginRight: 6 }}>
+                                        [{s.timestamp}]
+                                      </span>
+                                    )}
+                                    {s.text}
+                                  </span>
+                                );
+                              })}
+                            </>
+                          }
+                        />
+                      </Box>
                     </ListItemButton>
                   </ListItem>
                 ))}
@@ -210,6 +262,7 @@ export default function SearchPage() {
           resourceIds={results.hits.map(h => h.resourceId)}
           testimonialIds={results.testimonialHits.map(t => t.id)}
           onClose={() => setBulkDialogOpen(false)}
+          defaultName={query ? `Suchergebnis zu ${query}` : undefined}
         />
       )}
     </AppShell>
