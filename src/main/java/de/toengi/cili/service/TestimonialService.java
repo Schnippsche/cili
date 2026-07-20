@@ -62,12 +62,12 @@ public class TestimonialService {
         if (!aclService.hasTestimonialsPermission(user.getUserId(), AclPermission.READ)) {
             throw new AccessDeniedException("Kein Zugriff auf Erfahrungsberichte");
         }
-        if (source != null && !source.isBlank()) {
-            return repository.findBySourceOrderByCreatedAtDesc(source, pageable).map(this::toDto);
-        }
         if (q != null && !q.isBlank()) {
             log.info("Erfahrungsberichte-Suche: user='{}' query='{}'", user.getUsername(), q.trim());
-            return repository.searchLike(parseTerms(q), pageable).map(this::toDto);
+            return repository.searchLike(parseTerms(q), source, pageable).map(this::toDto);
+        }
+        if (source != null && !source.isBlank()) {
+            return repository.findBySourceOrderByCreatedAtDesc(source, pageable).map(this::toDto);
         }
         return repository.findAllByOrderByCreatedAtDesc(pageable).map(this::toDto);
     }

@@ -52,7 +52,10 @@ export interface CreateBulkImportResponse { jobId: string; items: BulkImportItem
 // ── Search ───────────────────────────────────────────────────────────────
 export interface SnippetDto { text: string; timestamp: string | null; timestampSeconds: number | null; language: string; }
 export interface SearchHitDto { resourceId: number; name: string; title: string | null; mimeType: string; size: number; folderId: number; folderPath: string | null; uploadedAt: string; score: number; snippets: SnippetDto[]; }
-export interface SearchResponse { hits: SearchHitDto[]; totalHits: number; page: number; size: number; testimonialHits: TestimonialSearchHitDto[]; }
+export interface SearchResponse {
+  hits: SearchHitDto[]; totalHits: number; page: number; size: number;
+  testimonialHits: TestimonialSearchHitDto[]; testimonialTotalHits: number; testimonialPage: number; testimonialSize: number;
+}
 export interface FacetDto { value: string; count: number; }
 export interface FacetsResponse { mimeTypes: FacetDto[]; languages: FacetDto[]; }
 
@@ -140,6 +143,7 @@ export interface TestimonialSearchHitDto {
   authorName: string;
   tags: string | null;
   text: string;
+  source: string | null;
   createdAt: string;
 }
 

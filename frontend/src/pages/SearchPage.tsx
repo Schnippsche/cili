@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Alert, Box, CircularProgress, IconButton, List, ListItem, ListItemButton, ListItemText, Tooltip, Typography } from '@mui/material';
+import { Alert, Box, CircularProgress, IconButton, List, ListItem, ListItemButton, ListItemText, Pagination, Tooltip, Typography } from '@mui/material';
 import Chip from '@mui/material/Chip';
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import PersonIcon from '@mui/icons-material/Person';
+import PetsIcon from '@mui/icons-material/Pets';
 import AppShell from '../components/layout/AppShell';
 import SearchBar from '../components/search/SearchBar';
 import AddToCollectionDialog from '../components/resource/AddToCollectionDialog';
@@ -24,7 +26,7 @@ function viewerType(mimeType: string): string | null {
 }
 
 export default function SearchPage() {
-  const { query, setQuery, results, isLoading } = useSearch();
+  const { query, setQuery, page, setPage, tPage, setTPage, results, isLoading } = useSearch();
   const navigate = useNavigate();
   const [collectionTarget, setCollectionTarget] = useState<{ id: number; type: 'resource' | 'testimonial' } | null>(null);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
@@ -129,6 +131,14 @@ export default function SearchPage() {
                   </ListItem>
                 ))}
               </List>
+              {results.totalHits > results.size && (
+                <Pagination
+                  count={Math.ceil(results.totalHits / results.size)}
+                  page={page + 1}
+                  onChange={(_, p) => setPage(p - 1)}
+                  sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
+                />
+              )}
               {results.testimonialHits.length > 0 && (
                 <>
                   <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 3, mb: 1 }}>
@@ -154,6 +164,11 @@ export default function SearchPage() {
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                                 <span>{t.authorName}</span>
                                 <Chip label="Testimonial" size="small" variant="outlined" color="secondary" />
+                                {t.source === 'Tier' ? (
+                                  <Chip icon={<PetsIcon />} label="Tier" size="small" color="success" />
+                                ) : t.source === 'Mensch' ? (
+                                  <Chip icon={<PersonIcon />} label="Mensch" size="small" color="primary" />
+                                ) : null}
                                 {t.tags?.split(',').map(tag => tag.trim()).filter(Boolean).map(tag => (
                                   <Chip key={tag} label={tag} size="small" color="info" sx={{ opacity: 0.85 }} />
                                 ))}
@@ -165,6 +180,14 @@ export default function SearchPage() {
                       </ListItem>
                     ))}
                   </List>
+                  {results.testimonialTotalHits > results.testimonialSize && (
+                    <Pagination
+                      count={Math.ceil(results.testimonialTotalHits / results.testimonialSize)}
+                      page={tPage + 1}
+                      onChange={(_, p) => setTPage(p - 1)}
+                      sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
+                    />
+                  )}
                 </>
               )}
               {results.hits.length === 0 && results.testimonialHits.length === 0 && query && (

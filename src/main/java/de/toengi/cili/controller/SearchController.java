@@ -32,7 +32,8 @@ public class SearchController {
             @RequestParam(required = false) String mimeType,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "relevance") String sort) {
+            @RequestParam(defaultValue = "relevance") String sort,
+            @RequestParam(defaultValue = "0") @Min(0) int tPage) {
 
         int clampedSize = Math.clamp(size, 1, maxPageSize);
 
@@ -46,7 +47,7 @@ public class SearchController {
         }
         PageRequest pageable = PageRequest.of(page, clampedSize, sorting);
 
-        return ResponseEntity.ok(searchService.search(q, folder, mimeType, pageable));
+        return ResponseEntity.ok(searchService.search(q, folder, mimeType, pageable, tPage));
     }
 
     @GetMapping("/facets")

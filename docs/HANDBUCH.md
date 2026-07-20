@@ -241,7 +241,7 @@ CILI bietet zwei unterschiedliche Suchmöglichkeiten:
 |---|---|---|
 | **Wo** | Eigene Seite (Lupe in Seitenleiste) | Direkt auf der Erfahrungsberichte-Seite |
 | **Durchsucht** | Dateien, Untertitel **und** Erfahrungsberichte | Nur Erfahrungsberichte |
-| **Ergebnisse** | Dateien + Erfahrungsberichte gemischt | Nur Erfahrungsberichte, seitenweise |
+| **Ergebnisse** | Dateien + Erfahrungsberichte getrennt, jeweils seitenweise | Nur Erfahrungsberichte, seitenweise |
 | **Einsatz** | Wenn unklar ist, wo etwas ist | Gezieltes Stöbern in Erfahrungsberichten |
 
 ---
@@ -263,11 +263,13 @@ Gib einen oder mehrere Suchbegriffe ein und drücke Enter. Bei mehreren Begriffe
 Die Treffer sind in zwei Kategorien aufgeteilt:
 
 - **Dateien** – mit Vorschaubild, Dateiname und Ordnerpfad
-- **Erfahrungsberichte** – mit Textausschnitt und Autor
+- **Erfahrungsberichte** – mit Textausschnitt und Autor; ein Symbol (👤 Mensch / 🐾 Tier) zeigt sofort, um welche Art von Bericht es sich handelt
 
 Bei Untertitel-Treffern wird der gefundene Textausschnitt angezeigt. Ein Klick öffnet das Video und springt direkt zur entsprechenden Stelle im Video.
 
 Neben jedem Treffer befindet sich ein **Lesezeichen-Symbol**, mit dem sich der Treffer direkt einer Sammlung hinzufügen lässt. Über das Symbol **Alle Treffer zur Sammlung hinzufügen** oberhalb der Trefferliste lässt sich das komplette Suchergebnis (Dateien und Erfahrungsberichte zusammen) auf einmal einer Sammlung hinzufügen (Details siehe [Suchtreffer zu einer Sammlung hinzufügen](#suchtreffer-zu-einer-sammlung-hinzufügen)).
+
+Liefert eine Suche mehr Treffer, als auf einer Seite Platz haben, erscheint darunter eine **Seitennavigation** — für Dateien und für Erfahrungsberichte jeweils getrennt, da beide Kategorien unabhängig voneinander blättern.
 
 ---
 
@@ -389,17 +391,20 @@ Den Link kannst du jederzeit **widerrufen** (sofort ungültig) oder **erneuern**
 
 ## 8. Erfahrungsberichte
 
-Erfahrungsberichte sind strukturierte Einträge mit Autorenname, Text und optionalen Tags sowie Bildern.
+Erfahrungsberichte sind strukturierte Einträge mit Autorenname, Text und optionalen Tags sowie Bildern. Jeder Bericht ist außerdem eindeutig als **Mensch**- oder **Tier**-Erfahrungsbericht gekennzeichnet und wird entsprechend mit einem Symbol (👤 bzw. 🐾) versehen — sowohl in der Übersicht als auch in den Suchergebnissen.
 
 ### Übersicht & Suche
 
-Unter **Erfahrungsberichte** in der Seitenleiste siehst du alle vorhandenen Einträge. Über das **Suchfeld** oberhalb der Liste kannst du direkt nach Autor, Text oder Tags filtern — die Liste aktualisiert sich dabei automatisch während der Eingabe. Diese Suche durchsucht **nur Erfahrungsberichte**. Für eine Suche über Dateien und Erfahrungsberichte gleichzeitig nutze die [Globale Suche](#61-globale-suche).
+Unter **Erfahrungsberichte** in der Seitenleiste siehst du alle vorhandenen Einträge. Über die Auswahl **Beide / Mensch / Tier** oberhalb der Liste lässt sich die Ansicht auf eine der beiden Kategorien einschränken. Über das **Suchfeld** darunter kannst du direkt nach Autor, Text oder Tags filtern — die Liste aktualisiert sich dabei automatisch während der Eingabe. Suchbegriff und Mensch/Tier-Auswahl wirken dabei **zusammen**: Ist z. B. „Mensch" ausgewählt, durchsucht die Eingabe im Suchfeld auch nur die Mensch-Erfahrungsberichte. Diese Suche durchsucht **nur Erfahrungsberichte**. Für eine Suche über Dateien und Erfahrungsberichte gleichzeitig nutze die [Globale Suche](#61-globale-suche).
+
+Die Trefferliste ist bei vielen Einträgen seitenweise blätterbar; die Seitennavigation erscheint unterhalb der Liste.
 
 ### Erfahrungsbericht anlegen
 
 Klicke auf **Neu** und fülle die Felder aus:
 
 - **Autorenname** – Name der Person
+- **Mensch / Tier** – Pflichtauswahl direkt unter dem Namensfeld, legt fest, ob es sich um einen Erfahrungsbericht zu einem Menschen oder einem Tier handelt
 - **Text** – Der eigentliche Bericht
 - **Tags** – Kommagetrennte Schlagwörter zur Kategorisierung
 - **Bilder** – Fotos können direkt angehängt werden

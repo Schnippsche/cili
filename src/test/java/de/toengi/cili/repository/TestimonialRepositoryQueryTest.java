@@ -27,7 +27,7 @@ class TestimonialRepositoryQueryTest {
     @Test
     void searchLike_method_exists() throws NoSuchMethodException {
         Method m = TestimonialRepository.class
-            .getMethod("searchLike", List.class, org.springframework.data.domain.Pageable.class);
+            .getMethod("searchLike", List.class, String.class, org.springframework.data.domain.Pageable.class);
         assertThat(m).isNotNull();
     }
 

@@ -212,12 +212,23 @@ class TestimonialServiceTest {
 
     @Test
     void list_withQuery_callsSearchLike() {
-        when(repository.searchLike(anyList(), any(Pageable.class))).thenReturn(Page.empty());
+        when(repository.searchLike(anyList(), isNull(), any(Pageable.class))).thenReturn(Page.empty());
 
         service.list("testsuche", null, PageRequest.of(0, 10));
 
-        verify(repository).searchLike(eq(List.of("testsuche")), any(Pageable.class));
+        verify(repository).searchLike(eq(List.of("testsuche")), isNull(), any(Pageable.class));
         verify(repository, never()).findAllByOrderByCreatedAtDesc(any());
+    }
+
+    @Test
+    void list_withQueryAndSource_combinesBothFilters() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(repository.searchLike(anyList(), eq("Mensch"), eq(pageable))).thenReturn(Page.empty());
+
+        service.list("testsuche", "Mensch", pageable);
+
+        verify(repository).searchLike(List.of("testsuche"), "Mensch", pageable);
+        verify(repository, never()).findBySourceOrderByCreatedAtDesc(any(), any());
     }
 
     @Test

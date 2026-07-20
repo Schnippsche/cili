@@ -17,15 +17,15 @@ public class TestimonialRepositoryImpl implements TestimonialRepositoryCustom {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Page<Testimonial> searchLike(List<String> terms, Pageable pageable) {
-        String where = buildWhere(terms);
+    public Page<Testimonial> searchLike(List<String> terms, String source, Pageable pageable) {
+        String where = buildWhere(terms, source);
         Query dataQ = em.createNativeQuery(
             "SELECT * FROM testimonials " + where + " ORDER BY created_at DESC",
             Testimonial.class);
         Query countQ = em.createNativeQuery(
             "SELECT COUNT(*) FROM testimonials " + where);
-        bindParams(dataQ, terms);
-        bindParams(countQ, terms);
+        bindParams(dataQ, terms, source);
+        bindParams(countQ, terms, source);
         dataQ.setFirstResult((int) pageable.getOffset());
         dataQ.setMaxResults(pageable.getPageSize());
         List<Testimonial> rows = dataQ.getResultList();
@@ -37,33 +37,38 @@ public class TestimonialRepositoryImpl implements TestimonialRepositoryCustom {
     @SuppressWarnings("unchecked")
     public List<Testimonial> searchLikeTop(List<String> terms, int max) {
         Query query = em.createNativeQuery(
-            "SELECT * FROM testimonials " + buildWhere(terms) + " ORDER BY created_at DESC",
+            "SELECT * FROM testimonials " + buildWhere(terms, null) + " ORDER BY created_at DESC",
             Testimonial.class);
-        bindParams(query, terms);
+        bindParams(query, terms, null);
         query.setMaxResults(max);
         return query.getResultList();
     }
 
-    private String buildWhere(List<String> terms) {
-        if (terms.isEmpty()) return "";
-        StringBuilder sb = new StringBuilder("WHERE ");
+    private String buildWhere(List<String> terms, String source) {
+        List<String> clauses = new java.util.ArrayList<>();
         for (int i = 0; i < terms.size(); i++) {
-            if (i > 0) sb.append(" AND ");
             int base = i * 3 + 1;
-            sb.append("(LOWER(author_name) LIKE ?").append(base)
-              .append(" OR LOWER(text) LIKE ?").append(base + 1)
-              .append(" OR LOWER(tags) LIKE ?").append(base + 2).append(")");
+            clauses.add("(LOWER(author_name) LIKE ?" + base
+                + " OR LOWER(text) LIKE ?" + (base + 1)
+                + " OR LOWER(tags) LIKE ?" + (base + 2) + ")");
         }
-        return sb.toString();
+        if (source != null && !source.isBlank()) {
+            clauses.add("source = ?" + (terms.size() * 3 + 1));
+        }
+        if (clauses.isEmpty()) return "";
+        return "WHERE " + String.join(" AND ", clauses);
     }
 
-    private void bindParams(Query query, List<String> terms) {
+    private void bindParams(Query query, List<String> terms, String source) {
         for (int i = 0; i < terms.size(); i++) {
             String pattern = "%" + terms.get(i).toLowerCase() + "%";
             int base = i * 3 + 1;
             query.setParameter(base,     pattern);
             query.setParameter(base + 1, pattern);
             query.setParameter(base + 2, pattern);
+        }
+        if (source != null && !source.isBlank()) {
+            query.setParameter(terms.size() * 3 + 1, source);
         }
     }
 }

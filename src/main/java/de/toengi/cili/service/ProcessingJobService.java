@@ -109,6 +109,13 @@ public class ProcessingJobService {
         return repo.findById(id).orElseThrow(() -> new IllegalStateException("Job not found: " + id));
     }
 
+    /** Heartbeat für lang laufende externe Prozesse — verhindert, dass JobRecoveryService
+     *  einen aktiv arbeitenden Job wegen fehlender updatedAt-Aktualisierung als Zombie killt. */
+    @Transactional
+    public void touch(Long jobId) {
+        repo.touchUpdatedAt(jobId);
+    }
+
     @Transactional
     public void updateResult(Long jobId, String resultJson) {
         ProcessingJob job = repo.findById(jobId).orElseThrow(() -> new IllegalStateException("Job not found: " + jobId));

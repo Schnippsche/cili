@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
@@ -92,9 +93,22 @@ public class TelegramImportService {
         try {
             Process process = pb.start();
 
+            // Heartbeat: JobRecoveryService killt RUNNING-Jobs, deren updatedAt seit
+            // cili.video-workflow.zombie-timeout-minutes nicht mehr aktualisiert wurde. Ohne
+            // periodisches Touch sähe ein aktiv laufender, aber >45-Min-dauernder Import immer
+            // wie ein hängengebliebener Prozess aus. Throttled auf max. alle 2 Minuten, damit
+            // nicht jede einzelne (teils sehr häufige) Ausgabezeile einen DB-Write auslöst.
+            AtomicLong lastHeartbeat = new AtomicLong(0);
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-                reader.lines().forEach(line -> log.info("[telegram-import:{}] {}", source.getName(), line));
+                reader.lines().forEach(line -> {
+                    log.info("[telegram-import:{}] {}", source.getName(), line);
+                    long now = System.nanoTime();
+                    if (now - lastHeartbeat.get() > TimeUnit.MINUTES.toNanos(2)) {
+                        lastHeartbeat.set(now);
+                        jobService.touch(jobId);
+                    }
+                });
             }
 
             boolean finished = process.waitFor(config.getTimeoutMinutes(), TimeUnit.MINUTES);

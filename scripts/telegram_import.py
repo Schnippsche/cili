@@ -26,6 +26,7 @@ import json
 import os
 import random
 import re
+import subprocess
 import sys
 import time
 from collections import defaultdict
@@ -65,9 +66,21 @@ TG_API_HASH = os.getenv("TG_API_HASH", "")
 TG_PHONE    = os.getenv("TG_PHONE", "")    # z.B. +4917012345678
 TG_GROUP    = os.getenv("TG_GROUP", "")    # Gruppenname, -link oder numerische ID
 
-AI_URL      = os.getenv("AI_URL", "http://localhost:11434/v1/chat/completions")
+# Basis-URL von Ollama (ohne Pfad) — classify_with_ai() spricht die native /api/generate-Route
+# an, nicht die OpenAI-kompatible /v1/chat/completions (dort unterdrückt think:false das
+# Qwen3-Reasoning nicht zuverlässig, siehe Kommentar in classify_with_ai). Damit funktioniert
+# nur noch echtes Ollama als Backend, kein LM Studio o.ä. mehr.
+AI_URL      = os.getenv("AI_URL", "http://localhost:11434")
 AI_MODEL    = os.getenv("AI_MODEL", "llama3")
 AI_TIMEOUT  = int(os.getenv("AI_TIMEOUT", "180"))
+# Kontextfenster und Antwortlänge für die Klassifikation. Da think:false über die native Route
+# zuverlässig greift, muss hier kein Reasoning-Overhead mehr eingeplant werden — die Antwort ist
+# ein kurzes JSON-Objekt (siehe CLASSIFY_PROMPT).
+AI_NUM_CTX     = int(os.getenv("AI_NUM_CTX", "4096"))
+AI_NUM_PREDICT = int(os.getenv("AI_NUM_PREDICT", "1024"))
+# Wartezeit vor dem ersten Retry nach einem Ollama-ReadTimeout (verdoppelt sich je Versuch).
+# Höher als der Standard-HTTP-Retry: ein neu ladendes Modell braucht eher zehn(e) Sekunden als eine.
+AI_RETRY_BACKOFF_SECONDS = float(os.getenv("AI_RETRY_BACKOFF_SECONDS", "15"))
 
 CILI_URL    = os.getenv("CILI_URL", "http://localhost:8080")
 CILI_USER   = os.getenv("CILI_USER", "admin")
@@ -166,8 +179,12 @@ _SESSION = requests.Session()
 
 
 def _http_request_with_retry(method: str, url: str, max_retries: int = 3,
-                             **kwargs) -> requests.Response:
-    """HTTP-Request mit exponentiellem Backoff bei transienten Fehlern (Timeout, Connection)."""
+                             base_backoff: float = 1.0, **kwargs) -> requests.Response:
+    """HTTP-Request mit exponentiellem Backoff bei transienten Fehlern (Timeout, Connection).
+
+    base_backoff skaliert die Wartezeit zwischen Versuchen (Sekunden vor Jitter/Verdopplung).
+    Für Ollama-Calls höher ansetzen als für die schnellen CILI-API-Calls: nach einem
+    ReadTimeout braucht ein neu ladendes Modell eher zehn(e) Sekunden als eine."""
     for attempt in range(max_retries):
         try:
             resp = _SESSION.request(method, url, **kwargs)
@@ -175,8 +192,8 @@ def _http_request_with_retry(method: str, url: str, max_retries: int = 3,
             return resp
         except (requests.Timeout, requests.ConnectionError) as e:
             if attempt < max_retries - 1:
-                # Backoff: 1s, 2s, 4s … plus Jitter, um gleichzeitige Retries zu entzerren
-                wait = (2 ** attempt) + random.uniform(0, 1)
+                # Backoff: base, base*2, base*4 … plus Jitter, um gleichzeitige Retries zu entzerren
+                wait = (base_backoff * (2 ** attempt)) + random.uniform(0, base_backoff)
                 print(f"  HTTP-Fehler ({e.__class__.__name__}), Retry {attempt + 1}/{max_retries - 1} "
                       f"in {wait:.1f}s …", flush=True)
                 time.sleep(wait)
@@ -185,9 +202,10 @@ def _http_request_with_retry(method: str, url: str, max_retries: int = 3,
     raise RuntimeError(f"max_retries muss > 0 sein (war {max_retries})")
 
 
-def _http_post_with_retry(url: str, max_retries: int = 3, **kwargs) -> requests.Response:
+def _http_post_with_retry(url: str, max_retries: int = 3, base_backoff: float = 1.0,
+                          **kwargs) -> requests.Response:
     """POST mit Retry (siehe _http_request_with_retry)."""
-    return _http_request_with_retry("POST", url, max_retries, **kwargs)
+    return _http_request_with_retry("POST", url, max_retries, base_backoff, **kwargs)
 
 
 def _http_get_with_retry(url: str, max_retries: int = 3, **kwargs) -> requests.Response:
@@ -272,21 +290,51 @@ def fix_json_control_chars(s: str) -> str:
     return "".join(result)
 
 
+def gpu_temperature() -> str:
+    """Liest die aktuelle GPU-Temperatur über nvidia-smi aus (z.B. '75'). Liefert '?' falls nicht verfügbar."""
+    try:
+        out = subprocess.run(
+            ['nvidia-smi', '--query-gpu=temperature.gpu', '--format=csv,noheader,nounits'],
+            capture_output=True, text=True, timeout=5, check=True,
+        )
+        return out.stdout.strip().splitlines()[0]
+    except Exception:
+        return '?'
+
+
 def classify_with_ai(sender_name: str, message_text: str) -> dict:
     # ftfy repariert kaputtes Unicode (Mojibake) vor dem Versand an die KI
     message_text = ftfy.fix_text(message_text)
     prompt = CLASSIFY_PROMPT.format(sender_name=sender_name, message_text=message_text)
+    # Ollamas native Route (/api/generate) statt der OpenAI-kompatiblen (/v1/chat/completions):
+    # Über Letztere unterdrückte think:false das Qwen3-Reasoning NICHT zuverlässig — Ollama
+    # dachte trotzdem weiter (nur ins separate "reasoning"-Feld statt "content"), was wiederholt
+    # das gesamte max_tokens-Budget aufbrauchte, bevor content geschrieben wurde (auch nach
+    # Erhöhung von 800 auf 4000 auf 8192 — siehe Git-History). Über /api/generate wird
+    # think:false zuverlässig respektiert, siehe analyze_worker.py für dasselbe Modell/Problem.
+    # Kehrseite: bricht Kompatibilität zu OpenAI-artigen Backends wie LM Studio.
+    print(f"  Sende an {AI_URL} (Modell: {AI_MODEL}, GPU-Temp={gpu_temperature()}°C)")
     resp = _http_post_with_retry(
-        AI_URL,
+        f"{AI_URL}/api/generate",
+        base_backoff=AI_RETRY_BACKOFF_SECONDS,
         json={
             "model": AI_MODEL,
-            "messages": [{"role": "user", "content": prompt}],
+            "prompt": prompt,
             "stream": False,
-            "temperature": 0.1,
+            "think": False,
+            "options": {
+                "temperature": 0.1,
+                "num_ctx": AI_NUM_CTX,
+                "num_predict": AI_NUM_PREDICT,
+            },
         },
         timeout=AI_TIMEOUT,
     )
-    raw = resp.json()["choices"][0]["message"]["content"].strip()
+    body = resp.json()
+    if body.get("done_reason") == "length":
+        print(f"  WARNUNG: KI-Antwort durch num_predict={AI_NUM_PREDICT} abgeschnitten "
+              f"(done_reason=length)")
+    raw = body["response"].strip()
     if "```" in raw:
         parts = raw.split("```")
         raw = parts[1].removeprefix("json").strip() if len(parts) > 1 else raw
@@ -297,7 +345,8 @@ def classify_with_ai(sender_name: str, message_text: str) -> dict:
             return json.loads(fix_json_control_chars(raw))
         except json.JSONDecodeError:
             raise json.JSONDecodeError(
-                f"{exc.msg} (raw response: {raw[:200]!r})", exc.doc, exc.pos
+                f"{exc.msg} (raw response: {raw[:200]!r}, full body: {json.dumps(body)[:1000]!r})",
+                exc.doc, exc.pos
             ) from exc
 
 

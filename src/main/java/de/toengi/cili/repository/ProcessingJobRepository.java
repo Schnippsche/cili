@@ -43,6 +43,14 @@ public interface ProcessingJobRepository extends JpaRepository<ProcessingJob, Lo
     @Query("UPDATE ProcessingJob j SET j.status = 'PENDING', j.workerLock = NULL, j.startedAt = NULL WHERE j.id IN :ids")
     void resetJobsToPending(@Param("ids") List<Long> ids);
 
+    // Heartbeat für lang laufende externe Prozesse (z.B. Telegram-Import), damit die
+    // Zombie-Erkennung (JobRecoveryService) einen aktiv arbeitenden Job nicht fälschlich
+    // als hängengeblieben killt. @Modifying-Bulk-Update, damit @UpdateTimestamp (das nur
+    // bei Hibernate-Dirty-Checking greift) sicher umgangen und updatedAt garantiert gesetzt wird.
+    @Modifying
+    @Query("UPDATE ProcessingJob j SET j.updatedAt = CURRENT_TIMESTAMP WHERE j.id = :id")
+    void touchUpdatedAt(@Param("id") Long id);
+
     Page<ProcessingJob> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     Page<ProcessingJob> findByStatusOrderByCreatedAtDesc(ProcessingJobStatus status, Pageable pageable);

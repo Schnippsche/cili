@@ -5,7 +5,10 @@ import { useSearch } from './useSearch';
 import * as searchApi from '../api/search';
 
 vi.mock('../api/search');
-vi.mocked(searchApi.search).mockResolvedValue({ hits: [], totalHits: 0, page: 0, size: 20, testimonialHits: [] });
+vi.mocked(searchApi.search).mockResolvedValue({
+  hits: [], totalHits: 0, page: 0, size: 20,
+  testimonialHits: [], testimonialTotalHits: 0, testimonialPage: 0, testimonialSize: 10,
+});
 vi.mocked(searchApi.getFacets).mockResolvedValue({ mimeTypes: [], languages: [] });
 
 function wrapper({ children }: { children: ReactNode }) {

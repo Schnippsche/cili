@@ -7,5 +7,8 @@ public record SearchResponse(
     long totalHits,
     int page,
     int size,
-    List<TestimonialSearchHitDto> testimonialHits
+    List<TestimonialSearchHitDto> testimonialHits,
+    long testimonialTotalHits,
+    int testimonialPage,
+    int testimonialSize
 ) {}

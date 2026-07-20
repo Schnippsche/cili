@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -52,20 +53,28 @@ public class SearchService {
     private static final Pattern TS_PATTERN = Pattern.compile(
             "(\\d{1,2}:\\d{2}:\\d{2}[.,]\\d{3})\\s*-->");
 
+    private static final int TESTIMONIAL_PAGE_SIZE = 10;
+
     @PreAuthorize("isAuthenticated()")
     public SearchResponse search(String q, Long folderId, String mimeType, Pageable pageable) {
+        return search(q, folderId, mimeType, pageable, 0);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    public SearchResponse search(String q, Long folderId, String mimeType, Pageable pageable, int testimonialPage) {
         CiliUserDetails user = currentUser();
         if (q != null && !q.isBlank()) {
             log.info("Suche: user='{}' query='{}' folderId={}", user != null ? user.getUsername() : "?", q.trim(), folderId);
         }
         boolean isAdmin = isAdmin(user);
         if (!checkFolderAccess(user, isAdmin, folderId)) {
-            return new SearchResponse(List.of(), 0L, pageable.getPageNumber(), pageable.getPageSize(), List.of());
+            return new SearchResponse(List.of(), 0L, pageable.getPageNumber(), pageable.getPageSize(),
+                    List.of(), 0L, testimonialPage, TESTIMONIAL_PAGE_SIZE);
         }
         List<Long> folderFilter = getFolderFilter(user, isAdmin, folderId);
         List<String> terms = parseTerms(q);
         Page<Resource> page = fetchPage(terms, folderId, folderFilter, pageable);
-        return buildResponse(page, terms, folderId, pageable);
+        return buildResponse(page, terms, folderId, pageable, testimonialPage);
     }
 
     private boolean isAdmin(CiliUserDetails user) {
@@ -118,7 +127,8 @@ public class SearchService {
             .collect(Collectors.joining(" "));
     }
 
-    private SearchResponse buildResponse(Page<Resource> page, List<String> terms, Long folderId, Pageable pageable) {
+    private SearchResponse buildResponse(Page<Resource> page, List<String> terms, Long folderId, Pageable pageable,
+                                          int testimonialPage) {
         List<Long> ids = page.getContent().stream().map(Resource::getId).toList();
         Map<Long, ResourceMetadata> metaById = metadataRepository.findByResourceIdIn(ids)
                 .stream().collect(Collectors.toMap(ResourceMetadata::getResourceId, m -> m));
@@ -127,20 +137,21 @@ public class SearchService {
         List<SearchHitDto> dtos = page.getContent().stream()
                 .map(r -> toDto(r, metaById.get(r.getId()), snippets.getOrDefault(r.getId(), List.of())))
                 .toList();
+        Page<TestimonialSearchHitDto> testimonials = fetchTestimonialHits(terms, folderId, testimonialPage);
         return new SearchResponse(dtos, page.getTotalElements(), pageable.getPageNumber(), pageable.getPageSize(),
-                fetchTestimonialHits(terms, folderId));
+                testimonials.getContent(), testimonials.getTotalElements(), testimonialPage, TESTIMONIAL_PAGE_SIZE);
     }
 
-    private List<TestimonialSearchHitDto> fetchTestimonialHits(List<String> terms, Long folderId) {
-        if (terms.isEmpty() || folderId != null) return List.of();
+    private Page<TestimonialSearchHitDto> fetchTestimonialHits(List<String> terms, Long folderId, int testimonialPage) {
+        if (terms.isEmpty() || folderId != null) return Page.empty();
         CiliUserDetails user = currentUser();
         if (user == null || !aclService.hasTestimonialsPermission(user.getUserId(), AclPermission.READ)) {
-            return List.of();
+            return Page.empty();
         }
-        return testimonialRepository.searchLikeTop(terms, 10).stream()
+        Pageable tPageable = PageRequest.of(testimonialPage, TESTIMONIAL_PAGE_SIZE);
+        return testimonialRepository.searchLike(terms, null, tPageable)
                 .map(t -> new TestimonialSearchHitDto(
-                    t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.getCreatedAt()))
-                .toList();
+                    t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.getSource(), t.getCreatedAt()));
     }
 
     public FacetsResponse getFacets(String q) {

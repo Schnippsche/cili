@@ -208,6 +208,20 @@
                 </configuration>
             </plugin>
 
+            <!-- Löst Dependency-Jar-Pfade als Properties auf (u.a. ${org.mockito:mockito-core:jar}),
+                 damit Surefire Mockito unten als -javaagent laden kann, ohne Version/Pfad hartzukodieren. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- Run forked test JVMs from target/, not the project root: a loose,
                  un-profiled application.yml at the project root (external, local-dev
                  overrides) otherwise outranks src/test/resources/application-test.yml
@@ -219,6 +233,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <workingDirectory>${project.build.directory}</workingDirectory>
+                    <!-- Mockitos inline-mock-maker hängt sich sonst zur Laufzeit selbst als Java-Agent
+                         ein (Byte Buddy self-attach) — ab neueren JDKs deprecated und künftig verboten
+                         (siehe Mockito-Javadoc "0.3 Add Mockito as an agent"). Stattdessen explizit als
+                         -javaagent beim JVM-Start laden. -->
+                    <argLine>-javaagent:"${org.mockito:mockito-core:jar}"</argLine>
                 </configuration>
             </plugin>
 

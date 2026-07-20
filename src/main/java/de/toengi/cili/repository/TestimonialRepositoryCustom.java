@@ -7,6 +7,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface TestimonialRepositoryCustom {
-    Page<Testimonial> searchLike(List<String> terms, Pageable pageable);
+    Page<Testimonial> searchLike(List<String> terms, String source, Pageable pageable);
     List<Testimonial> searchLikeTop(List<String> terms, int max);
 }

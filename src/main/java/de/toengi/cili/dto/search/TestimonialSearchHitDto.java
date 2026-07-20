@@ -7,5 +7,6 @@ public record TestimonialSearchHitDto(
     String authorName,
     String tags,
     String text,
+    String source,
     LocalDateTime createdAt
 ) {}
