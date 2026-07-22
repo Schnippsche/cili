@@ -374,6 +374,20 @@ class MediaClipServiceTest {
     }
 
     @Test
+    void enqueueClip_whenSourceMimeTypeUnsupported_throwsIllegalArgumentWithoutCreatingJob() {
+        Resource source = Resource.builder().id(1L).storedName("source-uuid")
+                .originalName("Dokument.pdf").folderId(42L).uploaderId(7L)
+                .mimeType("application/pdf").build();
+        when(resourceRepo.findById(1L)).thenReturn(Optional.of(source));
+        when(aclService.hasPermission(9L, 42L, AclResourceType.FOLDER, AclPermission.UPLOAD)).thenReturn(true);
+
+        assertThatThrownBy(() -> service.enqueueClip(1L, 75_000L, 150_500L, null, 9L))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verify(jobService, never()).createJob(any(), any(), any(), any());
+    }
+
+    @Test
     void enqueueClip_whenActiveDuplicateJobExists_returnsExistingJobIdWithoutCreatingNew() {
         Resource source = Resource.builder().id(1L).storedName("source-uuid")
                 .originalName("Urlaub.mp4").folderId(42L).uploaderId(7L)

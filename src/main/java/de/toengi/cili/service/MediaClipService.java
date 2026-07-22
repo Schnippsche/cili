@@ -102,6 +102,11 @@ public class MediaClipService {
         }
         Resource source = resourceRepository.findById(resourceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource", resourceId));
+        String sourceMimeType = source.getMimeType();
+        if (!sourceMimeType.startsWith("video/") && !sourceMimeType.startsWith("audio/")) {
+            throw new IllegalArgumentException(
+                    "Nur Video- oder Audiodateien können zugeschnitten werden: " + sourceMimeType);
+        }
         boolean canUpload = aclService.hasPermission(actorUserId, source.getFolderId(),
                 AclResourceType.FOLDER, AclPermission.UPLOAD);
         if (!canUpload) {
