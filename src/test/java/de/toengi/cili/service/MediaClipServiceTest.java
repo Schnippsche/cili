@@ -310,6 +310,49 @@ class MediaClipServiceTest {
         verify(jobService).markFailed(eq(job), contains("endMs"));
     }
 
+    @Test
+    void execute_onFfmpegSuccess_withAudioSource_createsMp3ResourceWithAudioMimeType() throws Exception {
+        Resource source = Resource.builder().id(1L).storedName("source-uuid")
+                .originalName("Podcast.mp3").folderId(42L).uploaderId(7L)
+                .mimeType("audio/mpeg").build();
+        when(resourceRepo.findById(1L)).thenReturn(Optional.of(source));
+
+        Path fakeInput = Files.createTempFile("input", ".mp3");
+        when(storageService.resolveLocalPath("source-uuid")).thenReturn(Optional.of(fakeInput));
+
+        Path tempDir = Files.createTempDirectory("cili-ffmpeg-clip");
+        ffmpegConfig.setTempDir(tempDir.toString());
+
+        when(commandRunner.run(anyList())).thenAnswer(inv -> {
+            List<String> cmd = inv.getArgument(0);
+            String outPath = cmd.get(cmd.size() - 1);
+            Files.writeString(Path.of(outPath), "fake-mp3-data");
+            return 0;
+        });
+        when(storageService.resolveStoragePath(anyString())).thenAnswer(inv ->
+                tempDir.resolve(inv.getArgument(0, String.class) + "-final"));
+        when(resourceRepo.save(any(Resource.class))).thenAnswer(inv -> {
+            Resource r = inv.getArgument(0);
+            r.setId(99L);
+            return r;
+        });
+
+        ProcessingJob job = ProcessingJob.builder().id(5L).resourceId(1L)
+                .attempts(0).maxAttempts(3)
+                .result("{\"startMs\":75000,\"endMs\":150500}")
+                .build();
+
+        service.execute(job);
+
+        verify(resourceRepo).save(argThat(r ->
+                r.getOriginalName().equals("Podcast_00-01-15_00-02-30.mp3")
+                && r.getMimeType().equals("audio/mpeg")
+                && r.getFolderId().equals(42L)));
+        verify(jobService).markDone(eq(job), contains("\"newResourceId\":99"));
+
+        Files.deleteIfExists(fakeInput);
+    }
+
     private static final List<ProcessingJobStatus> ACTIVE_STATUSES =
             List.of(ProcessingJobStatus.PENDING, ProcessingJobStatus.RUNNING);
 

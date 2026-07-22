@@ -186,11 +186,14 @@ public class MediaClipService {
         Path inputPath = storageService.resolveLocalPath(source.getStoredName())
                 .orElseThrow(() -> new IllegalStateException("File not found: " + source.getStoredName()));
 
+        boolean isAudio = source.getMimeType().startsWith("audio/");
+        String ext = isAudio ? "mp3" : "mp4";
+
         Path tempDir = Paths.get(ffmpegConfig.getTempDir());
         Files.createDirectories(tempDir);
 
         String newUuid = UUID.randomUUID().toString();
-        Path outputPath = tempDir.resolve(newUuid + ".mp4");
+        Path outputPath = tempDir.resolve(newUuid + "." + ext);
 
         List<String> cmd = buildClipCommand(source.getMimeType(), inputPath, outputPath, startMs, endMs, ffmpegConfig);
         log.info("Erstelle Clip für resource {}: {}", job.getResourceId(), cmd);
@@ -211,11 +214,11 @@ public class MediaClipService {
         String clipName;
         String metadataTitle;
         if (trimmedTitle != null && !trimmedTitle.isEmpty()) {
-            clipName = FileNameUtils.sanitize(trimmedTitle) + ".mp4";
+            clipName = FileNameUtils.sanitize(trimmedTitle) + "." + ext;
             metadataTitle = trimmedTitle;
         } else {
             String baseName = stripExtension(source.getOriginalName());
-            clipName = baseName + "_" + formatTimecode(startMs) + "_" + formatTimecode(endMs) + ".mp4";
+            clipName = baseName + "_" + formatTimecode(startMs) + "_" + formatTimecode(endMs) + "." + ext;
             metadataTitle = stripExtension(clipName);
         }
         long clipSize = Files.size(finalPath);
@@ -231,7 +234,7 @@ public class MediaClipService {
                         .folderId(source.getFolderId())
                         .originalName(clipName)
                         .storedName(newUuid)
-                        .mimeType("video/mp4")
+                        .mimeType(isAudio ? "audio/mpeg" : "video/mp4")
                         .size(clipSize)
                         .uploaderId(source.getUploaderId())
                         .storageType(StorageType.LOCAL)
