@@ -19,6 +19,7 @@ import de.toengi.cili.repository.ResourceRepository;
 import de.toengi.cili.service.storage.StorageService;
 import de.toengi.cili.util.CommandRunner;
 import de.toengi.cili.util.FileNameUtils;
+import de.toengi.cili.util.MimeTypeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
@@ -103,7 +104,7 @@ public class MediaClipService {
         Resource source = resourceRepository.findById(resourceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource", resourceId));
         String sourceMimeType = source.getMimeType();
-        if (!sourceMimeType.startsWith("video/") && !sourceMimeType.startsWith("audio/")) {
+        if (!(MimeTypeUtils.isVideo(sourceMimeType) || MimeTypeUtils.isAudio(sourceMimeType))) {
             throw new IllegalArgumentException(
                     "Nur Video- oder Audiodateien können zugeschnitten werden: " + sourceMimeType);
         }
