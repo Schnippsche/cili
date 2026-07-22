@@ -17,7 +17,7 @@ import PdfViewer from '../components/viewer/PdfViewer';
 import ImageLightbox from '../components/viewer/ImageLightbox';
 import MediaTrimBar from '../components/viewer/MediaTrimBar';
 import { useFolderBreadcrumb, useFolderChildren, useFolderPermissions } from '../hooks/useFolders';
-import { useResourcesByFolder, useSubtitleTracks, useCreateVideoClip, useActiveClipJobs } from '../hooks/useResources';
+import { useResourcesByFolder, useSubtitleTracks, useCreateMediaClip, useActiveClipJobs } from '../hooks/useResources';
 import { getStreamUrl, getPreviewUrl, getSubtitleUrl, reorderResources } from '../api/resources';
 import type { FolderDto, ResourceDto } from '../types/api';
 import { useSelector } from 'react-redux';
@@ -72,7 +72,7 @@ export default function FolderPage() {
   );
   const [trimMode, setTrimMode] = useState(false);
   const [player, setPlayer] = useState<Player | null>(null);
-  const createClip = useCreateVideoClip();
+  const createClip = useCreateMediaClip();
   const [clipSnack, setClipSnack] = useState<{ open: boolean; severity: 'success' | 'error'; msg: string }>(
     { open: false, severity: 'success', msg: '' },
   );

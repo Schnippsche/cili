@@ -198,7 +198,7 @@ export async function getActiveAnalysisJobs(resourceId: number): Promise<Process
   return data;
 }
 
-export async function createVideoClip(resourceId: number, startMs: number, endMs: number, title: string): Promise<{ jobId: number }> {
+export async function createMediaClip(resourceId: number, startMs: number, endMs: number, title: string): Promise<{ jobId: number }> {
   const { data } = await axiosClient.post<{ jobId: number }>(`/resources/${resourceId}/clip`, { startMs, endMs, title });
   return data;
 }

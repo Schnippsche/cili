@@ -130,10 +130,10 @@ export function useActiveAnalysisJobs(resourceId: number) {
   });
 }
 
-export function useCreateVideoClip() {
+export function useCreateMediaClip() {
   return useMutation({
     mutationFn: ({ id, startMs, endMs, title }: { id: number; startMs: number; endMs: number; title: string }) =>
-      api.createVideoClip(id, startMs, endMs, title),
+      api.createMediaClip(id, startMs, endMs, title),
   });
 }
 
