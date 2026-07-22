@@ -89,7 +89,7 @@ export default function FolderPage() {
   const viewResource = resources.find(r => r.id === viewId);
   const viewResourceTitle = viewResource?.metadata?.title ?? viewResource?.originalName;
 
-  const { data: activeClipJobs = [] } = useActiveClipJobs(viewType === 'video' && viewId ? viewId : 0);
+  const { data: activeClipJobs = [] } = useActiveClipJobs((viewType === 'video' || viewType === 'audio') && viewId ? viewId : 0);
   const clipJobsRunning = activeClipJobs.some(j => j.status === 'PENDING' || j.status === 'RUNNING');
 
   const images = resources.filter(r => r.mimeType.startsWith('image/'));
@@ -186,10 +186,12 @@ export default function FolderPage() {
             <Link component="button" variant="body2" onClick={() => setSearchParams({})}>Ansicht schließen</Link>
           </DialogTitle>
           <DialogContent>
-            {viewType === 'video' && streamUrl && (
+            {(viewType === 'video' || viewType === 'audio') && streamUrl && (
               <>
                 <VideoPlayer
                   src={streamUrl}
+                  mimeType={viewType === 'audio' ? (resources.find(r => r.id === viewId)?.mimeType ?? 'audio/mpeg') : undefined}
+                  audioOnly={viewType === 'audio'}
                   subtitles={subtitles}
                   initialTime={seekToTime}
                   onPlayerReady={setPlayer}
@@ -225,15 +227,6 @@ export default function FolderPage() {
                   />
                 )}
               </>
-            )}
-            {viewType === 'audio' && streamUrl && (
-              <VideoPlayer
-                src={streamUrl}
-                mimeType={resources.find(r => r.id === viewId)?.mimeType ?? 'audio/mpeg'}
-                audioOnly
-                subtitles={subtitles}
-                initialTime={seekToTime}
-              />
             )}
             {viewType === 'pdf' && <PdfViewer src={getPreviewUrl(viewId)} />}
           </DialogContent>
