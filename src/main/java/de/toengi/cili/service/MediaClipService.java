@@ -186,7 +186,7 @@ public class MediaClipService {
         Path inputPath = storageService.resolveLocalPath(source.getStoredName())
                 .orElseThrow(() -> new IllegalStateException("File not found: " + source.getStoredName()));
 
-        boolean isAudio = source.getMimeType().startsWith("audio/");
+        boolean isAudio = MimeTypeUtils.isAudio(source.getMimeType());
         String ext = isAudio ? "mp3" : "mp4";
 
         Path tempDir = Paths.get(ffmpegConfig.getTempDir());
@@ -281,7 +281,7 @@ public class MediaClipService {
                 "-i", input.toString(),
                 "-t", String.format(Locale.ROOT, "%.3f", durationSec)
         ));
-        if (mimeType.startsWith("audio/")) {
+        if (MimeTypeUtils.isAudio(mimeType)) {
             cmd.addAll(List.of("-vn", "-acodec", "libmp3lame", "-qscale:a", "2"));
         } else {
             boolean nvenc = cfg.getVideoCodec().contains("nvenc");
