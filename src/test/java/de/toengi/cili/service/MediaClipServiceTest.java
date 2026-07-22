@@ -70,7 +70,7 @@ class MediaClipServiceTest {
     @Test
     void buildClipCommand_containsSeekDurationAndCodec() {
         List<String> cmd = service.buildClipCommand(
-                Path.of("/input/video.mp4"), Path.of("/output/clip.mp4"),
+                "video/mp4", Path.of("/input/video.mp4"), Path.of("/output/clip.mp4"),
                 75_000L, 150_500L, ffmpegConfig);
 
         int ssIdx = cmd.indexOf("-ss");
@@ -86,6 +86,29 @@ class MediaClipServiceTest {
 
         // -ss muss vor -i stehen (Input-Seeking, schnell + framegenau bei Re-Encode)
         assertThat(ssIdx).isLessThan(cmd.indexOf("-i"));
+    }
+
+    @Test
+    void buildClipCommand_forAudioMimeType_producesMp3EncodeArgsWithoutVideoCodec() {
+        List<String> cmd = service.buildClipCommand(
+                "audio/mpeg", Path.of("/input/podcast.mp3"), Path.of("/output/clip.mp3"),
+                75_000L, 150_500L, ffmpegConfig);
+
+        assertThat(cmd).doesNotContain("-vcodec");
+        assertThat(cmd).contains("-vn");
+
+        int acodecIdx = cmd.indexOf("-acodec");
+        assertThat(acodecIdx).isGreaterThanOrEqualTo(0);
+        assertThat(cmd.get(acodecIdx + 1)).isEqualTo("libmp3lame");
+
+        int qscaleIdx = cmd.indexOf("-qscale:a");
+        assertThat(qscaleIdx).isGreaterThanOrEqualTo(0);
+        assertThat(cmd.get(qscaleIdx + 1)).isEqualTo("2");
+
+        int ssIdx = cmd.indexOf("-ss");
+        assertThat(cmd.get(ssIdx + 1)).isEqualTo("75.000");
+        int tIdx = cmd.indexOf("-t");
+        assertThat(cmd.get(tIdx + 1)).isEqualTo("75.500");
     }
 
     @Test

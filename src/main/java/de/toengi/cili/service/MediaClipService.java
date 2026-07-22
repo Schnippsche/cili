@@ -192,7 +192,7 @@ public class MediaClipService {
         String newUuid = UUID.randomUUID().toString();
         Path outputPath = tempDir.resolve(newUuid + ".mp4");
 
-        List<String> cmd = buildClipCommand(inputPath, outputPath, startMs, endMs, ffmpegConfig);
+        List<String> cmd = buildClipCommand(source.getMimeType(), inputPath, outputPath, startMs, endMs, ffmpegConfig);
         log.info("Erstelle Clip für resource {}: {}", job.getResourceId(), cmd);
 
         int rc = commandRunner.run(cmd);
@@ -268,24 +268,31 @@ public class MediaClipService {
         jobService.markDone(job, resultJson);
     }
 
-    List<String> buildClipCommand(Path input, Path output, long startMs, long endMs, FfmpegTranscodeConfig cfg) {
+    List<String> buildClipCommand(String mimeType, Path input, Path output, long startMs, long endMs, FfmpegTranscodeConfig cfg) {
         double startSec = startMs / 1000.0;
         double durationSec = (endMs - startMs) / 1000.0;
-        boolean nvenc = cfg.getVideoCodec().contains("nvenc");
-        return new ArrayList<>(List.of(
+        List<String> cmd = new ArrayList<>(List.of(
                 storageConfig.getFfmpegPath(),
                 "-y",
                 "-ss", String.format(Locale.ROOT, "%.3f", startSec),
                 "-i", input.toString(),
-                "-t", String.format(Locale.ROOT, "%.3f", durationSec),
-                "-vcodec", cfg.getVideoCodec(),
-                "-acodec", cfg.getAudioCodec(),
-                "-profile:a", "aac_low",
-                nvenc ? "-cq" : "-crf", String.valueOf(cfg.getCrf()),
-                "-preset", cfg.getPreset(),
-                "-movflags", "+faststart",
-                output.toString()
+                "-t", String.format(Locale.ROOT, "%.3f", durationSec)
         ));
+        if (mimeType.startsWith("audio/")) {
+            cmd.addAll(List.of("-vn", "-acodec", "libmp3lame", "-qscale:a", "2"));
+        } else {
+            boolean nvenc = cfg.getVideoCodec().contains("nvenc");
+            cmd.addAll(List.of(
+                    "-vcodec", cfg.getVideoCodec(),
+                    "-acodec", cfg.getAudioCodec(),
+                    "-profile:a", "aac_low",
+                    nvenc ? "-cq" : "-crf", String.valueOf(cfg.getCrf()),
+                    "-preset", cfg.getPreset(),
+                    "-movflags", "+faststart"
+            ));
+        }
+        cmd.add(output.toString());
+        return cmd;
     }
 
     private long readLongParam(ProcessingJob job, String key) {
