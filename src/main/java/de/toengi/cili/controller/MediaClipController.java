@@ -2,7 +2,7 @@ package de.toengi.cili.controller;
 
 import de.toengi.cili.dto.job.ProcessingJobDto;
 import de.toengi.cili.security.CiliUserDetails;
-import de.toengi.cili.service.VideoClipService;
+import de.toengi.cili.service.MediaClipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +12,9 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-public class VideoClipController {
+public class MediaClipController {
 
-    private final VideoClipService clipService;
+    private final MediaClipService clipService;
 
     public record CreateClipRequest(long startMs, long endMs, String title) {}
 

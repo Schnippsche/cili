@@ -44,7 +44,7 @@ import java.util.concurrent.Executor;
 
 @Service
 @Slf4j
-public class VideoClipService {
+public class MediaClipService {
 
     private final ResourceRepository resourceRepository;
     private final ResourceMetadataRepository metadataRepository;
@@ -63,7 +63,7 @@ public class VideoClipService {
     private static final List<ProcessingJobStatus> ACTIVE =
             List.of(ProcessingJobStatus.PENDING, ProcessingJobStatus.RUNNING);
 
-    public VideoClipService(
+    public MediaClipService(
             ResourceRepository resourceRepository,
             ResourceMetadataRepository metadataRepository,
             StorageService storageService,

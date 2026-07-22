@@ -35,7 +35,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class VideoClipServiceTest {
+class MediaClipServiceTest {
 
     @Mock ResourceRepository resourceRepo;
     @Mock ResourceMetadataRepository metadataRepo;
@@ -48,7 +48,7 @@ class VideoClipServiceTest {
     @Mock ProcessingJobRepository jobRepository;
     FfmpegTranscodeConfig ffmpegConfig;
     FileStorageConfig storageConfig;
-    VideoClipService service;
+    MediaClipService service;
 
     @BeforeEach
     void setUp() {
@@ -61,7 +61,7 @@ class VideoClipServiceTest {
         storageConfig = new FileStorageConfig();
         storageConfig.setFfmpegPath("/usr/bin/ffmpeg");
         when(txManager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
-        service = new VideoClipService(
+        service = new MediaClipService(
                 resourceRepo, metadataRepo, storageService, jobService,
                 commandRunner, ffmpegConfig, storageConfig, eventPublisher, txManager,
                 aclService, jobRepository, Runnable::run);
