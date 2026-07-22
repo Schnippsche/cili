@@ -18,7 +18,7 @@ function formatMs(ms: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export default function VideoTrimBar({ player, creating, defaultTitle, onCreateClip }: Readonly<Props>) {
+export default function MediaTrimBar({ player, creating, defaultTitle, onCreateClip }: Readonly<Props>) {
   const [durationMs, setDurationMs] = useState(0);
   const [range, setRange] = useState<[number, number]>([0, 0]);
   const [title, setTitle] = useState(defaultTitle);

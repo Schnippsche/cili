@@ -15,7 +15,7 @@ import DropZone from '../components/upload/DropZone';
 import VideoPlayer from '../components/viewer/VideoPlayer';
 import PdfViewer from '../components/viewer/PdfViewer';
 import ImageLightbox from '../components/viewer/ImageLightbox';
-import VideoTrimBar from '../components/viewer/VideoTrimBar';
+import MediaTrimBar from '../components/viewer/MediaTrimBar';
 import { useFolderBreadcrumb, useFolderChildren, useFolderPermissions } from '../hooks/useFolders';
 import { useResourcesByFolder, useSubtitleTracks, useCreateVideoClip, useActiveClipJobs } from '../hooks/useResources';
 import { getStreamUrl, getPreviewUrl, getSubtitleUrl, reorderResources } from '../api/resources';
@@ -202,7 +202,7 @@ export default function FolderPage() {
                   </Box>
                 )}
                 {trimMode && (
-                  <VideoTrimBar
+                  <MediaTrimBar
                     player={player}
                     creating={clipJobsRunning}
                     defaultTitle={viewResourceTitle ?? ''}
