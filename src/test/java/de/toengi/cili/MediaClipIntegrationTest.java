@@ -101,6 +101,36 @@ class MediaClipIntegrationTest {
         }
     }
 
+    private static byte[] testAudioBytes;
+
+    @BeforeAll
+    static void generateTestAudio() throws Exception {
+        Path audioFile = Files.createTempFile("cili-clip-source", ".mp3");
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "ffmpeg", "-y", "-loglevel", "error",
+                    "-f", "lavfi", "-i", "sine=frequency=1000:duration=3",
+                    "-c:a", "libmp3lame",
+                    audioFile.toAbsolutePath().toString());
+            pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+            pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+            Process process = pb.start();
+            boolean finished = process.waitFor(30, TimeUnit.SECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                throw new IllegalStateException(
+                        "Konnte Test-Fixture-Audio nicht erzeugen: ffmpeg-Timeout nach 30s.");
+            }
+            if (process.exitValue() != 0) {
+                throw new IllegalStateException(
+                        "Konnte Test-Fixture-Audio nicht erzeugen: ffmpeg exit=" + process.exitValue());
+            }
+            testAudioBytes = Files.readAllBytes(audioFile);
+        } finally {
+            Files.deleteIfExists(audioFile);
+        }
+    }
+
     @Autowired MockMvc mockMvc;
     @Autowired JwtTokenProvider jwtTokenProvider;
     @Autowired UserRepository userRepository;
@@ -119,6 +149,7 @@ class MediaClipIntegrationTest {
     private User regularUser;
     private Folder testFolder;
     private Resource videoResource;
+    private Resource audioResource;
     private String userToken;
 
     @BeforeEach
@@ -165,6 +196,13 @@ class MediaClipIntegrationTest {
                 .size((long) testVideoBytes.length).uploaderId(adminUser.getId())
                 .storageType(StorageType.LOCAL).build());
 
+        String audioStoredName = storageService.store(new ByteArrayInputStream(testAudioBytes), testAudioBytes.length);
+        audioResource = resourceRepository.save(Resource.builder()
+                .folderId(testFolder.getId()).originalName("source.mp3")
+                .storedName(audioStoredName).mimeType("audio/mpeg")
+                .size((long) testAudioBytes.length).uploaderId(adminUser.getId())
+                .storageType(StorageType.LOCAL).build());
+
         userToken = jwtTokenProvider.generateAccessToken(new CiliUserDetails(regularUser));
     }
 
@@ -186,7 +224,7 @@ class MediaClipIntegrationTest {
 
         // Die Clip-Erstellung läuft asynchron auf dem echten transcodeExecutor-Thread-Pool
         // (TestAsyncConfig) — daher pollen statt synchron zu prüfen. Timeout 30s.
-        JsonNode activeJobs = pollUntilNoActiveClipJobs(jobId);
+        JsonNode activeJobs = pollUntilNoActiveClipJobs(jobId, videoResource.getId());
         assertThat(activeJobs.isEmpty())
                 .as("VIDEO_CLIP-Job sollte innerhalb von 30s fertig sein (PENDING/RUNNING -> DONE/FAILED)")
                 .isTrue();
@@ -218,11 +256,70 @@ class MediaClipIntegrationTest {
         assertThat(resources).hasSizeGreaterThan(1);
     }
 
-    private JsonNode pollUntilNoActiveClipJobs(long jobId) throws Exception {
+    @Test
+    void createClip_fromUploadedAudio_producesNewPlayableMp3Resource() throws Exception {
+        String requestJson = """
+                {"startMs": 0, "endMs": 2000}""";
+
+        String createResponse = mockMvc.perform(post("/api/resources/{id}/clip", audioResource.getId())
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.jobId").isNumber())
+                .andReturn().getResponse().getContentAsString();
+
+        long jobId = objectMapper.readTree(createResponse).get("jobId").asLong();
+
+        JsonNode activeJobs = pollUntilNoActiveClipJobs(jobId, audioResource.getId());
+        assertThat(activeJobs.isEmpty())
+                .as("Audio-Clip-Job sollte innerhalb von 30s fertig sein")
+                .isTrue();
+
+        String resourcesJson = mockMvc.perform(get("/api/folders/{folderId}/resources", testFolder.getId())
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode resources = objectMapper.readTree(resourcesJson);
+        boolean hasClipResource = false;
+        for (JsonNode node : resources) {
+            String originalName = node.path("originalName").asText();
+            String mimeType = node.path("mimeType").asText();
+            if (originalName.endsWith("_00-00-00_00-00-02.mp3") && "audio/mpeg".equals(mimeType)) {
+                hasClipResource = true;
+                assertThat(node.path("size").asLong()).isGreaterThan(0);
+            }
+        }
+        assertThat(hasClipResource)
+                .as("expected an additional audio/mpeg resource named '<original>_00-00-00_00-00-02.mp3' "
+                        + "in folder listing, got: " + resourcesJson)
+                .isTrue();
+    }
+
+    @Test
+    void createClip_fromUnsupportedMimeType_returns400() throws Exception {
+        Resource pdfResource = resourceRepository.save(Resource.builder()
+                .folderId(testFolder.getId()).originalName("dokument.pdf")
+                .storedName("irrelevant-uuid").mimeType("application/pdf")
+                .size(1L).uploaderId(adminUser.getId())
+                .storageType(StorageType.LOCAL).build());
+
+        String requestJson = """
+                {"startMs": 0, "endMs": 2000}""";
+
+        mockMvc.perform(post("/api/resources/{id}/clip", pdfResource.getId())
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest());
+    }
+
+    private JsonNode pollUntilNoActiveClipJobs(long jobId, long resourceId) throws Exception {
         long deadline = System.currentTimeMillis() + 30_000;
         JsonNode activeJobs;
         while (true) {
-            String activeJson = mockMvc.perform(get("/api/resources/{id}/clip-jobs/active", videoResource.getId())
+            String activeJson = mockMvc.perform(get("/api/resources/{id}/clip-jobs/active", resourceId)
                             .header("Authorization", "Bearer " + userToken))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString();
