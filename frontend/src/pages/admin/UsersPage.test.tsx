@@ -10,7 +10,7 @@ import * as adminApi from '../../api/admin';
 
 vi.mock('../../api/admin');
 vi.mocked(adminApi.listUsers).mockResolvedValue({ content: [
-  { id: 2, username: 'bob', email: 'bob@test.com', displayName: 'Bob', active: true, role: 'USER', createdAt: '' }
+  { id: 2, username: 'bob', email: 'bob@test.com', displayName: 'Bob', memberId: null, url: null, phone: null, active: true, role: 'USER', createdAt: '' }
 ], page: 0, size: 20, totalElements: 1, totalPages: 1 });
 
 function renderPage() {

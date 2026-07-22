@@ -4,9 +4,9 @@ export interface LoginUserInfo { id: number; username: string; displayName: stri
 export interface LoginResponse { accessToken: string; refreshToken: string; expiresIn: number; user: LoginUserInfo; }
 
 // ── User ─────────────────────────────────────────────────────────────────
-export interface UserDto { id: number; username: string; email: string; displayName: string | null; active: boolean; role: string; createdAt: string; }
-export interface CreateUserRequest { username: string; email: string; password: string; role?: string; displayName?: string; }
-export interface UpdateUserRequest { email?: string; password?: string; displayName?: string; role?: string; active?: boolean; }
+export interface UserDto { id: number; username: string; email: string; displayName: string | null; memberId: number | null; url: string | null; phone: string | null; active: boolean; role: string; createdAt: string; }
+export interface CreateUserRequest { username: string; email: string; password: string; role?: string; displayName?: string; memberId?: number; url?: string; phone?: string; }
+export interface UpdateUserRequest { email?: string; password?: string; displayName?: string; memberId?: number; url?: string; phone?: string; role?: string; active?: boolean; }
 
 // ── Group ────────────────────────────────────────────────────────────────
 export interface GroupDto { id: number; name: string; description: string | null; system: boolean; memberCount: number; createdAt: string; }

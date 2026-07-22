@@ -7,6 +7,9 @@ public record UserDto(
     String username,
     String email,
     String displayName,
+    Integer memberId,
+    String url,
+    String phone,
     boolean active,
     String role,
     LocalDateTime createdAt

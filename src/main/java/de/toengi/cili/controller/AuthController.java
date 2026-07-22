@@ -4,14 +4,24 @@ import de.toengi.cili.dto.auth.ChangePasswordRequest;
 import de.toengi.cili.dto.auth.LoginRequest;
 import de.toengi.cili.dto.auth.LoginResponse;
 import de.toengi.cili.dto.auth.RefreshRequest;
+import de.toengi.cili.dto.user.UserDto;
 import de.toengi.cili.security.CiliUserDetails;
+import de.toengi.cili.service.AdminUserService;
 import de.toengi.cili.service.AuthService;
+import de.toengi.cili.service.UserLabelService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -19,6 +29,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final AdminUserService adminUserService;
+    private final UserLabelService userLabelService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request,
@@ -51,5 +63,28 @@ public class AuthController {
                                                @AuthenticationPrincipal CiliUserDetails user) {
         authService.changePassword(request.currentPassword(), request.newPassword(), user);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> me(@AuthenticationPrincipal CiliUserDetails user) {
+        return ResponseEntity.ok(adminUserService.getUser(user.getUserId()));
+    }
+
+    @GetMapping("/labels")
+    public ResponseEntity<StreamingResponseBody> generateLabels(@AuthenticationPrincipal CiliUserDetails user)
+            throws IOException {
+        Path pdfPath = userLabelService.generateLabelSheet(user.getUserId());
+        StreamingResponseBody body = out -> {
+            try {
+                Files.copy(pdfPath, out);
+            } finally {
+                Files.deleteIfExists(pdfPath);
+            }
+        };
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(Files.size(pdfPath))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .body(body);
     }
 }

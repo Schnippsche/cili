@@ -6,12 +6,19 @@ import de.toengi.cili.dto.user.CreateUserRequest;
 import de.toengi.cili.dto.user.UpdateUserRequest;
 import de.toengi.cili.dto.user.UserDto;
 import de.toengi.cili.service.AdminUserService;
+import de.toengi.cili.service.UserLabelService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -20,6 +27,7 @@ import java.util.List;
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
+    private final UserLabelService userLabelService;
 
     @GetMapping
     public ResponseEntity<PageResponse<UserDto>> listUsers(
@@ -53,5 +61,22 @@ public class AdminUserController {
     @GetMapping("/{id}/groups")
     public ResponseEntity<List<GroupDto>> listUserGroups(@PathVariable Long id) {
         return ResponseEntity.ok(adminUserService.listGroups(id));
+    }
+
+    @GetMapping("/{id}/labels")
+    public ResponseEntity<StreamingResponseBody> generateLabels(@PathVariable Long id) throws IOException {
+        Path pdfPath = userLabelService.generateLabelSheet(id);
+        StreamingResponseBody body = out -> {
+            try {
+                Files.copy(pdfPath, out);
+            } finally {
+                Files.deleteIfExists(pdfPath);
+            }
+        };
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(Files.size(pdfPath))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .body(body);
     }
 }

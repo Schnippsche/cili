@@ -31,6 +31,15 @@ public class User {
     @Column(name = "display_name", length = 100)
     private String displayName;
 
+    @Column(name = "member_id")
+    private Integer memberId;
+
+    @Column(name = "url", length = 255)
+    private String url;
+
+    @Column(name = "phone", length = 50)
+    private String phone;
+
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean active = true;

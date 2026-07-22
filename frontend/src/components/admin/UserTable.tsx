@@ -1,6 +1,6 @@
 import {
   Alert, Autocomplete, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
-  FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, Select, Switch,
+  FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, Select, Snackbar, Switch,
   Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow,
   TextField, Paper, Tooltip, Typography,
 } from '@mui/material';
@@ -8,6 +8,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import LockResetIcon from '@mui/icons-material/LockReset';
+import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -15,6 +16,7 @@ import * as adminApi from '../../api/admin';
 import type { RootState } from '../../store/store';
 import type { CreateUserRequest, GroupDto, UpdateUserRequest, UserDto } from '../../types/api';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { extractBlobErrorMessage } from '../../utils/blobError';
 
 function extractErrorMessage(err: unknown): string {
   if (err && typeof err === 'object' && 'response' in err) {
@@ -123,6 +125,9 @@ function EditUserDialog({ user, onClose }: Readonly<{ user: UserDto; onClose: ()
   const [form, setForm] = useState<UpdateUserRequest>({
     email: user.email,
     displayName: user.displayName ?? '',
+    memberId: user.memberId ?? undefined,
+    url: user.url ?? '',
+    phone: user.phone ?? '',
     role: user.role,
     active: user.active,
   });
@@ -151,6 +156,18 @@ function EditUserDialog({ user, onClose }: Readonly<{ user: UserDto; onClose: ()
         <TextField
           label="Anzeigename" value={form.displayName ?? ''} fullWidth
           onChange={e => setForm({ ...form, displayName: e.target.value })}
+        />
+        <TextField
+          label="Mitglieds-ID" type="number" value={form.memberId ?? ''} fullWidth
+          onChange={e => setForm({ ...form, memberId: e.target.value === '' ? undefined : Number(e.target.value) })}
+        />
+        <TextField
+          label="URL" value={form.url ?? ''} fullWidth
+          onChange={e => setForm({ ...form, url: e.target.value })}
+        />
+        <TextField
+          label="Telefon" value={form.phone ?? ''} fullWidth
+          onChange={e => setForm({ ...form, phone: e.target.value })}
         />
         <FormControl fullWidth>
           <InputLabel>Rolle</InputLabel>
@@ -234,10 +251,21 @@ export default function UserTable() {
   const [deleteUser, setDeleteUser] = useState<UserDto | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
+  const [labelError, setLabelError] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin', 'users', page, rowsPerPage],
     queryFn: () => adminApi.listUsers(page, rowsPerPage),
+  });
+
+  const generateLabels = useMutation({
+    mutationFn: (userId: number) => adminApi.generateUserLabels(userId),
+    onSuccess: (blob) => {
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    },
+    onError: (err) => { void extractBlobErrorMessage(err).then(setLabelError); },
   });
 
   const createUser = useMutation({
@@ -272,15 +300,19 @@ export default function UserTable() {
           <TableHead>
             <TableRow>
               <TableCell>Benutzername</TableCell><TableCell>E-Mail</TableCell>
+              <TableCell>Mitglieds-ID</TableCell><TableCell>URL</TableCell><TableCell>Telefon</TableCell>
               <TableCell>Rolle</TableCell><TableCell>Status</TableCell><TableCell align="right">Aktionen</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {isLoading && <TableRow><TableCell colSpan={5}>Lade…</TableCell></TableRow>}
+            {isLoading && <TableRow><TableCell colSpan={8}>Lade…</TableCell></TableRow>}
             {data?.content.map(u => (
               <TableRow key={u.id} hover>
                 <TableCell>{u.username}</TableCell>
                 <TableCell>{u.email}</TableCell>
+                <TableCell>{u.memberId ?? '–'}</TableCell>
+                <TableCell>{u.url ?? '–'}</TableCell>
+                <TableCell>{u.phone ?? '–'}</TableCell>
                 <TableCell>{u.role}</TableCell>
                 <TableCell><Chip label={u.active ? 'Aktiv' : 'Inaktiv'} color={u.active ? 'success' : 'default'} size="small" /></TableCell>
                 <TableCell align="right">
@@ -298,6 +330,17 @@ export default function UserTable() {
                     <IconButton size="small" onClick={() => setGroupsUser(u)}>
                       <GroupOutlinedIcon fontSize="small" />
                     </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Etikettenbogen (Zweckform 6174) mit QR-Code erzeugen und anzeigen">
+                    <span>
+                      <IconButton
+                        size="small"
+                        disabled={generateLabels.isPending && generateLabels.variables === u.id}
+                        onClick={() => generateLabels.mutate(u.id)}
+                      >
+                        <PrintOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </span>
                   </Tooltip>
                   {u.id !== currentUserId && (
                     <Tooltip title="Löschen">
@@ -348,6 +391,25 @@ export default function UserTable() {
             helperText="Mindestens 8 Zeichen"
             fullWidth
           />
+          <TextField
+            label="Mitglieds-ID"
+            type="number"
+            value={form.memberId ?? ''}
+            onChange={e => setForm({ ...form, memberId: e.target.value === '' ? undefined : Number(e.target.value) })}
+            fullWidth
+          />
+          <TextField
+            label="URL"
+            value={form.url ?? ''}
+            onChange={e => setForm({ ...form, url: e.target.value })}
+            fullWidth
+          />
+          <TextField
+            label="Telefon"
+            value={form.phone ?? ''}
+            onChange={e => setForm({ ...form, phone: e.target.value })}
+            fullWidth
+          />
           <FormControl fullWidth>
             <InputLabel>Rolle</InputLabel>
             <Select value={form.role} label="Rolle" onChange={e => setForm({ ...form, role: e.target.value })}>
@@ -367,6 +429,9 @@ export default function UserTable() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar open={!!labelError} autoHideDuration={6000} onClose={() => setLabelError(null)}>
+        <Alert severity="error" onClose={() => setLabelError(null)}>{labelError}</Alert>
+      </Snackbar>
     </>
   );
 }

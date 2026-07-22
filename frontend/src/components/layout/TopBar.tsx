@@ -1,15 +1,18 @@
-import { AppBar, Avatar, Box, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography } from '@mui/material';
+import { Alert, AppBar, Avatar, Box, Divider, IconButton, Menu, MenuItem, Snackbar, Toolbar, Tooltip, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useVersion } from '../../hooks/useVersion';
 import { toggleTheme } from '../../store/themeSlice';
 import type { RootState } from '../../store/store';
+import * as authApi from '../../api/auth';
+import { extractBlobErrorMessage } from '../../utils/blobError';
 import ChangePasswordDialog from '../auth/ChangePasswordDialog';
 
 export default function TopBar({ onMenuClick }: Readonly<{ onMenuClick: () => void }>) {
@@ -17,9 +20,28 @@ export default function TopBar({ onMenuClick }: Readonly<{ onMenuClick: () => vo
   const { data: versionInfo } = useVersion();
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [labelError, setLabelError] = useState<string | null>(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const mode = useSelector((s: RootState) => s.theme.mode);
+
+  const { data: me } = useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: () => authApi.getMe(),
+    enabled: !!user,
+    staleTime: 60_000,
+  });
+  const canGenerateLabels = !!me?.url;
+
+  const generateLabels = useMutation({
+    mutationFn: () => authApi.generateMyLabels(),
+    onSuccess: (blob) => {
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    },
+    onError: (err) => { void extractBlobErrorMessage(err).then(setLabelError); },
+  });
 
   return (
     <AppBar position="fixed" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
@@ -58,9 +80,18 @@ export default function TopBar({ onMenuClick }: Readonly<{ onMenuClick: () => vo
         <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
           <MenuItem onClick={() => { setAnchor(null); setChangePasswordOpen(true); }}>Passwort ändern</MenuItem>
           <MenuItem onClick={() => { setAnchor(null); void logout(); }}>Abmelden</MenuItem>
+          {canGenerateLabels && <Divider />}
+          {canGenerateLabels && (
+            <MenuItem onClick={() => { setAnchor(null); generateLabels.mutate(); }} disabled={generateLabels.isPending}>
+              Etikettenbogen erzeugen
+            </MenuItem>
+          )}
         </Menu>
       </Toolbar>
       <ChangePasswordDialog open={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} />
+      <Snackbar open={!!labelError} autoHideDuration={6000} onClose={() => setLabelError(null)}>
+        <Alert severity="error" onClose={() => setLabelError(null)}>{labelError}</Alert>
+      </Snackbar>
     </AppBar>
   );
 }

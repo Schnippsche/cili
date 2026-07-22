@@ -422,4 +422,12 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception as exc:
+        msg = str(exc)
+        if msg.upper().startswith("ERROR: "):
+            msg = msg[7:]
+        sys.exit(f"Fehler: {msg}")

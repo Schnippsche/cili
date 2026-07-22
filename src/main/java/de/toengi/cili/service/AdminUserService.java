@@ -63,6 +63,9 @@ public class AdminUserService {
                 .email(req.email())
                 .passwordHash(passwordEncoder.encode(req.password()))
                 .displayName(req.displayName())
+                .memberId(req.memberId())
+                .url(req.url())
+                .phone(req.phone())
                 .role(role)
                 .build();
         UserDto saved = userMapper.toDto(userRepository.save(user));
@@ -84,6 +87,15 @@ public class AdminUserService {
         }
         if (StringUtils.hasText(req.displayName())) {
             user.setDisplayName(req.displayName());
+        }
+        if (req.memberId() != null) {
+            user.setMemberId(req.memberId());
+        }
+        if (StringUtils.hasText(req.url())) {
+            user.setUrl(req.url());
+        }
+        if (StringUtils.hasText(req.phone())) {
+            user.setPhone(req.phone());
         }
         if (req.active() != null) {
             user.setActive(req.active());

@@ -144,3 +144,8 @@ export async function fetchLogs(lines = 500): Promise<LogResponse> {
   const { data } = await axiosClient.get<LogResponse>('/admin/logs', { params: { lines } });
   return data;
 }
+
+export async function generateUserLabels(userId: number): Promise<Blob> {
+  const { data } = await axiosClient.get(`/admin/users/${userId}/labels`, { responseType: 'blob' });
+  return data;
+}

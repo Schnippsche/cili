@@ -62,7 +62,7 @@ class AdminUserIntegrationTest {
 
     @Test
     void createUser_asAdmin_returns201() throws Exception {
-        var req = new CreateUserRequest("newuser", "new@example.com", "password123", "New User", "USER");
+        var req = new CreateUserRequest("newuser", "new@example.com", "password123", "New User", null, null, null, "USER");
 
         mvc.perform(post("/api/admin/users")
                         .header("Authorization", "Bearer " + adminToken)
@@ -74,7 +74,7 @@ class AdminUserIntegrationTest {
 
     @Test
     void createUser_withDuplicateUsername_returns409() throws Exception {
-        var req = new CreateUserRequest("admin", "other@example.com", "password123", null, null);
+        var req = new CreateUserRequest("admin", "other@example.com", "password123", null, null, null, null, null);
 
         mvc.perform(post("/api/admin/users")
                         .header("Authorization", "Bearer " + adminToken)
