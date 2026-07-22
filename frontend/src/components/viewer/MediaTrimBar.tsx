@@ -64,14 +64,14 @@ export default function MediaTrimBar({ player, creating, defaultTitle, onCreateC
     void player.play();
   };
 
-  const handleRangeChange = (_: Event, value: number | number[], activeThumb: number) => {
-    const next = value as [number, number];
-    setRange(next);
-    // Live-Scrub: Video springt beim Ziehen sofort an die Position des bewegten Handles,
-    // damit man den Punkt sieht ohne die ganze Vorschau abspielen zu müssen.
-    isPreviewingRef.current = false;
-    player.pause();
-    player.currentTime(next[activeThumb] / 1000);
+  const handleSetStart = () => {
+    const t = (player.currentTime() ?? 0) * 1000;
+    setRange([t, endMs]);
+  };
+
+  const handleSetEnd = () => {
+    const t = (player.currentTime() ?? 0) * 1000;
+    setRange([startMs, t]);
   };
 
   return (
@@ -85,6 +85,9 @@ export default function MediaTrimBar({ player, creating, defaultTitle, onCreateC
         sx={{ mb: 1 }}
       />
       <Stack direction="row" spacing={2} alignItems="center">
+        <Button size="small" disabled={creating} onClick={handleSetStart}>
+          Start setzen
+        </Button>
         <Typography variant="caption" sx={{ minWidth: 40 }}>{formatMs(startMs)}</Typography>
         <Slider
           value={range}
@@ -93,12 +96,17 @@ export default function MediaTrimBar({ player, creating, defaultTitle, onCreateC
           min={0}
           max={durationMs}
           step={100}
-          onChange={handleRangeChange}
-          disableSwap
+          disabled
           size="small"
-          sx={{ flexGrow: 1 }}
+          sx={{
+            flexGrow: 1,
+            '&.Mui-disabled': { color: 'primary.main' },
+          }}
         />
         <Typography variant="caption" sx={{ minWidth: 40 }}>{formatMs(endMs)}</Typography>
+        <Button size="small" disabled={creating} onClick={handleSetEnd}>
+          Ende setzen
+        </Button>
       </Stack>
       <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ mt: 1 }}>
         <Button size="small" disabled={creating} startIcon={<PlayCircleOutlineIcon />} onClick={handlePreview}>
