@@ -17,6 +17,7 @@ CILI ist ein Medienverwaltungssystem exklusiv für Cili-Member für Dateien alle
 9. [Freigabe-Links](#9-freigabe-links)
 10. [Favoriten](#10-favoriten)
 11. [Papierkorb](#11-papierkorb)
+12. [Eigene Etiketten drucken](#12-eigene-etiketten-drucken)
 
 ---
 
@@ -464,6 +465,20 @@ Gelöschte Ordner (und ihr Inhalt) werden zunächst in den Papierkorb verschoben
 
 - **Wiederherstellen**: Ordner wird mit allen Inhalten an seinen ursprünglichen Ort zurückgesetzt
 - **Endgültig löschen**: Ordner und alle enthaltenen Dateien werden unwiderruflich entfernt (Bestätigung erforderlich)
+
+---
+
+## 12. Eigene Etiketten drucken
+
+Du kannst einen Etikettenbogen mit deinen eigenen Kontaktdaten und einem QR-Code erzeugen — passend zum Format **Zweckform 6174** (21 Etiketten je A4-Bogen).
+
+1. Klicke oben rechts auf dein **Profil-Symbol** (Avatar)
+2. Wähle im Benutzermenü **Etikettenbogen erzeugen**
+3. Der Etikettenbogen wird als PDF in einem neuen Tab geöffnet — von dort aus drucken oder speichern
+
+Jedes Etikett zeigt deinen Namen, deine E-Mail-Adresse, optional Mitglieds-ID und Telefonnummer sowie einen QR-Code, der auf deine hinterlegte **URL** verweist. Der gesamte Bogen enthält denselben Eintrag mehrfach (ein voller Bogen, keine Mischung mehrerer Personen).
+
+> Der Menüpunkt **Etikettenbogen erzeugen** erscheint im Benutzermenü nur, wenn in deinem Profil eine **URL** hinterlegt ist. Fehlt sie, wende dich an deinen Administrator.
 
 ---
 
