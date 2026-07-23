@@ -18,7 +18,6 @@ import de.toengi.cili.repository.ResourceMetadataRepository;
 import de.toengi.cili.repository.ResourceRepository;
 import de.toengi.cili.service.storage.StorageService;
 import de.toengi.cili.util.CommandRunner;
-import de.toengi.cili.util.FileNameUtils;
 import de.toengi.cili.util.MimeTypeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -214,7 +213,7 @@ public class MediaClipService {
         String clipName;
         String metadataTitle;
         if (trimmedTitle != null && !trimmedTitle.isEmpty()) {
-            clipName = FileNameUtils.sanitize(trimmedTitle) + "." + ext;
+            clipName = trimmedTitle + "." + ext;
             metadataTitle = trimmedTitle;
         } else {
             String baseName = stripExtension(source.getOriginalName());

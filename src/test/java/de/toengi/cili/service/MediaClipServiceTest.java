@@ -155,7 +155,7 @@ class MediaClipServiceTest {
     }
 
     @Test
-    void execute_withCustomTitle_usesSanitizedTitleAsNameAndRawTitleAsMetadata() throws Exception {
+    void execute_withCustomTitle_usesRawTrimmedTitleAsNameAndMetadata() throws Exception {
         Resource source = Resource.builder().id(1L).storedName("source-uuid")
                 .originalName("Urlaub.mp4").folderId(42L).uploaderId(7L)
                 .mimeType("video/mp4").build();
@@ -189,7 +189,7 @@ class MediaClipServiceTest {
         service.execute(job);
 
         verify(resourceRepo).save(argThat(r ->
-                r.getOriginalName().equals("Best_Moment__Sunset_Beach_.mp4")
+                r.getOriginalName().equals("Best Moment: Sunset/Beach!.mp4")
                 && r.getFolderId().equals(42L)));
         verify(metadataRepo).save(argThat(m ->
                 m.getTitle().equals("Best Moment: Sunset/Beach!")));
