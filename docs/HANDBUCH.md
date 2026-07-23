@@ -154,10 +154,9 @@ Für alle anderen Dateitypen steht ein Download-Button bereit.
 Aus einem Video lässt sich ein kurzer Ausschnitt als eigenständige neue Datei extrahieren — etwa um nur eine relevante Szene weiterzugeben, ohne das gesamte Video teilen zu müssen.
 
 1. Öffne das Video im Player und klicke auf **Ausschnitt erstellen**
-2. Nutze den normalen Zeitregler des Players, um zur gewünschten Position zu springen, und klicke dann auf **Start setzen** bzw. **Ende setzen**, um den jeweiligen Zeitpunkt zu übernehmen
+2. Trage Start- und Endzeitpunkt in die beiden Eingabefelder ein (Format `m:ss`, bei längeren Aufnahmen `h:mm:ss`)
 3. Klicke auf **Vorschau**, um den markierten Bereich am Stück abzuspielen (das Video pausiert automatisch am Endpunkt)
-4. Passe bei Bedarf den vorgeschlagenen **Titel** an
-5. Klicke auf **Clip erstellen**
+4. Klicke auf **Clip erstellen** — der Dateiname wird automatisch aus dem Titel des Mediums und der gewählten Zeitspanne gebildet
 
 Der neue Ausschnitt wird im Hintergrund erzeugt und erscheint nach kurzer Zeit als eigenständige Datei im selben Ordner — unabhängig vom Originalvideo, mit eigenem Vorschaubild und eigenen Metadaten.
 
