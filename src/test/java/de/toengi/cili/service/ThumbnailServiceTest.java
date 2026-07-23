@@ -43,6 +43,8 @@ class ThumbnailServiceTest {
     CommandRunner commandRunner;
     @Mock
     PlatformTransactionManager txManager;
+    @Mock
+    LibreOfficeConversionService libreOfficeConversionService;
 
     private FileStorageConfig config;
     private ThumbnailService thumbnailService;
@@ -56,7 +58,8 @@ class ThumbnailServiceTest {
         lenient().when(txManager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
 
         thumbnailService = new ThumbnailService(
-                thumbnailRepository, resourceRepository, storageService, config, commandRunner, txManager);
+                thumbnailRepository, resourceRepository, storageService, config, commandRunner, txManager,
+                libreOfficeConversionService);
     }
 
     // --- processUpload ---

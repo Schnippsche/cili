@@ -40,7 +40,13 @@ class DocumentPreviewServiceTest {
         config = new FileStorageConfig();
         config.setBasePath(tempDir.toString());
         config.setLibreOfficePath("/usr/bin/soffice");
-        documentPreviewService = new DocumentPreviewService(resourceRepository, storageService, config, commandRunner);
+        // Real LibreOfficeConversionService wired to the mocked CommandRunner — the mock stays
+        // the source of truth for exit codes/output-file simulation used by tests below, while
+        // the isolated-profile-dir behavior runs for real (not itself under test here, see
+        // LibreOfficeConversionServiceTest).
+        LibreOfficeConversionService libreOfficeConversionService =
+                new LibreOfficeConversionService(config, commandRunner);
+        documentPreviewService = new DocumentPreviewService(resourceRepository, storageService, config, libreOfficeConversionService);
     }
 
     @Test

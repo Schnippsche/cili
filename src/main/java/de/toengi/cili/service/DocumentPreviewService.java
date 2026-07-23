@@ -5,7 +5,6 @@ import de.toengi.cili.exception.ResourceNotFoundException;
 import de.toengi.cili.model.entity.Resource;
 import de.toengi.cili.repository.ResourceRepository;
 import de.toengi.cili.service.storage.StorageService;
-import de.toengi.cili.util.CommandRunner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +25,7 @@ public class DocumentPreviewService {
     private final ResourceRepository resourceRepository;
     private final StorageService storageService;
     private final FileStorageConfig config;
-    private final CommandRunner commandRunner;
+    private final LibreOfficeConversionService libreOfficeConversionService;
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasPermission(#resourceId, 'RESOURCE', 'READ')")
@@ -59,15 +57,9 @@ public class DocumentPreviewService {
             Files.copy(inputPath, tempInput, StandardCopyOption.REPLACE_EXISTING);
             Files.createDirectories(previewDir);
 
-            List<String> cmd = List.of(
-                    config.getLibreOfficePath(),
-                    "--headless", "--convert-to", "pdf",
-                    "--outdir", previewDir.toString(),
-                    tempInput.toString());
-
             int exitCode;
             try {
-                exitCode = commandRunner.run(cmd);
+                exitCode = libreOfficeConversionService.convert("pdf", previewDir, tempInput);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new IOException("LibreOffice conversion interrupted", e);

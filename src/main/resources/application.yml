@@ -46,7 +46,10 @@ cili:
     base-path: /var/cili/data
     ffmpeg-path: /usr/bin/ffmpeg
     ffprobe-path: /usr/bin/ffprobe
-    libre-office-path: /usr/bin/sofficemuss
+    libre-office-path: /usr/bin/soffice
+
+  libreoffice:
+    timeout-minutes: 5
 
   ffmpeg:
     target-height: 720

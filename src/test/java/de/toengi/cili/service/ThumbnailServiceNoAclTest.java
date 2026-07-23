@@ -37,6 +37,7 @@ class ThumbnailServiceNoAclTest {
     @Mock StorageService storageService;
     @Mock CommandRunner commandRunner;
     @Mock PlatformTransactionManager txManager;
+    @Mock LibreOfficeConversionService libreOfficeConversionService;
 
     private ThumbnailService service;
 
@@ -47,7 +48,8 @@ class ThumbnailServiceNoAclTest {
         config.setFfmpegPath("/usr/bin/ffmpeg");
         lenient().when(txManager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
         service = new ThumbnailService(
-                thumbnailRepository, resourceRepository, storageService, config, commandRunner, txManager);
+                thumbnailRepository, resourceRepository, storageService, config, commandRunner, txManager,
+                libreOfficeConversionService);
     }
 
     @Test

@@ -1,12 +1,10 @@
 package de.toengi.cili.service;
 
-import de.toengi.cili.config.FileStorageConfig;
 import de.toengi.cili.model.entity.Resource;
 import de.toengi.cili.model.entity.ResourceMetadata;
 import de.toengi.cili.repository.ResourceMetadataRepository;
 import de.toengi.cili.repository.ResourceRepository;
 import de.toengi.cili.service.storage.StorageService;
-import de.toengi.cili.util.CommandRunner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
@@ -22,7 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -48,8 +45,7 @@ public class TextExtractionService {
     private final ResourceRepository resourceRepository;
     private final ResourceMetadataRepository metadataRepository;
     private final StorageService storageService;
-    private final FileStorageConfig config;
-    private final CommandRunner commandRunner;
+    private final LibreOfficeConversionService libreOfficeConversionService;
 
     public boolean supports(String mimeType) {
         return PDF_TYPES.contains(mimeType) || OFFICE_TYPES.contains(mimeType);
@@ -113,13 +109,8 @@ public class TextExtractionService {
                 Files.copy(in, tempInput, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            List<String> cmd = List.of(
-                    config.getLibreOfficePath(),
-                    "--headless", "--convert-to", "txt:Text (encoded):UTF8",
-                    "--outdir", outDir.toString(),
-                    tempInput.toString());
-
-            int exitCode = commandRunner.run(cmd);
+            int exitCode = libreOfficeConversionService.convert(
+                    "txt:Text (encoded):UTF8", outDir, tempInput);
 
             // LibreOffice schreibt {basename}.txt in outdir
             String baseName = tempInput.getFileName().toString().replaceAll("\\.[^.]+$", "");

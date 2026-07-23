@@ -62,6 +62,7 @@ public class ThumbnailService {
     private final FileStorageConfig config;
     private final CommandRunner commandRunner;
     private final PlatformTransactionManager txManager;
+    private final LibreOfficeConversionService libreOfficeConversionService;
 
     private static boolean isDocument(String mimeType) {
         return mimeType.equals("application/pdf")
@@ -404,13 +405,7 @@ public class ThumbnailService {
             Files.copy(inputPath, tmpInput, StandardCopyOption.REPLACE_EXISTING);
             Files.createDirectories(previewDir);
 
-            List<String> cmd = List.of(
-                    config.getLibreOfficePath(),
-                    "--headless", "--convert-to", "pdf",
-                    "--outdir", previewDir.toString(),
-                    tmpInput.toString());
-
-            int rc = commandRunner.run(cmd);
+            int rc = libreOfficeConversionService.convert("pdf", previewDir, tmpInput);
             String baseName = tmpInput.getFileName().toString().replaceAll("\\.[^.]+$", "");
             Path libOut = previewDir.resolve(baseName + ".pdf");
 

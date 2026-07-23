@@ -45,8 +45,12 @@ class TextExtractionServiceTest {
         FileStorageConfig config = new FileStorageConfig();
         config.setBasePath(tempDir.toString());
         config.setLibreOfficePath("/usr/bin/soffice");
+        // Real LibreOfficeConversionService wired to the mocked CommandRunner — see
+        // DocumentPreviewServiceTest for the same pattern and its rationale.
+        LibreOfficeConversionService libreOfficeConversionService =
+                new LibreOfficeConversionService(config, commandRunner);
         service = new TextExtractionService(
-                resourceRepository, metadataRepository, storageService, config, commandRunner);
+                resourceRepository, metadataRepository, storageService, libreOfficeConversionService);
     }
 
     @Test
