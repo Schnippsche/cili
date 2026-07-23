@@ -213,6 +213,10 @@ public class MediaClipService {
         String clipName;
         String metadataTitle;
         if (trimmedTitle != null && !trimmedTitle.isEmpty()) {
+            // Bewusst unbereinigt: originalName ist reines Anzeige-/Download-Metadatum
+            // (ContentDisposition-Header), keine echte Pfadkomponente — konsistent mit
+            // UploadService, das originalName ebenfalls nie bereinigt. ext ist stets
+            // serverseitig aus dem MIME-Type abgeleitet, nie aus dem Titel.
             clipName = trimmedTitle + "." + ext;
             metadataTitle = trimmedTitle;
         } else {
