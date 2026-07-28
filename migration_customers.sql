@@ -2,6 +2,8 @@
 -- Neue Tabelle: Kunden/Interessenten, die ein Sponsor (User) eintraegt,
 -- inkl. Single-Opt-in-Consent, permanentem Abmelde-Token und optionalen Profilfeldern
 -- (fuer Anrede/spaetere Erinnerungsmails, alle nullable, da diese Runde keinen Update-Endpoint hat).
+-- ACHTUNG: nur einmalig gegen eine leere/neue customers-Tabelle ausfuehren.
+-- DROP TABLE loescht bei erneutem Lauf alle bereits erfassten Consent-/Abmeldedaten unwiderruflich.
 DROP TABLE IF EXISTS `customers`;
 CREATE TABLE IF NOT EXISTS `customers`
 (
