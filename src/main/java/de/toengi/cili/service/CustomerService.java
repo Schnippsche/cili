@@ -74,7 +74,7 @@ public class CustomerService {
     @Transactional
     public void unsubscribe(String token) {
         Customer customer = customerRepository.findByUnsubscribeToken(token)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer", token));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", 0L));
         if (customer.isConsentGranted()) {
             customer.setConsentGranted(false);
             customer.setConsentRevokedAt(LocalDateTime.now());
@@ -86,7 +86,7 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public void verifyToken(String token) {
         customerRepository.findByUnsubscribeToken(token)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer", token));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", 0L));
     }
 
     private CustomerDto toDto(Customer c) {
