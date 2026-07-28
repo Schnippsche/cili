@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Vom Mailversand abmelden</title></head>
+<body>
+<h1>Vom Mailversand abmelden?</h1>
+<p>Möchten Sie sich wirklich vom Mailversand abmelden? Sie erhalten danach keine weiteren E-Mails mehr.</p>
+<form th:action="'/api/public/customers/unsubscribe/' + ${token}" method="post">
+    <button type="submit">Ja, abmelden</button>
+</form>
+</body>
+</html>
