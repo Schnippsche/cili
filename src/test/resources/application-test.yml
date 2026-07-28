@@ -27,3 +27,5 @@ cili:
     refresh-token-expiry: 604800000
   storage:
     base-path: /tmp/cili-test
+  mail:
+    enabled: false

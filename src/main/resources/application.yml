@@ -7,6 +7,14 @@ spring:
       max-request-size: 50MB
   thymeleaf:
     check-template-location: false   # programmatische Nutzung, kein MVC-ViewResolver
+  mail:
+    host: ${MAIL_HOST:smtp.example.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
   jpa:
     open-in-view: false
     hibernate:
@@ -31,6 +39,10 @@ cili:
   security:
     max-login-attempts: 5
     login-lockout-minutes: 15
+
+  mail:
+    from: "no-reply@cili.toengi.de"
+    enabled: true
 
   share:
     token-validity-days: 90          # Gültigkeitsdauer für Freigabe-Links in Tagen
