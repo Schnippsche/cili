@@ -1,5 +1,6 @@
 package de.toengi.cili.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,10 +9,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
 @EnableAsync
 @EnableScheduling
+@Slf4j
 public class AsyncConfig {
 
     /** Anzahl gleichzeitiger Video-Workflows (Transcode + WAV + Whisper). */
@@ -99,6 +102,24 @@ public class AsyncConfig {
         exec.setThreadNamePrefix("telegram-import-");
         exec.setWaitForTasksToCompleteOnShutdown(true);
         exec.setAwaitTerminationSeconds(120);
+        exec.initialize();
+        return exec;
+    }
+
+    @Bean(name = "mailExecutor")
+    public Executor mailExecutor() {
+        ThreadPoolTaskExecutor exec = new ThreadPoolTaskExecutor();
+        exec.setCorePoolSize(1);
+        exec.setMaxPoolSize(2);
+        exec.setQueueCapacity(50);
+        exec.setThreadNamePrefix("mail-");
+        exec.setWaitForTasksToCompleteOnShutdown(true);
+        exec.setAwaitTerminationSeconds(30);
+        // Standard-AbortPolicy würde TaskRejectedException SYNCHRON beim Aufrufer werfen
+        // (vor Ausführung von MailService.send, also außerhalb von dessen try/catch) —
+        // widerspricht dem Fire-and-Forget-Anspruch. Stattdessen loggen und verwerfen.
+        exec.setRejectedExecutionHandler((Runnable task, ThreadPoolExecutor executor) ->
+            log.warn("Mail-Executor-Queue voll — E-Mail-Auftrag wurde verworfen"));
         exec.initialize();
         return exec;
     }
