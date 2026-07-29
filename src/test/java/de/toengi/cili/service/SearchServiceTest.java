@@ -67,6 +67,16 @@ class SearchServiceTest {
     }
 
     @Test
+    void search_emptyQuery_withFolderFilter_usesFolderId() {
+        when(resourceRepository.findByFolderId(eq(5L), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        searchService.search("", 5L, null, PageRequest.of(0, 20));
+
+        verify(resourceRepository).findByFolderId(eq(5L), any(Pageable.class));
+    }
+
+    @Test
     void search_withFolderFilter_usesFolder() {
         when(resourceRepository.searchByFolderAndNameOrMetadata(eq(5L), eq("+doc*"), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of()));

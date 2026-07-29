@@ -107,7 +107,7 @@ public class SearchService {
     }
 
     private Page<Resource> fetchNoTermsPage(Long folderId, List<Long> folderFilter, Pageable pageable) {
-        if (folderId != null) return resourceRepository.findByFolderIdAndOriginalNameContainingIgnoreCase(folderId, "", pageable);
+        if (folderId != null) return resourceRepository.findByFolderId(folderId, pageable);
         if (folderFilter != null) return resourceRepository.findByFolderIdIn(folderFilter, pageable);
         return resourceRepository.findAllInFolders(pageable);
     }

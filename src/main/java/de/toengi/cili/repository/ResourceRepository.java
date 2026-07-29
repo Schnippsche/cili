@@ -21,13 +21,10 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     @Query("SELECT r FROM Resource r WHERE r.folderId IS NOT NULL")
     Page<Resource> findAllInFolders(Pageable pageable);
 
-    Page<Resource> findByOriginalNameContainingIgnoreCase(String q, Pageable pageable);
-
-    Page<Resource> findByFolderIdAndOriginalNameContainingIgnoreCase(
-            Long folderId, String q, Pageable pageable);
+    Page<Resource> findByFolderId(Long folderId, Pageable pageable);
 
     @Query(value =
-           "SELECT DISTINCT r.id, r.folder_id, r.testimonial_id, r.original_name, r.stored_name, r.mime_type, " +
+           "SELECT r.id, r.folder_id, r.testimonial_id, r.original_name, r.stored_name, r.mime_type, " +
            "r.size, r.checksum, r.uploader_id, r.storage_type, r.file_date, r.sort_order, r.created_at, r.updated_at " +
            "FROM resources r LEFT JOIN resource_metadata rm ON rm.resource_id = r.id " +
            "WHERE r.folder_id IN :folderIds AND (" +
@@ -37,7 +34,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
            "   OR EXISTS (SELECT 1 FROM subtitle_tracks st WHERE st.resource_id = r.id " +
            "              AND MATCH(st.text_content) AGAINST (:boolQ IN BOOLEAN MODE)))",
            countQuery =
-           "SELECT COUNT(DISTINCT r.id) FROM resources r " +
+           "SELECT COUNT(r.id) FROM resources r " +
            "LEFT JOIN resource_metadata rm ON rm.resource_id = r.id " +
            "WHERE r.folder_id IN :folderIds AND (" +
            "   MATCH(r.original_name) AGAINST (:boolQ IN BOOLEAN MODE) " +
@@ -54,7 +51,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     Page<Resource> findByFolderIdIn(List<Long> folderIds, Pageable pageable);
 
     @Query(value =
-           "SELECT DISTINCT r.id, r.folder_id, r.testimonial_id, r.original_name, r.stored_name, r.mime_type, " +
+           "SELECT r.id, r.folder_id, r.testimonial_id, r.original_name, r.stored_name, r.mime_type, " +
            "r.size, r.checksum, r.uploader_id, r.storage_type, r.file_date, r.sort_order, r.created_at, r.updated_at " +
            "FROM resources r LEFT JOIN resource_metadata rm ON rm.resource_id = r.id " +
            "WHERE r.folder_id IS NOT NULL AND (" +
@@ -64,7 +61,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
            "   OR EXISTS (SELECT 1 FROM subtitle_tracks st WHERE st.resource_id = r.id " +
            "              AND MATCH(st.text_content) AGAINST (:boolQ IN BOOLEAN MODE)))",
            countQuery =
-           "SELECT COUNT(DISTINCT r.id) FROM resources r " +
+           "SELECT COUNT(r.id) FROM resources r " +
            "LEFT JOIN resource_metadata rm ON rm.resource_id = r.id " +
            "WHERE r.folder_id IS NOT NULL AND (" +
            "   MATCH(r.original_name) AGAINST (:boolQ IN BOOLEAN MODE) " +
@@ -76,7 +73,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     Page<Resource> searchByNameOrMetadata(@Param("boolQ") String boolQ, Pageable pageable);
 
     @Query(value =
-           "SELECT DISTINCT r.id, r.folder_id, r.testimonial_id, r.original_name, r.stored_name, r.mime_type, " +
+           "SELECT r.id, r.folder_id, r.testimonial_id, r.original_name, r.stored_name, r.mime_type, " +
            "r.size, r.checksum, r.uploader_id, r.storage_type, r.file_date, r.sort_order, r.created_at, r.updated_at " +
            "FROM resources r LEFT JOIN resource_metadata rm ON rm.resource_id = r.id " +
            "WHERE r.folder_id = :folderId AND (" +
@@ -86,7 +83,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
            "   OR EXISTS (SELECT 1 FROM subtitle_tracks st WHERE st.resource_id = r.id " +
            "              AND MATCH(st.text_content) AGAINST (:boolQ IN BOOLEAN MODE)))",
            countQuery =
-           "SELECT COUNT(DISTINCT r.id) FROM resources r " +
+           "SELECT COUNT(r.id) FROM resources r " +
            "LEFT JOIN resource_metadata rm ON rm.resource_id = r.id " +
            "WHERE r.folder_id = :folderId AND (" +
            "   MATCH(r.original_name) AGAINST (:boolQ IN BOOLEAN MODE) " +
