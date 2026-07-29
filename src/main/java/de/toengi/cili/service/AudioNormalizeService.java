@@ -8,6 +8,7 @@ import de.toengi.cili.model.entity.Resource;
 import de.toengi.cili.repository.ResourceRepository;
 import de.toengi.cili.service.storage.StorageService;
 import de.toengi.cili.util.CommandRunner;
+import de.toengi.cili.util.FileNameUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -74,6 +75,8 @@ public class AudioNormalizeService {
         String originalStoredName = resource.getStoredName();
         resource.setStoredName(newUuid);
         resource.setSize(Files.size(finalPath));
+        resource.setMimeType("audio/mpeg");
+        resource.setOriginalName(FileNameUtils.getBaseName(resource.getOriginalName()) + ".mp3");
         resourceRepository.save(resource);
 
         try {

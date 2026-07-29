@@ -428,6 +428,14 @@ class UploadServiceTest {
         verify(bulkImportJobRepository, times(1)).incrementFilesFailed("job4");
     }
 
+    @Test
+    void normalizeMimeType_oggUploadedAsApplicationOgg_correctedToAudioOgg() {
+        assertThat(UploadService.normalizeMimeType("audio_2026-07-29_16-57-53.ogg", "application/ogg"))
+                .isEqualTo("audio/ogg");
+        assertThat(UploadService.normalizeMimeType("recording.oga", "application/ogg"))
+                .isEqualTo("audio/ogg");
+    }
+
     // --- helper ---
 
     private UploadJob job(String id, Long userId, Long folderId, int chunksTotal, int chunkSize) {
