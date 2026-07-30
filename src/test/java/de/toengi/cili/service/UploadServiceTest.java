@@ -196,6 +196,29 @@ class UploadServiceTest {
     }
 
     @Test
+    void completeUpload_testimonialUpload_propagatesTestimonialIdToResource() throws IOException {
+        UploadJob job = job("j4b", 1L, null, 1, 5);
+        job.setTestimonialId(20L);
+        job.setChunksReceived(1);
+        when(uploadJobRepository.findById("j4b")).thenReturn(Optional.of(job));
+        when(uploadJobRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Path chunkDir = tempDir.resolve("uploads/j4b");
+        Files.createDirectories(chunkDir);
+        Files.write(chunkDir.resolve("0"), "hello".getBytes());
+
+        var resourceCaptor = org.mockito.ArgumentCaptor.forClass(Resource.class);
+        when(resourceRepository.save(resourceCaptor.capture()))
+                .thenAnswer(inv -> inv.getArgument(0));
+        lenient().when(metadataRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        uploadService.completeUpload("j4b", 1L, false);
+
+        assertThat(resourceCaptor.getValue().getTestimonialId()).isEqualTo(20L);
+        assertThat(resourceCaptor.getValue().getFolderId()).isNull();
+    }
+
+    @Test
     void completeUpload_missingChunk_throwsIllegalState() throws IOException {
         UploadJob job = job("j5", 1L, 10L, 2, 5);
         when(uploadJobRepository.findById("j5")).thenReturn(Optional.of(job));

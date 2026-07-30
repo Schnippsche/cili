@@ -260,6 +260,7 @@ public class UploadService {
             }
             Resource resource = Resource.builder()
                     .folderId(job.getFolderId())
+                    .testimonialId(job.getTestimonialId())
                     .originalName(job.getFileName())
                     .storedName(storedName)
                     .mimeType(job.getMimeType())
