@@ -8,6 +8,7 @@ import {
   DialogTitle,
   IconButton,
   LinearProgress,
+  Snackbar,
   Stack,
   TextField,
   ToggleButton,
@@ -15,7 +16,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -44,7 +44,7 @@ function ExistingAttachmentThumb({attachment, onRemove}: Readonly<ExistingAttach
     : null;
   const url = useAuthenticatedUrl(thumbSrc, isImage ? 3 : 0);
 
-  return (
+  const thumb = (
       <Box sx={{position: 'relative', width: 72, height: 72}}>
         {isImage && (
           <Box component="img" src={url ?? undefined} alt={attachment.originalName}
@@ -111,6 +111,74 @@ function ExistingAttachmentThumb({attachment, onRemove}: Readonly<ExistingAttach
         </Tooltip>
       </Box>
   );
+
+  return (isVideo || isAudio) ? <Tooltip title={attachment.originalName}>{thumb}</Tooltip> : thumb;
+}
+
+interface NewMediaFileTileProps {
+  file: File;
+  state: MediaUploadState | undefined;
+  onRemove: () => void;
+}
+
+function NewMediaFileTile({file, state, onRemove}: Readonly<NewMediaFileTileProps>) {
+  const isVideo = isVideoLikeFile(file);
+  const isError = state?.status === 'error';
+  const tooltipTitle = isError ? `${file.name} — ${state?.error}` : file.name;
+
+  return (
+      <Tooltip title={tooltipTitle}>
+        <Box sx={{
+          position: 'relative',
+          width: 72,
+          height: 72,
+          borderRadius: 1,
+          bgcolor: 'action.hover',
+          overflow: 'hidden',
+          border: isError ? '1px solid' : 'none',
+          borderColor: isError ? 'error.main' : undefined,
+        }}>
+          <Box sx={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            {isVideo
+                ? <PlayArrowIcon sx={{fontSize: 32, color: 'text.secondary'}}/>
+                : <MusicNoteIcon sx={{fontSize: 32, color: 'text.secondary'}}/>}
+          </Box>
+          {state?.status === 'uploading' && (
+              <LinearProgress
+                  variant="determinate"
+                  value={state.progress}
+                  sx={{position: 'absolute', bottom: 0, left: 0, right: 0, height: 4}}
+              />
+          )}
+          <Tooltip title="Entfernen">
+            <IconButton size="small" onClick={onRemove}
+                        sx={{
+                          position: 'absolute',
+                          top: -8,
+                          right: -8,
+                          bgcolor: 'background.paper',
+                          p: 0.25,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          '&:hover': {bgcolor: 'error.light', color: 'white'}
+                        }}>
+              <CloseIcon sx={{fontSize: 14}}/>
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Tooltip>
+  );
+}
+
+function formatRejectedNames(names: string[]): string {
+  if (names.length <= 3) return names.join(', ');
+  return `${names.slice(0, 3).join(', ')} und ${names.length - 3} weitere`;
 }
 
 interface Props {
@@ -160,12 +228,12 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
   const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
   const [deleteAttachmentIds, setDeleteAttachmentIds] = useState<number[]>([]);
+  const [rejectedFileNames, setRejectedFileNames] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<{ authorName?: string; tags?: string; text?: string; source?: string }>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [mediaUploads, setMediaUploads] = useState<Map<string, MediaUploadState>>(new Map());
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -177,6 +245,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
       setNewPreviews([]);
       setNewMediaFiles([]);
       setDeleteAttachmentIds([]);
+      setRejectedFileNames([]);
       setErrors({});
       setSaveError(null);
     }
@@ -278,16 +347,23 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
     }
   }
 
-  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []).filter(f => f.type.startsWith('image/'));
-    setNewFiles(prev => [...prev, ...files]);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  }
+  function handleAttachmentFileChange(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    const images: File[] = [];
+    const media: File[] = [];
+    const rejected: string[] = [];
 
-  function handleMediaFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []).filter(isMediaFile);
-    setNewMediaFiles(prev => [...prev, ...files]);
-    if (mediaInputRef.current) mediaInputRef.current.value = '';
+    for (const file of files) {
+      if (file.type.startsWith('image/')) images.push(file);
+      else if (isMediaFile(file)) media.push(file);
+      else rejected.push(file.name);
+    }
+
+    if (images.length) setNewFiles(prev => [...prev, ...images]);
+    if (media.length) setNewMediaFiles(prev => [...prev, ...media]);
+    if (rejected.length) setRejectedFileNames(rejected);
+
+    if (attachmentInputRef.current) attachmentInputRef.current.value = '';
   }
 
   function removeNewFile(idx: number) {
@@ -338,24 +414,25 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
               fullWidth sx={{mb: 2}}
           />
 
-          {/* Image section */}
+          {/* Anhänge */}
           <Box sx={{mb: 2}}>
             <Stack direction="row" alignItems="center" gap={1} sx={{mb: 1}}>
-              <Typography variant="caption" color="text.secondary">Bilder</Typography>
-              <Tooltip title="Bilder hinzufügen (JPG, PNG, GIF, WebP, BMP)">
-                <IconButton size="small" onClick={() => fileInputRef.current?.click()}>
-                  <AddPhotoAlternateIcon fontSize="small"/>
+              <Typography variant="caption" color="text.secondary">Anhänge</Typography>
+              <Tooltip title="Bilder, Video oder Audio hinzufügen">
+                <IconButton size="small" onClick={() => attachmentInputRef.current?.click()}>
+                  <AddIcon fontSize="small"/>
                 </IconButton>
               </Tooltip>
             </Stack>
-            <input ref={fileInputRef} type="file" accept="image/*" multiple hidden
-                   onChange={handleFileChange}/>
-            {(existingAttachments.filter(a => a.mimeType?.startsWith('image/')).length > 0 || newFiles.length > 0) && (
+            <input ref={attachmentInputRef} type="file" accept="image/*,video/*,audio/*" multiple hidden
+                   data-testid="attachment-input"
+                   onChange={handleAttachmentFileChange}/>
+            {(existingAttachments.length > 0 || newFiles.length > 0 || newMediaFiles.length > 0) && (
                 <Stack direction="row" flexWrap="wrap" gap={1}>
-                  {existingAttachments.filter(a => a.mimeType?.startsWith('image/')).map(img => (
+                  {existingAttachments.map(attachment => (
                       <ExistingAttachmentThumb
-                          key={img.id} attachment={img}
-                          onRemove={() => markAttachmentForDelete(img.id)}
+                          key={attachment.id} attachment={attachment}
+                          onRemove={() => markAttachmentForDelete(attachment.id)}
                       />
                   ))}
                   {newFiles.map((file, idx) => (
@@ -380,64 +457,14 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
                         </Tooltip>
                       </Box>
                   ))}
-                </Stack>
-            )}
-          </Box>
-
-          {/* Video/Audio section */}
-          <Box sx={{mb: 2}}>
-            <Stack direction="row" alignItems="center" gap={1} sx={{mb: 1}}>
-              <Typography variant="caption" color="text.secondary">Video/Audio</Typography>
-              <Tooltip title="Video/Audio hinzufügen (MP4, WebM, MP3, WAV, OGG, etc.)">
-                <IconButton size="small" onClick={() => mediaInputRef.current?.click()}>
-                  <AddIcon fontSize="small"/>
-                </IconButton>
-              </Tooltip>
-            </Stack>
-            <input ref={mediaInputRef} type="file" accept="video/*,audio/*" multiple hidden
-                   onChange={handleMediaFileChange}/>
-            {(existingAttachments.filter(a => a.mimeType?.startsWith('video/') || a.mimeType?.startsWith('audio/')).length > 0 || newMediaFiles.length > 0) && (
-                <Stack gap={1.5}>
-                  {existingAttachments.filter(a => a.mimeType?.startsWith('video/') || a.mimeType?.startsWith('audio/')).map(attachment => (
-                      <Box key={attachment.id} sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                        <ExistingAttachmentThumb
-                            attachment={attachment}
-                            onRemove={() => markAttachmentForDelete(attachment.id)}
-                        />
-                        <Box sx={{flex: 1}}>
-                          <Typography variant="caption">{attachment.originalName}</Typography>
-                        </Box>
-                      </Box>
+                  {newMediaFiles.map((file, idx) => (
+                      <NewMediaFileTile
+                          key={`${file.name}-${file.size}-${file.lastModified}`}
+                          file={file}
+                          state={mediaUploads.get(file.name)}
+                          onRemove={() => removeNewMediaFile(idx)}
+                      />
                   ))}
-                  {newMediaFiles.map((file, idx) => {
-                    const state = mediaUploads.get(file.name);
-                    return (
-                        <Box key={`${file.name}-${file.size}-${file.lastModified}`}>
-                          <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 0.5}}>
-                            <Typography variant="caption" sx={{flex: 1}}>{file.name}</Typography>
-                            {state?.status === 'error' && (
-                                <Typography variant="caption" color="error">{state.error}</Typography>
-                            )}
-                            <Tooltip title="Entfernen">
-                              <IconButton size="small" onClick={() => removeNewMediaFile(idx)}
-                                          sx={{p: 0.25}}>
-                                <CloseIcon sx={{fontSize: 14}}/>
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
-                          {state?.status !== 'error' && (
-                              <LinearProgress
-                                  variant="determinate"
-                                  value={state?.progress ?? 0}
-                                  sx={{height: 6, borderRadius: 1}}
-                              />
-                          )}
-                          {state?.status === 'done' && (
-                              <Typography variant="caption" color="success.main">Fertig</Typography>
-                          )}
-                        </Box>
-                    );
-                  })}
                 </Stack>
             )}
           </Box>
@@ -458,6 +485,16 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
             {saving ? 'Wird gespeichert…' : 'Speichern'}
           </Button>
         </DialogActions>
+        <Snackbar
+            open={rejectedFileNames.length > 0}
+            autoHideDuration={6000}
+            onClose={() => setRejectedFileNames([])}
+            anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+        >
+          <Alert severity="warning" onClose={() => setRejectedFileNames([])}>
+            Nicht unterstützt und übersprungen: {formatRejectedNames(rejectedFileNames)}
+          </Alert>
+        </Snackbar>
       </Dialog>
   );
 }
