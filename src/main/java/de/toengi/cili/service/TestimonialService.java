@@ -15,6 +15,7 @@ import de.toengi.cili.security.CiliUserDetails;
 import de.toengi.cili.service.storage.StorageService;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -150,7 +151,7 @@ public class TestimonialService {
 
     @PreAuthorize("isAuthenticated()")
     @Transactional
-    public void deleteImage(Long testimonialId, Long resourceId) {
+    public void deleteAttachment(Long testimonialId, Long resourceId) {
         CiliUserDetails user = currentUser();
         if (!aclService.hasTestimonialsPermission(user.getUserId(), AclPermission.WRITE)) {
             throw new AccessDeniedException("Keine Berechtigung zum Bearbeiten");
@@ -163,6 +164,19 @@ public class TestimonialService {
                 deleteResourceFile(r);
                 resourceRepository.delete(r);
             }, () -> { throw new ResourceNotFoundException("Resource", resourceId); });
+    }
+
+    @Transactional(readOnly = true)
+    public void assertPublicAttachment(Long testimonialId, Long resourceId) {
+        repository.findById(testimonialId)
+            .orElseThrow(() -> new ResourceNotFoundException("Testimonial", testimonialId));
+
+        Resource resource = resourceRepository.findById(resourceId)
+            .orElseThrow(() -> new ResourceNotFoundException("Resource", resourceId));
+
+        if (!Objects.equals(resource.getTestimonialId(), testimonialId)) {
+            throw new AccessDeniedException("Resource does not belong to testimonial");
+        }
     }
 
     private void storeImages(Long testimonialId, List<MultipartFile> files, Long uploaderId) {

@@ -74,6 +74,6 @@ public class TestimonialController {
     @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteImage(@PathVariable Long id, @PathVariable Long resourceId) {
-        service.deleteImage(id, resourceId);
+        service.deleteAttachment(id, resourceId);
     }
 }
