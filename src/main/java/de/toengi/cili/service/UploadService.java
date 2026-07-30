@@ -12,6 +12,7 @@ import de.toengi.cili.model.entity.BulkImportJob;
 import de.toengi.cili.model.entity.Resource;
 import de.toengi.cili.model.entity.ResourceMetadata;
 import de.toengi.cili.model.entity.UploadJob;
+import de.toengi.cili.model.enums.AclPermission;
 import de.toengi.cili.model.enums.BulkImportItemStatus;
 import de.toengi.cili.model.enums.StorageType;
 import de.toengi.cili.model.enums.UploadJobStatus;
@@ -61,6 +62,7 @@ public class UploadService {
     private final PlatformTransactionManager txManager;
     private final BulkImportItemRepository bulkImportItemRepository;
     private final BulkImportJobRepository bulkImportJobRepository;
+    private final AclService aclService;
 
     private static final java.util.Set<String> BLOCKED_MIME_TYPES = java.util.Set.of(
             "text/html", "application/xhtml+xml",
@@ -91,11 +93,22 @@ public class UploadService {
             bulkImportItemRepository.save(bulkItem);
         }
 
+        // Validate exactly one of folderId or testimonialId is set
+        if ((req.folderId() == null) == (req.testimonialId() == null)) {
+            throw new CiliException("Entweder folderId oder testimonialId muss gesetzt sein", HttpStatus.BAD_REQUEST);
+        }
+
+        // If testimonialId is set, check ACL permission
+        if (req.testimonialId() != null && !aclService.hasTestimonialsPermission(userId, AclPermission.WRITE)) {
+            throw new AccessDeniedException("Keine Berechtigung zum Anhängen von Medien");
+        }
+
         int chunksTotal = (int) Math.ceil((double) req.totalSize() / req.chunkSize());
         UploadJob job = UploadJob.builder()
                 .id(UUID.randomUUID().toString())
                 .userId(userId)
                 .folderId(req.folderId())
+                .testimonialId(req.testimonialId())
                 .fileName(req.fileName())
                 .mimeType(mime)
                 .totalSize(req.totalSize())
@@ -260,6 +273,7 @@ public class UploadService {
             }
             Resource resource = Resource.builder()
                     .folderId(job.getFolderId())
+                    .testimonialId(job.getTestimonialId())
                     .originalName(job.getFileName())
                     .storedName(storedName)
                     .mimeType(job.getMimeType())
