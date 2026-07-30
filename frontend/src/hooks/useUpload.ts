@@ -1,12 +1,17 @@
 import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { completeUpload, initUpload, uploadChunk } from '../api/upload';
-import { uploadSubtitle } from '../api/resources';
+import { getResource, uploadSubtitle } from '../api/resources';
 import type { ResourceDto } from '../types/api';
 
 const CHUNK_SIZE = 5 * 1024 * 1024;
 const SUBTITLE_EXTS = new Set(['srt', 'vtt']);
 const VIDEO_EXTS = new Set(['mp4', 'mkv', 'avi', 'mov', 'webm', 'flv', 'wmv', 'ts', 'ogv', 'm4v']);
+const AUDIO_EXTS = new Set(['mp3', 'wav', 'ogg', 'oga', 'flac', 'm4a', 'aac', 'wma', 'opus']);
+// Server konvertiert Audio-Uploads asynchron zu MP3 (AudioNormalizeService) — bis dahin
+// pollen, damit die Ordnerliste nicht mit veralteter Dateiendung/mimeType hängen bleibt.
+const AUDIO_NORMALIZE_POLL_MS = 1500;
+const AUDIO_NORMALIZE_MAX_ATTEMPTS = 10;
 
 export interface UploadEntry {
   id: string;
@@ -32,6 +37,10 @@ function isVideoFile(name: string): boolean {
 
 function isSubtitleFile(name: string): boolean {
   return SUBTITLE_EXTS.has(fileExt(name));
+}
+
+function isAudioFile(name: string, mimeType: string): boolean {
+  return mimeType.startsWith('audio/') || AUDIO_EXTS.has(fileExt(name));
 }
 
 // "video1.de.vtt" → "video1", "video1.vtt" → "video1", "video1.mp4" → "video1"
@@ -80,6 +89,20 @@ export function useUpload(folderId: number) {
     }
   }, []);
 
+  const pollAudioNormalization = useCallback(async (resourceId: number) => {
+    for (let attempt = 0; attempt < AUDIO_NORMALIZE_MAX_ATTEMPTS; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, AUDIO_NORMALIZE_POLL_MS));
+      let resource: ResourceDto;
+      try {
+        resource = await getResource(resourceId);
+      } catch {
+        return;
+      }
+      if (resource.mimeType === 'audio/mpeg') break;
+    }
+    qc.invalidateQueries({ queryKey: ['resources', 'folder', folderId] });
+  }, [folderId, qc]);
+
   const uploadFile = useCallback(async (file: File, pairedSubtitle?: File) => {
     const eid = `${file.name}-${Date.now()}`;
     setUploads(prev => [...prev, {
@@ -106,13 +129,16 @@ export function useUpload(folderId: number) {
       const done = await completeUpload(job.jobId);
       update(eid, { status: 'done', progress: 100, resourceId: done.resourceId, codecWarning: done.codecWarning });
       qc.invalidateQueries({ queryKey: ['resources', 'folder', folderId] });
+      if (isAudioFile(file.name, file.type)) {
+        void pollAudioNormalization(done.resourceId);
+      }
       if (pairedSubtitle && done.resourceId) {
         await doSubtitleUpload(eid, done.resourceId, pairedSubtitle);
       }
     } catch (err) {
       update(eid, { status: 'error', error: (err as { message?: string })?.message ?? 'Upload fehlgeschlagen' });
     }
-  }, [folderId, qc, doSubtitleUpload]);
+  }, [folderId, qc, doSubtitleUpload, pollAudioNormalization]);
 
   const uploadSubtitleOnly = useCallback(async (sub: File) => {
     const eid = `${sub.name}-${Date.now()}`;
