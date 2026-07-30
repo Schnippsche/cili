@@ -113,10 +113,22 @@ describe('Anhänge-Upload (vereinheitlicht)', () => {
     fireEvent.change(input, { target: { files: [image, video] } });
 
     await screen.findByAltText('Neu 1');
-    // MUI Tooltip setzt aria-label statt title auf dem Kind-Element — getByLabelText statt getByTitle.
-    // `bestand.mp4` ist nur auffindbar, weil Step 4 ExistingAttachmentThumb um einen Tooltip erweitert hat.
-    const tiles = screen.getAllByRole('img').map(el => el.getAttribute('alt'))
-        .concat(screen.getAllByLabelText(/neu\.mp4|bestand\.mp4/).map(el => el.getAttribute('aria-label')));
+    // MUI Tooltip setzt aria-label statt title auf dem Kind-Element — daher werden Video/Audio-Kacheln
+    // über aria-label statt Bild-alt-Text identifiziert.
+    // Wichtig: alle vier relevanten Kachel-Bezeichner müssen aus EINER einzigen, Dokument-Reihenfolge-
+    // erhaltenden Abfrage stammen. Zwei separate getAllBy*-Aufrufe (z. B. getAllByRole('img') und
+    // getAllByLabelText(...)) anschließend zu concat()en zerstört die echte DOM-Reihenfolge, weil jede
+    // Teilliste für sich in Dokumentreihenfolge sortiert ist, aber die Reihenfolge zwischen den beiden
+    // Teillisten beim Zusammenfügen verloren geht — ein Test darauf würde "neue Video/Audio-Kachel nach
+    // neuen Bildern" nie wirklich prüfen (verifiziert: JSX-Reihenfolge im TestimonialForm testweise
+    // vertauscht — newMediaFiles zuerst — und der ursprüngliche concat()-Test lief trotzdem grün durch).
+    // document.body.querySelectorAll(...) in einem einzigen Aufruf lieferte echte DOM-Reihenfolge.
+    // Query-Root ist document.body statt RTL-container, weil MUI Dialog per Portal dorthin rendert
+    // (siehe bereits bestehender Kommentar weiter oben in dieser Datei).
+    const relevantNames = ['bestand.jpg', 'Neu 1', 'neu.mp4', 'bestand.mp4'];
+    const tiles = Array.from(document.body.querySelectorAll('img[alt], [aria-label]'))
+        .map(el => el.getAttribute('alt') ?? el.getAttribute('aria-label'))
+        .filter((name): name is string => name !== null && relevantNames.includes(name));
 
     // Bestehende Anhänge zuerst (Reihenfolge wie von initial.attachments geliefert),
     // danach neue Bilder, danach neue Video/Audio-Kacheln.
