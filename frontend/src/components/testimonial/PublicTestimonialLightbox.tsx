@@ -54,7 +54,14 @@ export default function PublicTestimonialLightbox({ images, testimonialId, index
           </span>
         </Tooltip>
 
-        <Box sx={{ maxWidth: '90vw', maxHeight: '90vh', overflow: 'auto' }}>
+        <Box sx={{
+          maxWidth: '90vw', maxHeight: '90vh', overflow: 'auto',
+          // VideoPlayer/AudioPlayer size themselves via width-relative padding-bottom —
+          // inside this flex+align-items:center modal that needs an explicit width to
+          // anchor to (unlike <img>, which sizes from its own intrinsic dimensions);
+          // without it the box collapses to zero width/height and nothing is visible.
+          ...(isVideo || isAudio ? { width: 'min(80vw, 960px)' } : {}),
+        }}>
           {isImage && (
             <img
               src={publicImageUrl(current.id, 'large')}

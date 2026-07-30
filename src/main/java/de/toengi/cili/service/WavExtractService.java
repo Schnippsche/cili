@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +41,8 @@ public class WavExtractService {
         jobService.markRunning(job, "wav:" + Thread.currentThread().getName());
         try {
             Path wavPath = doExtract(job);
-            String resultJson = objectMapper.writeValueAsString(Map.of("wavPath", wavPath.toString()));
+            String resultJson = objectMapper.writeValueAsString(
+                wavPath != null ? Map.of("wavPath", wavPath.toString()) : Map.of("noAudioStream", true));
             jobService.markDone(job, resultJson);
             return wavPath;
         } catch (InterruptedException ie) {
@@ -58,6 +62,11 @@ public class WavExtractService {
 
         Path remotePath = storageService.resolveLocalPath(resource.getStoredName())
             .orElseThrow(() -> new IllegalStateException("File not found: " + resource.getStoredName()));
+
+        if (!hasAudioStream(remotePath)) {
+            log.info("Resource {} hat keine Audiospur — WAV-Extraktion übersprungen", job.getResourceId());
+            return null;
+        }
 
         Path tempDir = Paths.get(ffmpegConfig.getTempDir());
         Files.createDirectories(tempDir);
@@ -96,5 +105,46 @@ public class WavExtractService {
             "-ac", "1",
             output.toString()
         ));
+    }
+
+    /**
+     * Prüft per ffprobe, ob die Quelldatei überhaupt eine Audiospur enthält (z.B. stumme
+     * Videoclips haben keine). Gibt bei Unsicherheit (ffprobe-Fehler, Timeout) {@code true}
+     * zurück, um das bisherige Verhalten (Extraktion versuchen) für den Fall nicht zu ändern,
+     * dass ffprobe selbst fehlkonfiguriert ist — nur ein sauberes "0 Audiospuren"-Ergebnis
+     * führt zum Überspringen.
+     */
+    private boolean hasAudioStream(Path input) {
+        List<String> cmd = List.of(
+            storageConfig.getFfprobePath(),
+            "-v", "quiet",
+            "-select_streams", "a",
+            "-show_entries", "stream=index",
+            "-of", "csv=p=0",
+            input.toString()
+        );
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        pb.redirectErrorStream(true);
+        Process p = null;
+        try {
+            p = pb.start();
+            String output;
+            try (InputStream is = p.getInputStream()) {
+                output = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            }
+            if (!p.waitFor(30, TimeUnit.SECONDS)) {
+                log.warn("[WAV] ffprobe (Audiospur-Check) timed out für {}", input.getFileName());
+                return true;
+            }
+            return !output.isBlank();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            return true;
+        } catch (IOException e) {
+            log.warn("[WAV] ffprobe (Audiospur-Check) fehlgeschlagen für {}: {}", input.getFileName(), e.getMessage());
+            return true;
+        } finally {
+            if (p != null) p.destroyForcibly();
+        }
     }
 }

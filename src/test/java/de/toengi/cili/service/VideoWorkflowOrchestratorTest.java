@@ -129,6 +129,17 @@ class VideoWorkflowOrchestratorTest {
     }
 
     @Test
+    void dispatch_wavExtract_noAudioStream_skipsWhisperGracefully() throws Exception {
+        ProcessingJob wavJob = job(3L, 10L, ProcessingJobType.WAV_EXTRACT, null);
+        when(wavService.execute(wavJob)).thenReturn(null);
+
+        orchestrator.dispatch(wavJob);
+
+        verify(whisperService, never()).execute(any());
+        verify(jobService, never()).createJob(eq(10L), eq(ProcessingJobType.WHISPER_TRANSCRIBE), any(), anyString());
+    }
+
+    @Test
     void dispatch_wavExtract_subtitleAlreadyExists_skipsWhisper() throws Exception {
         ProcessingJob wavJob = job(3L, 10L, ProcessingJobType.WAV_EXTRACT, null);
         when(wavService.execute(wavJob)).thenReturn(Path.of("/tmp/audio.wav"));

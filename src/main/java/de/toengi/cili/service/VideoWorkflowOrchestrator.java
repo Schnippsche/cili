@@ -153,6 +153,10 @@ public class VideoWorkflowOrchestrator implements JobDispatcher {
         try {
             boolean forceWhisper = readBoolParam(job, "forceWhisper");
             Path wavPath = wavService.execute(job);
+            if (wavPath == null) {
+                log.info("Keine Audiospur für resource {} — Whisper-Transkription übersprungen", job.getResourceId());
+                return;
+            }
             if (!forceWhisper && subtitleTrackRepository.existsByResourceIdAndLanguageCode(
                     job.getResourceId(), whisperConfig.getLanguage())) {
                 log.info("Untertitel bereits vorhanden für resource {} (lang={}) — Whisper übersprungen, WAV gelöscht",
