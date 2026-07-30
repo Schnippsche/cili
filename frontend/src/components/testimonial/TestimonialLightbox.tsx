@@ -2,12 +2,12 @@ import { Box, CircularProgress, IconButton, Modal, Tooltip } from '@mui/material
 import CloseIcon from '@mui/icons-material/Close';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { TestimonialAttachmentDto } from '../../types/api';
-import { getThumbnailUrl, getStreamUrl } from '../../api/resources';
+import { getThumbnailUrl, getStreamUrl, getSubtitleUrl } from '../../api/resources';
 import { useAuthenticatedUrl } from '../../hooks/useAuthenticatedUrl';
+import { useSubtitleTracks } from '../../hooks/useResources';
 import VideoPlayer from '../viewer/VideoPlayer';
-import AudioPlayer from '../viewer/AudioPlayer';
 
 interface Props {
   images: TestimonialAttachmentDto[];
@@ -30,6 +30,15 @@ export default function TestimonialLightbox({ images, index, onClose, onNavigate
   // Range requests themselves; going through axiosClient (useAuthenticatedUrl) would load the
   // whole file into a single blob and break seeking, like FolderPage.tsx does it.
   const streamUrl = current && (isVideo || isAudio) ? getStreamUrl(current.id) : null;
+
+  const { data: subtitleTracks = [] } = useSubtitleTracks(
+    current && (isVideo || isAudio) ? current.id : null
+  );
+  const subtitles = useMemo(() => subtitleTracks.map(t => ({
+    src: getSubtitleUrl(t.resourceId, t.id),
+    label: t.label ?? t.languageCode,
+    language: t.languageCode,
+  })), [subtitleTracks]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -65,7 +74,7 @@ export default function TestimonialLightbox({ images, index, onClose, onNavigate
 
         <Box sx={{
           maxWidth: '90vw', maxHeight: '90vh', overflow: 'auto',
-          // VideoPlayer/AudioPlayer size themselves via width-relative padding-bottom —
+          // VideoPlayer sizes itself via width-relative padding-bottom (audioOnly too) —
           // inside this flex+align-items:center modal that needs an explicit width to
           // anchor to (unlike <img>, which sizes from its own intrinsic dimensions);
           // without it the box collapses to zero width/height and nothing is visible.
@@ -78,10 +87,10 @@ export default function TestimonialLightbox({ images, index, onClose, onNavigate
               : <CircularProgress sx={{ color: 'white' }} />
           )}
           {isVideo && streamUrl && (
-            <VideoPlayer src={streamUrl} mimeType={current.mimeType} />
+            <VideoPlayer src={streamUrl} mimeType={current.mimeType} subtitles={subtitles} />
           )}
           {isAudio && streamUrl && (
-            <AudioPlayer src={streamUrl} title={current.originalName} />
+            <VideoPlayer src={streamUrl} audioOnly subtitles={subtitles} />
           )}
         </Box>
 

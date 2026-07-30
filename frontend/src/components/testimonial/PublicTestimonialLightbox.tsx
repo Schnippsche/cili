@@ -2,11 +2,11 @@ import { Box, IconButton, Modal, Tooltip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type { TestimonialAttachmentDto } from '../../types/api';
-import { publicImageUrl, getPublicStreamUrl } from '../../api/publicTestimonials';
+import { publicImageUrl, getPublicStreamUrl, getPublicSubtitleTracks, getPublicSubtitleUrl } from '../../api/publicTestimonials';
 import VideoPlayer from '../viewer/VideoPlayer';
-import AudioPlayer from '../viewer/AudioPlayer';
 
 interface Props {
   images: TestimonialAttachmentDto[];
@@ -21,6 +21,17 @@ export default function PublicTestimonialLightbox({ images, testimonialId, index
   const isImage = current?.mimeType?.startsWith('image/');
   const isVideo = current?.mimeType?.startsWith('video/');
   const isAudio = current?.mimeType?.startsWith('audio/');
+
+  const { data: subtitleTracks = [] } = useQuery({
+    queryKey: ['public-testimonial-subtitles', testimonialId, current?.id],
+    queryFn: () => getPublicSubtitleTracks(testimonialId, current.id),
+    enabled: current != null && (isVideo || isAudio),
+  });
+  const subtitles = useMemo(() => subtitleTracks.map(t => ({
+    src: getPublicSubtitleUrl(testimonialId, t.resourceId, t.id),
+    label: t.label ?? t.languageCode,
+    language: t.languageCode,
+  })), [subtitleTracks, testimonialId]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -56,7 +67,7 @@ export default function PublicTestimonialLightbox({ images, testimonialId, index
 
         <Box sx={{
           maxWidth: '90vw', maxHeight: '90vh', overflow: 'auto',
-          // VideoPlayer/AudioPlayer size themselves via width-relative padding-bottom —
+          // VideoPlayer sizes itself via width-relative padding-bottom (audioOnly too) —
           // inside this flex+align-items:center modal that needs an explicit width to
           // anchor to (unlike <img>, which sizes from its own intrinsic dimensions);
           // without it the box collapses to zero width/height and nothing is visible.
@@ -70,10 +81,10 @@ export default function PublicTestimonialLightbox({ images, testimonialId, index
             />
           )}
           {isVideo && (
-            <VideoPlayer src={getPublicStreamUrl(testimonialId, current.id)} mimeType={current.mimeType} />
+            <VideoPlayer src={getPublicStreamUrl(testimonialId, current.id)} mimeType={current.mimeType} subtitles={subtitles} />
           )}
           {isAudio && (
-            <AudioPlayer src={getPublicStreamUrl(testimonialId, current.id)} title={current.originalName} />
+            <VideoPlayer src={getPublicStreamUrl(testimonialId, current.id)} audioOnly subtitles={subtitles} />
           )}
         </Box>
 

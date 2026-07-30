@@ -1,7 +1,10 @@
 package de.toengi.cili.controller;
 
+import de.toengi.cili.dto.media.SubtitleTrackDto;
 import de.toengi.cili.dto.testimonial.PublicTestimonialDto;
+import de.toengi.cili.model.enums.SubtitleFormat;
 import de.toengi.cili.service.StreamService;
+import de.toengi.cili.service.SubtitleService;
 import de.toengi.cili.service.TestimonialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.support.ResourceRegion;
@@ -10,8 +13,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -21,6 +26,7 @@ public class PublicTestimonialController {
 
     private final TestimonialService testimonialService;
     private final StreamService streamService;
+    private final SubtitleService subtitleService;
 
     private static final int MAX_PAGE_SIZE = 100;
 
@@ -50,5 +56,31 @@ public class PublicTestimonialController {
             @RequestHeader HttpHeaders headers) throws IOException {
         testimonialService.assertPublicAttachment(id, resourceId);
         return streamService.streamPublic(resourceId, headers);
+    }
+
+    @GetMapping("/{id}/subtitles/{resourceId}")
+    public List<SubtitleTrackDto> subtitles(
+            @PathVariable Long id,
+            @PathVariable Long resourceId) {
+        testimonialService.assertPublicAttachment(id, resourceId);
+        return subtitleService.listNoAcl(resourceId);
+    }
+
+    @GetMapping("/{id}/subtitles/{resourceId}/{trackId}")
+    public ResponseEntity<StreamingResponseBody> subtitleTrack(
+            @PathVariable Long id,
+            @PathVariable Long resourceId,
+            @PathVariable Long trackId) throws IOException {
+        testimonialService.assertPublicAttachment(id, resourceId);
+        SubtitleService.SubtitleDownload result = subtitleService.downloadNoAcl(resourceId, trackId);
+        StreamingResponseBody body = out -> {
+            try (InputStream stream = result.stream()) {
+                stream.transferTo(out);
+            }
+        };
+        String contentType = result.format() == SubtitleFormat.VTT ? "text/vtt" : "text/plain";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, contentType)
+                .body(body);
     }
 }

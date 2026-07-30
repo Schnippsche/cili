@@ -143,6 +143,34 @@ public class SubtitleService {
         log.info("Untertitel gelöscht: user={} resource={} track={} sprache='{}'", userId, resourceId, trackId, track.getLanguageCode());
     }
 
+    /**
+     * ACL-freie Variante von {@link #list(Long, Long)} für den öffentlichen Testimonial-Zugriff —
+     * der Aufrufer muss den Zugriff selbst absichern (siehe TestimonialService.assertPublicAttachment()),
+     * analog zu ThumbnailService.getThumbnailBytesNoAcl().
+     */
+    @Transactional(readOnly = true)
+    public List<SubtitleTrackDto> listNoAcl(Long resourceId) {
+        findResourceOrThrow(resourceId);
+        return subtitleTrackRepository.findByResourceId(resourceId)
+                .stream().map(this::toDto).toList();
+    }
+
+    /**
+     * ACL-freie Variante von {@link #download(Long, Long, Long)} für den öffentlichen
+     * Testimonial-Zugriff — der Aufrufer muss den Zugriff selbst absichern.
+     */
+    @Transactional(readOnly = true)
+    public SubtitleDownload downloadNoAcl(Long resourceId, Long trackId) throws IOException {
+        findResourceOrThrow(resourceId);
+        SubtitleTrack track = subtitleTrackRepository.findByIdAndResourceId(trackId, resourceId)
+                .orElseThrow(() -> new ResourceNotFoundException(SUBTITLE_TRACK, trackId));
+        if (track.getTextContent() != null) {
+            byte[] bytes = track.getTextContent().getBytes(StandardCharsets.UTF_8);
+            return new SubtitleDownload(new ByteArrayInputStream(bytes), track.getFormat());
+        }
+        return new SubtitleDownload(storageService.retrieve(track.getStoredName()), track.getFormat());
+    }
+
     private void findResourceOrThrow(Long resourceId) {
         resourceRepository.findById(resourceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource", resourceId));

@@ -1,5 +1,5 @@
 import axiosClient from './axiosClient';
-import type { PublicTestimonialDto, SpringPage } from '../types/api';
+import type { PublicTestimonialDto, SpringPage, SubtitleTrackDto } from '../types/api';
 
 export function listPublicTestimonials(params?: {
   q?: string;
@@ -18,4 +18,14 @@ export function publicImageUrl(resourceId: number, size: 'small' | 'large'): str
 
 export function getPublicStreamUrl(testimonialId: number, resourceId: number): string {
   return `/api/public/testimonials/${testimonialId}/stream/${resourceId}`;
+}
+
+export function getPublicSubtitleTracks(testimonialId: number, resourceId: number): Promise<SubtitleTrackDto[]> {
+  return axiosClient
+    .get<SubtitleTrackDto[]>(`/public/testimonials/${testimonialId}/subtitles/${resourceId}`)
+    .then(r => r.data);
+}
+
+export function getPublicSubtitleUrl(testimonialId: number, resourceId: number, trackId: number): string {
+  return `/api/public/testimonials/${testimonialId}/subtitles/${resourceId}/${trackId}`;
 }

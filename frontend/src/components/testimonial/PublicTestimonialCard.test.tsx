@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PublicTestimonialCard from './PublicTestimonialCard';
 import type { PublicTestimonialDto } from '../../types/api';
 
@@ -10,33 +11,42 @@ const base: PublicTestimonialDto = {
   attachments: [],
 };
 
+function renderCard(testimonial: PublicTestimonialDto) {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <QueryClientProvider client={qc}>
+      <PublicTestimonialCard testimonial={testimonial} />
+    </QueryClientProvider>
+  );
+}
+
 describe('PublicTestimonialCard', () => {
   test('zeigt Autor und vollständigen Text', () => {
-    render(<PublicTestimonialCard testimonial={base} />);
+    renderCard(base);
     expect(screen.getByText('Erika Muster')).toBeInTheDocument();
     expect(screen.getByText('Sehr empfehlenswert!')).toBeInTheDocument();
   });
 
   test('zeigt Datum im deutschen Format', () => {
-    render(<PublicTestimonialCard testimonial={base} />);
+    renderCard(base);
     expect(screen.getByText(/01\.06\.2026/)).toBeInTheDocument();
   });
 
   test('zeigt Tags als Chips wenn vorhanden', () => {
-    render(<PublicTestimonialCard testimonial={{ ...base, tags: 'Schule, Sport' }} />);
+    renderCard({ ...base, tags: 'Schule, Sport' });
     expect(screen.getByText('Schule')).toBeInTheDocument();
     expect(screen.getByText('Sport')).toBeInTheDocument();
   });
 
   test('kein Edit/Delete-Button vorhanden', () => {
-    render(<PublicTestimonialCard testimonial={base} />);
+    renderCard(base);
     expect(screen.queryByRole('button', { name: /bearbeiten/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /löschen/i })).not.toBeInTheDocument();
   });
 
   test('langer Text wird vollständig angezeigt ohne Kürzung', () => {
     const longText = 'x'.repeat(500);
-    render(<PublicTestimonialCard testimonial={{ ...base, text: longText }} />);
+    renderCard({ ...base, text: longText });
     expect(screen.getByText(longText)).toBeInTheDocument();
     expect(screen.queryByText(/mehr anzeigen/i)).not.toBeInTheDocument();
   });
@@ -46,7 +56,7 @@ describe('PublicTestimonialCard', () => {
       ...base,
       attachments: [{ id: 10, originalName: 'foto.jpg', mimeType: 'image/jpeg', size: 1000, createdAt: '2026-06-01T10:00:00', thumbnailStatus: null, storedName: null }],
     };
-    render(<PublicTestimonialCard testimonial={withImages} />);
+    renderCard(withImages);
     const img = screen.getByRole('img', { name: 'foto.jpg' });
     fireEvent.click(img);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
