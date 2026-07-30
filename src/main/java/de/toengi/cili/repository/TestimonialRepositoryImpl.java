@@ -47,13 +47,16 @@ public class TestimonialRepositoryImpl implements TestimonialRepositoryCustom {
     private String buildWhere(List<String> terms, String source) {
         List<String> clauses = new java.util.ArrayList<>();
         for (int i = 0; i < terms.size(); i++) {
-            int base = i * 3 + 1;
+            int base = i * 4 + 1;
             clauses.add("(LOWER(author_name) LIKE ?" + base
                 + " OR LOWER(text) LIKE ?" + (base + 1)
-                + " OR LOWER(tags) LIKE ?" + (base + 2) + ")");
+                + " OR LOWER(tags) LIKE ?" + (base + 2)
+                + " OR EXISTS (SELECT 1 FROM resources res JOIN subtitle_tracks st ON st.resource_id = res.id "
+                + "            WHERE res.testimonial_id = testimonials.id AND LOWER(st.text_content) LIKE ?" + (base + 3) + ")"
+                + ")");
         }
         if (source != null && !source.isBlank()) {
-            clauses.add("source = ?" + (terms.size() * 3 + 1));
+            clauses.add("source = ?" + (terms.size() * 4 + 1));
         }
         if (clauses.isEmpty()) return "";
         return "WHERE " + String.join(" AND ", clauses);
@@ -62,13 +65,14 @@ public class TestimonialRepositoryImpl implements TestimonialRepositoryCustom {
     private void bindParams(Query query, List<String> terms, String source) {
         for (int i = 0; i < terms.size(); i++) {
             String pattern = "%" + terms.get(i).toLowerCase() + "%";
-            int base = i * 3 + 1;
+            int base = i * 4 + 1;
             query.setParameter(base,     pattern);
             query.setParameter(base + 1, pattern);
             query.setParameter(base + 2, pattern);
+            query.setParameter(base + 3, pattern);
         }
         if (source != null && !source.isBlank()) {
-            query.setParameter(terms.size() * 3 + 1, source);
+            query.setParameter(terms.size() * 4 + 1, source);
         }
     }
 }

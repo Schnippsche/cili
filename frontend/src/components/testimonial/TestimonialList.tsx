@@ -165,10 +165,11 @@ export default function TestimonialList({ canWrite, canDelete, highlightId }: Re
       </ToggleButtonGroup>
 
       <Alert severity="info" sx={{ mb: 2 }}>
-        Hier werden ausschließlich textuelle Erfahrungsberichte ggf. mit Bildern angezeigt und durchsucht.
+        Die Suche durchsucht Name, Text und Tags der Erfahrungsberichte sowie die automatisch
+        erstellten Untertitel angehängter Video-/Audio-Dateien.
         Über die Auswahl oben lässt sich zusätzlich nach Mensch- oder Tier-Erfahrungsberichten filtern.
         Zusätzlich kann ein Suchergebnis als Bericht zur Weitergabe exportiert werden.
-        Die <strong>globale Suche</strong> erfasst zusätzlich Dateien wie Videos, Dokumente und Videountertitel.
+        Die <strong>globale Suche</strong> erfasst zusätzlich Dateien wie Ordner-Videos und -Dokumente.
       </Alert>
 
       <TextField
