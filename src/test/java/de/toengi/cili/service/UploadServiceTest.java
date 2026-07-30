@@ -78,7 +78,7 @@ class UploadServiceTest {
 
     @Test
     void initUpload_rejects_html_mime_type() {
-        InitUploadRequest req = new InitUploadRequest("evil.html", "text/html", 100L, 1000, 10L, null, null);
+        InitUploadRequest req = new InitUploadRequest("evil.html", "text/html", 100L, 1000, 10L, null, null, null);
 
         assertThatThrownBy(() -> uploadService.initUpload(req, 1L))
                 .isInstanceOf(CiliException.class)
@@ -87,7 +87,7 @@ class UploadServiceTest {
 
     @Test
     void initUpload_rejects_javascript_mime_type() {
-        InitUploadRequest req = new InitUploadRequest("script.js", "application/javascript", 100L, 1000, 10L, null, null);
+        InitUploadRequest req = new InitUploadRequest("script.js", "application/javascript", 100L, 1000, 10L, null, null, null);
 
         assertThatThrownBy(() -> uploadService.initUpload(req, 1L))
                 .isInstanceOf(CiliException.class);
@@ -95,7 +95,7 @@ class UploadServiceTest {
 
     @Test
     void initUpload_rejects_svg_mime_type() {
-        InitUploadRequest req = new InitUploadRequest("image.svg", "image/svg+xml", 100L, 1000, 10L, null, null);
+        InitUploadRequest req = new InitUploadRequest("image.svg", "image/svg+xml", 100L, 1000, 10L, null, null, null);
 
         assertThatThrownBy(() -> uploadService.initUpload(req, 1L))
                 .isInstanceOf(CiliException.class);
@@ -103,7 +103,7 @@ class UploadServiceTest {
 
     @Test
     void initUpload_singleChunk_chunksTotal1() {
-        InitUploadRequest req = new InitUploadRequest("video.mp4", "video/mp4", 500L, 1000, 10L, null, null);
+        InitUploadRequest req = new InitUploadRequest("video.mp4", "video/mp4", 500L, 1000, 10L, null, null, null);
         when(uploadJobRepository.save(any(UploadJob.class))).thenAnswer(inv -> inv.getArgument(0));
 
         UploadJobDto dto = uploadService.initUpload(req, 1L);
@@ -116,7 +116,7 @@ class UploadServiceTest {
 
     @Test
     void initUpload_partialLastChunk_roundsUp() {
-        InitUploadRequest req = new InitUploadRequest("big.mp4", "video/mp4", 2500L, 1000, 10L, null, null);
+        InitUploadRequest req = new InitUploadRequest("big.mp4", "video/mp4", 2500L, 1000, 10L, null, null, null);
         when(uploadJobRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         UploadJobDto dto = uploadService.initUpload(req, 1L);
@@ -326,7 +326,7 @@ class UploadServiceTest {
         when(bulkImportJobRepository.findById("job1")).thenReturn(Optional.of(bulkJob));
         when(uploadJobRepository.save(any(UploadJob.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        InitUploadRequest req = new InitUploadRequest("video1.mp4", "video/mp4", 500L, 1000, 10L, null, 5L);
+        InitUploadRequest req = new InitUploadRequest("video1.mp4", "video/mp4", 500L, 1000, 10L, null, null, 5L);
         uploadService.initUpload(req, 1L);
 
         assertThat(item.getStatus()).isEqualTo(BulkImportItemStatus.UPLOADING);
@@ -342,7 +342,7 @@ class UploadServiceTest {
         when(bulkImportItemRepository.findById(6L)).thenReturn(Optional.of(item));
         when(bulkImportJobRepository.findById("job2")).thenReturn(Optional.of(bulkJob));
 
-        InitUploadRequest req = new InitUploadRequest("video1.mp4", "video/mp4", 500L, 1000, 10L, null, 6L);
+        InitUploadRequest req = new InitUploadRequest("video1.mp4", "video/mp4", 500L, 1000, 10L, null, null, 6L);
 
         assertThatThrownBy(() -> uploadService.initUpload(req, 1L))
                 .isInstanceOf(CiliException.class);
@@ -357,7 +357,7 @@ class UploadServiceTest {
         when(bulkImportItemRepository.findById(7L)).thenReturn(Optional.of(item));
         when(bulkImportJobRepository.findById("job3")).thenReturn(Optional.of(bulkJob));
 
-        InitUploadRequest req = new InitUploadRequest("video1.mp4", "video/mp4", 500L, 1000, 10L, null, 7L);
+        InitUploadRequest req = new InitUploadRequest("video1.mp4", "video/mp4", 500L, 1000, 10L, null, null, 7L);
 
         assertThatThrownBy(() -> uploadService.initUpload(req, 1L))
                 .isInstanceOf(AccessDeniedException.class);
@@ -389,7 +389,7 @@ class UploadServiceTest {
         when(bulkImportItemRepository.findById(8L)).thenReturn(Optional.of(item));
         when(bulkImportJobRepository.findById("job4")).thenReturn(Optional.of(bulkJob));
 
-        InitUploadRequest req = new InitUploadRequest("diagram.svg", "image/svg+xml", 100L, 1000, 10L, null, 8L);
+        InitUploadRequest req = new InitUploadRequest("diagram.svg", "image/svg+xml", 100L, 1000, 10L, null, null, 8L);
 
         assertThatThrownBy(() -> uploadService.initUpload(req, 1L))
                 .isInstanceOf(CiliException.class);
@@ -413,7 +413,7 @@ class UploadServiceTest {
         when(bulkImportItemRepository.findById(8L)).thenReturn(Optional.of(item));
         when(bulkImportJobRepository.findById("job4")).thenReturn(Optional.of(bulkJob));
 
-        InitUploadRequest req = new InitUploadRequest("diagram.svg", "image/svg+xml", 100L, 1000, 10L, null, 8L);
+        InitUploadRequest req = new InitUploadRequest("diagram.svg", "image/svg+xml", 100L, 1000, 10L, null, null, 8L);
 
         // First call: marks the item FAILED and increments the counter (same as the test above).
         assertThatThrownBy(() -> uploadService.initUpload(req, 1L))

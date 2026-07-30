@@ -94,7 +94,7 @@ class TestimonialServiceTest {
 
         assertThat(result.authorName()).isEqualTo("Max Mustermann");
         assertThat(result.userId()).isEqualTo(1L);
-        assertThat(result.images()).isEmpty();
+        assertThat(result.attachments()).isEmpty();
     }
 
     @Test
