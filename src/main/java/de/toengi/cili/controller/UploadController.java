@@ -26,7 +26,7 @@ public class UploadController {
 
     @PostMapping("/init")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasPermission(#request.folderId(), 'FOLDER', 'UPLOAD')")
+    @PreAuthorize("#request.folderId() == null or hasPermission(#request.folderId(), 'FOLDER', 'UPLOAD')")
     public UploadJobDto initUpload(@Valid @RequestBody InitUploadRequest request,
                                    @AuthenticationPrincipal CiliUserDetails user) {
         log.info("[user:{}] Upload gestartet: \"{}\" ({} MB) → Ordner {}",
