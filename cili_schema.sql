@@ -478,7 +478,8 @@ CREATE TABLE IF NOT EXISTS `upload_jobs`
 (
     `id`                 char(36) COLLATE utf8mb4_unicode_ci                                                          NOT NULL,
     `user_id`            bigint                                                                                       NOT NULL,
-    `folder_id`          bigint                                                                                       NOT NULL,
+    `folder_id`          bigint                                                                                                DEFAULT NULL,
+    `testimonial_id`     bigint                                                                                                DEFAULT NULL,
     `file_name`          varchar(500) COLLATE utf8mb4_unicode_ci                                                      NOT NULL,
     `mime_type`          varchar(200) COLLATE utf8mb4_unicode_ci                                                      NOT NULL,
     `total_size`         bigint                                                                                       NOT NULL,
@@ -493,13 +494,18 @@ CREATE TABLE IF NOT EXISTS `upload_jobs`
     `bulk_import_item_id` bigint                                                                                               DEFAULT NULL,
     PRIMARY KEY (`id`),
     KEY `folder_id` (`folder_id`),
+    KEY `idx_upload_jobs_testimonial` (`testimonial_id`),
     KEY `idx_upload_jobs_user` (`user_id`),
     KEY `idx_upload_jobs_status` (`status`),
     KEY `idx_upload_jobs_expires` (`expires_at`),
     KEY `idx_upload_jobs_bulk_import_item` (`bulk_import_item_id`),
     CONSTRAINT `upload_jobs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
     CONSTRAINT `upload_jobs_ibfk_2` FOREIGN KEY (`folder_id`) REFERENCES `folders` (`id`) ON DELETE CASCADE,
-    CONSTRAINT `fk_upload_jobs_bulk_import_item` FOREIGN KEY (`bulk_import_item_id`) REFERENCES `bulk_import_items` (`id`) ON DELETE SET NULL
+    CONSTRAINT `fk_upload_jobs_testimonial` FOREIGN KEY (`testimonial_id`) REFERENCES `testimonials` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_upload_jobs_bulk_import_item` FOREIGN KEY (`bulk_import_item_id`) REFERENCES `bulk_import_items` (`id`) ON DELETE SET NULL,
+    CONSTRAINT `chk_upload_jobs_destination` CHECK ((
+        (`folder_id` IS NOT NULL AND `testimonial_id` IS NULL) OR
+        (`folder_id` IS NULL AND `testimonial_id` IS NOT NULL)))
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
