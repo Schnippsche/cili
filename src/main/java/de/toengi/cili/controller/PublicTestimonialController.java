@@ -1,8 +1,10 @@
 package de.toengi.cili.controller;
 
 import de.toengi.cili.dto.testimonial.PublicTestimonialDto;
+import de.toengi.cili.service.StreamService;
 import de.toengi.cili.service.TestimonialService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -18,6 +20,7 @@ import java.util.List;
 public class PublicTestimonialController {
 
     private final TestimonialService testimonialService;
+    private final StreamService streamService;
 
     private static final int MAX_PAGE_SIZE = 100;
 
@@ -38,5 +41,14 @@ public class PublicTestimonialController {
                 .header(HttpHeaders.CACHE_CONTROL, "max-age=604800")
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(bytes);
+    }
+
+    @GetMapping("/{id}/stream/{resourceId}")
+    public ResponseEntity<ResourceRegion> stream(
+            @PathVariable Long id,
+            @PathVariable Long resourceId,
+            @RequestHeader HttpHeaders headers) throws IOException {
+        testimonialService.assertPublicAttachment(id, resourceId);
+        return streamService.streamPublic(resourceId, headers);
     }
 }

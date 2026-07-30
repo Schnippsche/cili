@@ -59,8 +59,8 @@ public class TestimonialController {
             @RequestParam String text,
             @RequestParam(required = false) String source,
             @RequestPart(value = "images", required = false) List<MultipartFile> newImages,
-            @RequestParam(value = "deleteImageIds", required = false) List<Long> deleteImageIds) {
-        return service.update(id, new UpdateTestimonialRequest(authorName, tags, text, source), newImages, deleteImageIds);
+            @RequestParam(value = "deleteAttachmentIds", required = false) List<Long> deleteAttachmentIds) {
+        return service.update(id, new UpdateTestimonialRequest(authorName, tags, text, source), newImages, deleteAttachmentIds);
     }
 
     @DeleteMapping("/{id}")
@@ -70,10 +70,10 @@ public class TestimonialController {
         service.delete(id);
     }
 
-    @DeleteMapping("/{id}/images/{resourceId}")
+    @DeleteMapping("/{id}/attachments/{resourceId}")
     @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteImage(@PathVariable Long id, @PathVariable Long resourceId) {
+    public void deleteAttachment(@PathVariable Long id, @PathVariable Long resourceId) {
         service.deleteAttachment(id, resourceId);
     }
 }

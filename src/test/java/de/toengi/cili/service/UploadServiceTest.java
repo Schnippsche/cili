@@ -11,6 +11,7 @@ import de.toengi.cili.model.entity.BulkImportItem;
 import de.toengi.cili.model.entity.BulkImportJob;
 import de.toengi.cili.model.entity.Resource;
 import de.toengi.cili.model.entity.UploadJob;
+import de.toengi.cili.model.enums.AclPermission;
 import de.toengi.cili.model.enums.BulkImportItemStatus;
 import de.toengi.cili.model.enums.UploadJobStatus;
 import de.toengi.cili.repository.BulkImportItemRepository;
@@ -62,6 +63,8 @@ class UploadServiceTest {
     BulkImportItemRepository bulkImportItemRepository;
     @Mock
     BulkImportJobRepository bulkImportJobRepository;
+    @Mock
+    AclService aclService;
 
     UploadService uploadService;
 
@@ -71,7 +74,7 @@ class UploadServiceTest {
         config.setBasePath(tempDir.toString());
         lenient().when(txManager.getTransaction(any(TransactionDefinition.class))).thenReturn(new SimpleTransactionStatus());
         uploadService = new UploadService(uploadJobRepository, resourceRepository, metadataRepository, config,
-                eventPublisher, txManager, bulkImportItemRepository, bulkImportJobRepository);
+                eventPublisher, txManager, bulkImportItemRepository, bulkImportJobRepository, aclService);
     }
 
     // --- initUpload ---
@@ -99,6 +102,46 @@ class UploadServiceTest {
 
         assertThatThrownBy(() -> uploadService.initUpload(req, 1L))
                 .isInstanceOf(CiliException.class);
+    }
+
+    @Test
+    void initUpload_neitherFolderIdNorTestimonialId_throwsBadRequest() {
+        InitUploadRequest req = new InitUploadRequest("video.mp4", "video/mp4", 500L, 1000, null, null, null, null);
+
+        assertThatThrownBy(() -> uploadService.initUpload(req, 1L))
+                .isInstanceOf(CiliException.class)
+                .hasMessageContaining("folderId oder testimonialId");
+    }
+
+    @Test
+    void initUpload_bothFolderIdAndTestimonialId_throwsBadRequest() {
+        InitUploadRequest req = new InitUploadRequest("video.mp4", "video/mp4", 500L, 1000, 10L, 20L, null, null);
+
+        assertThatThrownBy(() -> uploadService.initUpload(req, 1L))
+                .isInstanceOf(CiliException.class)
+                .hasMessageContaining("folderId oder testimonialId");
+    }
+
+    @Test
+    void initUpload_testimonialUpload_withoutWritePermission_throwsAccessDenied() {
+        InitUploadRequest req = new InitUploadRequest("video.mp4", "video/mp4", 500L, 1000, null, 20L, null, null);
+        when(aclService.hasTestimonialsPermission(1L, AclPermission.WRITE)).thenReturn(false);
+
+        assertThatThrownBy(() -> uploadService.initUpload(req, 1L))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    void initUpload_testimonialUpload_setsTestimonialIdOnJob() {
+        InitUploadRequest req = new InitUploadRequest("video.mp4", "video/mp4", 500L, 1000, null, 20L, null, null);
+        when(aclService.hasTestimonialsPermission(1L, AclPermission.WRITE)).thenReturn(true);
+        var jobCaptor = org.mockito.ArgumentCaptor.forClass(UploadJob.class);
+        when(uploadJobRepository.save(jobCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+
+        uploadService.initUpload(req, 1L);
+
+        assertThat(jobCaptor.getValue().getTestimonialId()).isEqualTo(20L);
+        assertThat(jobCaptor.getValue().getFolderId()).isNull();
     }
 
     @Test
