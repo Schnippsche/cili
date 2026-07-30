@@ -70,10 +70,10 @@ public class TestimonialController {
         service.delete(id);
     }
 
-    @DeleteMapping("/{id}/images/{resourceId}")
+    @DeleteMapping("/{id}/attachments/{resourceId}")
     @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteImage(@PathVariable Long id, @PathVariable Long resourceId) {
-        service.deleteImage(id, resourceId);
+    public void deleteAttachment(@PathVariable Long id, @PathVariable Long resourceId) {
+        service.deleteAttachment(id, resourceId);
     }
 }

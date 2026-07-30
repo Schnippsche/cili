@@ -150,7 +150,7 @@ public class TestimonialService {
 
     @PreAuthorize("isAuthenticated()")
     @Transactional
-    public void deleteImage(Long testimonialId, Long resourceId) {
+    public void deleteAttachment(Long testimonialId, Long resourceId) {
         CiliUserDetails user = currentUser();
         if (!aclService.hasTestimonialsPermission(user.getUserId(), AclPermission.WRITE)) {
             throw new AccessDeniedException("Keine Berechtigung zum Bearbeiten");
