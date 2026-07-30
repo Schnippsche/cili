@@ -96,6 +96,8 @@ function ExistingAttachmentThumb({attachment, onRemove}: Readonly<ExistingAttach
         )}
         <Tooltip title="Entfernen">
           <IconButton size="small" onClick={onRemove}
+                      onMouseOver={(e) => e.stopPropagation()}
+                      onFocus={(e) => e.stopPropagation()}
                       sx={{
                         position: 'absolute',
                         top: -8,
@@ -158,6 +160,8 @@ function NewMediaFileTile({file, state, onRemove}: Readonly<NewMediaFileTileProp
           )}
           <Tooltip title="Entfernen">
             <IconButton size="small" onClick={onRemove}
+                        onMouseOver={(e) => e.stopPropagation()}
+                        onFocus={(e) => e.stopPropagation()}
                         sx={{
                           position: 'absolute',
                           top: -8,
