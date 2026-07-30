@@ -4,17 +4,23 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useEffect } from 'react';
 import type { TestimonialAttachmentDto } from '../../types/api';
-import { publicImageUrl } from '../../api/publicTestimonials';
+import { publicImageUrl, getPublicStreamUrl } from '../../api/publicTestimonials';
+import VideoPlayer from '../viewer/VideoPlayer';
+import AudioPlayer from '../viewer/AudioPlayer';
 
 interface Props {
   images: TestimonialAttachmentDto[];
+  testimonialId: number;
   index: number;
   onClose: () => void;
   onNavigate: (index: number) => void;
 }
 
-export default function PublicTestimonialLightbox({ images, index, onClose, onNavigate }: Readonly<Props>) {
+export default function PublicTestimonialLightbox({ images, testimonialId, index, onClose, onNavigate }: Readonly<Props>) {
   const current = images[index];
+  const isImage = current?.mimeType?.startsWith('image/');
+  const isVideo = current?.mimeType?.startsWith('video/');
+  const isAudio = current?.mimeType?.startsWith('audio/');
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -38,9 +44,9 @@ export default function PublicTestimonialLightbox({ images, index, onClose, onNa
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Vorheriges Bild">
+        <Tooltip title="Vorheriges Element">
           <span>
-            <IconButton aria-label="vorheriges Bild"
+            <IconButton aria-label="vorheriges Element"
               onClick={() => onNavigate(index - 1)} disabled={index === 0}
               sx={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'white', zIndex: 1 }}>
               <ChevronLeftIcon sx={{ fontSize: 48 }} />
@@ -48,15 +54,25 @@ export default function PublicTestimonialLightbox({ images, index, onClose, onNa
           </span>
         </Tooltip>
 
-        <img
-          src={publicImageUrl(current.id, 'large')}
-          alt={current.originalName}
-          style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', display: 'block', imageOrientation: 'from-image' }}
-        />
+        <Box sx={{ maxWidth: '90vw', maxHeight: '90vh', overflow: 'auto' }}>
+          {isImage && (
+            <img
+              src={publicImageUrl(current.id, 'large')}
+              alt={current.originalName}
+              style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', display: 'block', imageOrientation: 'from-image' }}
+            />
+          )}
+          {isVideo && (
+            <VideoPlayer src={getPublicStreamUrl(testimonialId, current.id)} mimeType={current.mimeType} />
+          )}
+          {isAudio && (
+            <AudioPlayer src={getPublicStreamUrl(testimonialId, current.id)} title={current.originalName} />
+          )}
+        </Box>
 
-        <Tooltip title="Nächstes Bild">
+        <Tooltip title="Nächstes Element">
           <span>
-            <IconButton aria-label="nächstes Bild"
+            <IconButton aria-label="nächstes Element"
               onClick={() => onNavigate(index + 1)} disabled={index === images.length - 1}
               sx={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', color: 'white', zIndex: 1 }}>
               <ChevronRightIcon sx={{ fontSize: 48 }} />
