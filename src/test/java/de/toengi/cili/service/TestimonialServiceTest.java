@@ -51,6 +51,7 @@ class TestimonialServiceTest {
     @Mock ApplicationEventPublisher eventPublisher;
     @Mock AclService aclService;
     @Mock ThumbnailService thumbnailService;
+    @Mock de.toengi.cili.repository.ThumbnailRepository thumbnailRepository;
     @InjectMocks TestimonialService service;
 
     private CiliUserDetails mockUser;

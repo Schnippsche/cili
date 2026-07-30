@@ -20,10 +20,15 @@ interface TileProps {
 }
 
 function AttachmentTile({ attachment, onClick }: Readonly<TileProps>) {
-  const url = useAuthenticatedUrl(getThumbnailUrl(attachment.id, 'small'));
   const isImage = attachment.mimeType?.startsWith('image/');
   const isVideo = attachment.mimeType?.startsWith('video/');
   const isAudio = attachment.mimeType?.startsWith('audio/');
+  // Video-Poster erst laden wenn DONE — storedName als Cache-Busting-Parameter sorgt dafür,
+  // dass die URL sich beim Übergang PENDING→DONE ändert und useAuthenticatedUrl neu fetcht.
+  const thumbSrc = isImage || attachment.thumbnailStatus === 'DONE'
+    ? getThumbnailUrl(attachment.id, 'small', attachment.thumbnailStatus === 'DONE' ? attachment.storedName ?? undefined : undefined)
+    : null;
+  const url = useAuthenticatedUrl(thumbSrc, isImage ? 3 : 0);
 
   return (
     <Box
@@ -53,16 +58,18 @@ function AttachmentTile({ attachment, onClick }: Readonly<TileProps>) {
       )}
       {isVideo && (
         <>
-          <Box
-            component="img"
-            src={url ?? undefined}
-            alt={attachment.originalName}
-            sx={{
-              width: 80,
-              height: 80,
-              objectFit: 'cover',
-            }}
-          />
+          {url && (
+            <Box
+              component="img"
+              src={url}
+              alt={attachment.originalName}
+              sx={{
+                width: 80,
+                height: 80,
+                objectFit: 'cover',
+              }}
+            />
+          )}
           <Box
             sx={{
               position: 'absolute',

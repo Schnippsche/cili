@@ -103,6 +103,8 @@ export interface TestimonialAttachmentDto {
   mimeType: string;
   size: number;
   createdAt: string;
+  thumbnailStatus: 'DONE' | 'PENDING' | 'PROCESSING' | 'FAILED' | null;
+  storedName: string | null;
 }
 
 export interface TestimonialDto {

@@ -7,5 +7,7 @@ public record TestimonialAttachmentDto(
     String originalName,
     String mimeType,
     Long size,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    String thumbnailStatus,  // PENDING/DONE/FAILED, null wenn kein Thumbnail-Job existiert
+    String storedName        // Cache-Busting-Parameter für die Thumbnail-URL sobald DONE
 ) {}

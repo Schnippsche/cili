@@ -34,11 +34,15 @@ interface ExistingAttachmentThumbProps {
 }
 
 function ExistingAttachmentThumb({attachment, onRemove}: Readonly<ExistingAttachmentThumbProps>) {
-  const url = useAuthenticatedUrl(getThumbnailUrl(attachment.id, 'small'));
-
   const isImage = attachment.mimeType?.startsWith('image/');
   const isVideo = attachment.mimeType?.startsWith('video/');
   const isAudio = attachment.mimeType?.startsWith('audio/');
+  // Video-Poster erst laden wenn DONE — storedName als Cache-Busting-Parameter sorgt dafür,
+  // dass die URL sich beim Übergang PENDING→DONE ändert und useAuthenticatedUrl neu fetcht.
+  const thumbSrc = isImage || attachment.thumbnailStatus === 'DONE'
+    ? getThumbnailUrl(attachment.id, 'small', attachment.thumbnailStatus === 'DONE' ? attachment.storedName ?? undefined : undefined)
+    : null;
+  const url = useAuthenticatedUrl(thumbSrc, isImage ? 3 : 0);
 
   return (
       <Box sx={{position: 'relative', width: 72, height: 72}}>
@@ -54,14 +58,16 @@ function ExistingAttachmentThumb({attachment, onRemove}: Readonly<ExistingAttach
         )}
         {isVideo && (
           <>
-            <Box component="img" src={url ?? undefined} alt={attachment.originalName}
-                 sx={{
-                   width: 72,
-                   height: 72,
-                   objectFit: 'cover',
-                   borderRadius: 1,
-                   bgcolor: 'action.hover'
-                 }}/>
+            {url && (
+              <Box component="img" src={url} alt={attachment.originalName}
+                   sx={{
+                     width: 72,
+                     height: 72,
+                     objectFit: 'cover',
+                     borderRadius: 1,
+                     bgcolor: 'action.hover'
+                   }}/>
+            )}
             <Box sx={{
               position: 'absolute',
               inset: 0,

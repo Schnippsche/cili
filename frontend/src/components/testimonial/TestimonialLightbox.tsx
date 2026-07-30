@@ -26,9 +26,10 @@ export default function TestimonialLightbox({ images, index, onClose, onNavigate
     current && isImage ? getThumbnailUrl(current.id, 'large') : null
   );
 
-  // For video/audio, get the stream URL (relative path, will be fetched via axiosClient)
+  // Direct browser-native URL (token as query param) — needed so <video>/<audio> can issue
+  // Range requests themselves; going through axiosClient (useAuthenticatedUrl) would load the
+  // whole file into a single blob and break seeking, like FolderPage.tsx does it.
   const streamUrl = current && (isVideo || isAudio) ? getStreamUrl(current.id) : null;
-  const authenticatedStreamUrl = useAuthenticatedUrl(streamUrl);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -69,15 +70,11 @@ export default function TestimonialLightbox({ images, index, onClose, onNavigate
                   style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', display: 'block', imageOrientation: 'from-image' }} />
               : <CircularProgress sx={{ color: 'white' }} />
           )}
-          {isVideo && (
-            authenticatedStreamUrl
-              ? <VideoPlayer src={authenticatedStreamUrl} mimeType={current.mimeType} />
-              : <CircularProgress sx={{ color: 'white' }} />
+          {isVideo && streamUrl && (
+            <VideoPlayer src={streamUrl} mimeType={current.mimeType} />
           )}
-          {isAudio && (
-            authenticatedStreamUrl
-              ? <AudioPlayer src={authenticatedStreamUrl} title={current.originalName} />
-              : <CircularProgress sx={{ color: 'white' }} />
+          {isAudio && streamUrl && (
+            <AudioPlayer src={streamUrl} title={current.originalName} />
           )}
         </Box>
 

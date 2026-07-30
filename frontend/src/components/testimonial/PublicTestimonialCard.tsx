@@ -46,16 +46,18 @@ function AttachmentTile({ attachment, onClick }: Readonly<AttachmentTileProps>) 
       )}
       {isVideo && (
         <>
-          <Box
-            component="img"
-            src={publicImageUrl(attachment.id, 'small')}
-            alt={attachment.originalName}
-            sx={{
-              width: 80,
-              height: 80,
-              objectFit: 'cover',
-            }}
-          />
+          {attachment.thumbnailStatus === 'DONE' && (
+            <Box
+              component="img"
+              src={publicImageUrl(attachment.id, 'small')}
+              alt={attachment.originalName}
+              sx={{
+                width: 80,
+                height: 80,
+                objectFit: 'cover',
+              }}
+            />
+          )}
           <Box
             sx={{
               position: 'absolute',

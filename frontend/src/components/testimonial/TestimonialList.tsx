@@ -24,6 +24,12 @@ import type { TestimonialDto } from '../../types/api';
 import TestimonialCard from './TestimonialCard';
 import TestimonialForm from './TestimonialForm';
 
+function hasPendingThumbnail(testimonials: TestimonialDto[]): boolean {
+  return testimonials.some(t =>
+    t.attachments.some(a => a.thumbnailStatus === 'PENDING' || a.thumbnailStatus === 'PROCESSING')
+  );
+}
+
 interface Props { canWrite: boolean; canDelete: boolean; highlightId?: number; }
 
 export default function TestimonialList({ canWrite, canDelete, highlightId }: Readonly<Props>) {
@@ -36,6 +42,7 @@ export default function TestimonialList({ canWrite, canDelete, highlightId }: Re
     queryKey: ['testimonial', highlightId],
     queryFn: () => getTestimonial(highlightId!),
     enabled: highlightId != null,
+    refetchInterval: (query) => hasPendingThumbnail(query.state.data ? [query.state.data] : []) ? 3000 : false,
   });
 
   useEffect(() => {
@@ -61,6 +68,7 @@ export default function TestimonialList({ canWrite, canDelete, highlightId }: Re
       page,
       size: 25
     }),
+    refetchInterval: (query) => hasPendingThumbnail(query.state.data?.content ?? []) ? 3000 : false,
   });
 
   const createMut = useMutation({

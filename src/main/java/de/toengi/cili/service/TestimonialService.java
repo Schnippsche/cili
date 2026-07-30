@@ -6,16 +6,20 @@ import de.toengi.cili.exception.CiliException;
 import de.toengi.cili.exception.ResourceNotFoundException;
 import de.toengi.cili.model.entity.Resource;
 import de.toengi.cili.model.entity.Testimonial;
+import de.toengi.cili.model.entity.Thumbnail;
 import de.toengi.cili.model.enums.AclPermission;
 import de.toengi.cili.model.enums.StorageType;
 import de.toengi.cili.model.enums.UserRole;
 import de.toengi.cili.repository.ResourceRepository;
 import de.toengi.cili.repository.TestimonialRepository;
+import de.toengi.cili.repository.ThumbnailRepository;
 import de.toengi.cili.security.CiliUserDetails;
 import de.toengi.cili.service.storage.StorageService;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -55,6 +59,7 @@ public class TestimonialService {
     private final ApplicationEventPublisher eventPublisher;
     private final AclService aclService;
     private final ThumbnailService thumbnailService;
+    private final ThumbnailRepository thumbnailRepository;
 
     @PreAuthorize("isAuthenticated()")
     @Transactional(readOnly = true)
@@ -279,16 +284,25 @@ public class TestimonialService {
     }
 
     private TestimonialDto toDto(Testimonial t) {
-        List<TestimonialAttachmentDto> attachments = resourceRepository
-            .findByTestimonialIdOrderByCreatedAtAsc(t.getId())
-            .stream().map(this::toAttachmentDto).toList();
+        List<Resource> resources = resourceRepository.findByTestimonialIdOrderByCreatedAtAsc(t.getId());
+        Map<Long, Thumbnail> thumbsByResourceId = thumbnailsFor(resources);
+        List<TestimonialAttachmentDto> attachments = resources.stream()
+            .map(r -> toAttachmentDto(r, thumbsByResourceId.get(r.getId())))
+            .toList();
         return new TestimonialDto(
             t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.getSource(),
             t.getUserId(), t.getCreatedAt(), t.getUpdatedAt(), attachments);
     }
 
-    private TestimonialAttachmentDto toAttachmentDto(Resource r) {
-        return new TestimonialAttachmentDto(r.getId(), r.getOriginalName(), r.getMimeType(), r.getSize(), r.getCreatedAt());
+    private Map<Long, Thumbnail> thumbnailsFor(List<Resource> resources) {
+        return thumbnailRepository.findByResourceIdIn(resources.stream().map(Resource::getId).toList())
+            .stream().collect(Collectors.toMap(Thumbnail::getResourceId, th -> th));
+    }
+
+    private TestimonialAttachmentDto toAttachmentDto(Resource r, Thumbnail thumbnail) {
+        String status = thumbnail != null ? thumbnail.getStatus().name() : null;
+        return new TestimonialAttachmentDto(r.getId(), r.getOriginalName(), r.getMimeType(), r.getSize(), r.getCreatedAt(),
+            status, r.getStoredName());
     }
 
     private CiliUserDetails currentUser() {
@@ -324,9 +338,11 @@ public class TestimonialService {
     }
 
     private PublicTestimonialDto toPublicDto(Testimonial t) {
-        List<TestimonialAttachmentDto> attachments = resourceRepository
-            .findByTestimonialIdOrderByCreatedAtAsc(t.getId())
-            .stream().map(this::toAttachmentDto).toList();
+        List<Resource> resources = resourceRepository.findByTestimonialIdOrderByCreatedAtAsc(t.getId());
+        Map<Long, Thumbnail> thumbsByResourceId = thumbnailsFor(resources);
+        List<TestimonialAttachmentDto> attachments = resources.stream()
+            .map(r -> toAttachmentDto(r, thumbsByResourceId.get(r.getId())))
+            .toList();
         return new PublicTestimonialDto(
             t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.getSource(),
             t.getCreatedAt(), t.getUpdatedAt(), attachments);

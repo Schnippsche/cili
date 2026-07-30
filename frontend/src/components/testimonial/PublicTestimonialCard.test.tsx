@@ -44,7 +44,7 @@ describe('PublicTestimonialCard', () => {
   test('öffnet Lightbox beim Klick auf Bild', () => {
     const withImages: PublicTestimonialDto = {
       ...base,
-      attachments: [{ id: 10, originalName: 'foto.jpg', mimeType: 'image/jpeg', size: 1000, createdAt: '2026-06-01T10:00:00' }],
+      attachments: [{ id: 10, originalName: 'foto.jpg', mimeType: 'image/jpeg', size: 1000, createdAt: '2026-06-01T10:00:00', thumbnailStatus: null, storedName: null }],
     };
     render(<PublicTestimonialCard testimonial={withImages} />);
     const img = screen.getByRole('img', { name: 'foto.jpg' });
