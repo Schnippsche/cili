@@ -31,8 +31,11 @@ public class UploadJob implements Persistable<String> {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "folder_id", nullable = false)
+    @Column(name = "folder_id", nullable = true)
     private Long folderId;
+
+    @Column(name = "testimonial_id", nullable = true)
+    private Long testimonialId;
 
     @Column(name = "file_name", nullable = false, length = 500)
     private String fileName;
