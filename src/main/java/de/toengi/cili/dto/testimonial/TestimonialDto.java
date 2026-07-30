@@ -12,5 +12,5 @@ public record TestimonialDto(
     Long userId,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
-    List<TestimonialImageDto> images
+    List<TestimonialAttachmentDto> attachments
 ) {}

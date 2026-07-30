@@ -41,9 +41,9 @@ export default function PublicTestimonialCard({ testimonial }: Readonly<Props>) 
           {testimonial.text}
         </Typography>
 
-        {testimonial.images.length > 0 && (
+        {testimonial.attachments.length > 0 && (
           <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 1.5 }}>
-            {testimonial.images.map((img, idx) => (
+            {testimonial.attachments.map((img, idx) => (
               <Box
                 key={img.id}
                 component="img"
@@ -63,7 +63,7 @@ export default function PublicTestimonialCard({ testimonial }: Readonly<Props>) 
 
       {lightboxIndex !== null && (
         <PublicTestimonialLightbox
-          images={testimonial.images}
+          images={testimonial.attachments}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onNavigate={setLightboxIndex}

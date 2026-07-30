@@ -11,5 +11,5 @@ public record PublicTestimonialDto(
     String source,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
-    List<TestimonialImageDto> images
+    List<TestimonialAttachmentDto> attachments
 ) {}

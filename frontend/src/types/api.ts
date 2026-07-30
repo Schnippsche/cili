@@ -36,7 +36,7 @@ export interface UpdateMetadataRequest { title?: string; description?: string; t
 export interface SubtitleTrackDto { id: number; resourceId: number; languageCode: string; label: string | null; format: 'SRT' | 'VTT'; createdAt: string; hasTextContent: boolean; }
 
 // ── Upload ───────────────────────────────────────────────────────────────
-export interface InitUploadRequest { fileName: string; mimeType: string; totalSize: number; chunkSize: number; folderId: number; fileLastModified?: number; bulkImportItemId?: number; }
+export interface InitUploadRequest { fileName: string; mimeType: string; totalSize: number; chunkSize: number; folderId?: number; testimonialId?: number; fileLastModified?: number; bulkImportItemId?: number; }
 export interface UploadJobDto { jobId: string; chunksTotal: number; chunksReceived: number; status: string; }
 export interface CompleteUploadResponse { resourceId: number; codecWarning?: string; }
 
@@ -97,7 +97,7 @@ export interface SpringPage<T> {
 }
 
 // ── Testimonials ────────────────────────────────────────────────────────────
-export interface TestimonialImageDto {
+export interface TestimonialAttachmentDto {
   id: number;
   originalName: string;
   mimeType: string;
@@ -114,7 +114,7 @@ export interface TestimonialDto {
   userId: number;
   createdAt: string;
   updatedAt: string;
-  images: TestimonialImageDto[];
+  attachments: TestimonialAttachmentDto[];
 }
 
 export interface PublicTestimonialDto {
@@ -125,7 +125,7 @@ export interface PublicTestimonialDto {
   source: string;
   createdAt: string;
   updatedAt: string;
-  images: TestimonialImageDto[];
+  attachments: TestimonialAttachmentDto[];
 }
 
 export interface CreateTestimonialRequest {
