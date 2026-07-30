@@ -193,6 +193,12 @@ describe('Anhänge-Upload (vereinheitlicht)', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Speichern' }));
 
-    await waitFor(() => expect(screen.getByLabelText(/clip\.mp4 — Upload fehlgeschlagen/)).toBeInTheDocument());
+    // getByLabelText greift hier den äußeren Box, auf den die Tooltip-Komponente das aria-label klont —
+    // genau dieser Box trägt in NewMediaFileTile auch border/borderColor für den Fehlerzustand
+    // (border: isError ? '1px solid' : 'none', borderColor: isError ? 'error.main' : undefined).
+    // error.main löst im Test-Theme zu rgb(211, 47, 47) auf.
+    const tile = await waitFor(() => screen.getByLabelText(/clip\.mp4 — Upload fehlgeschlagen/));
+    expect(tile).toBeInTheDocument();
+    expect(tile).toHaveStyle({ borderColor: 'rgb(211, 47, 47)' });
   });
 });
