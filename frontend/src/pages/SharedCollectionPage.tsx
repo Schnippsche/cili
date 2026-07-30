@@ -211,9 +211,9 @@ function SharedTestimonialCard({ testimonial, token }: {
           ))}
         </Box>
         <Typography variant="body2" sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>{testimonial.text}</Typography>
-        {testimonial.images.length > 0 && (
+        {testimonial.attachments.length > 0 && (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5 }}>
-            {testimonial.images.map((img, idx) => (
+            {testimonial.attachments.map((img, idx) => (
               <Box
                 key={img.id}
                 component="img"
@@ -243,8 +243,8 @@ function SharedTestimonialCard({ testimonial, token }: {
             </Tooltip>
             <Box
               component="img"
-              src={collectionShareStreamUrl(token, testimonial.images[lightboxIndex].id)}
-              alt={testimonial.images[lightboxIndex].originalName}
+              src={collectionShareStreamUrl(token, testimonial.attachments[lightboxIndex].id)}
+              alt={testimonial.attachments[lightboxIndex].originalName}
               sx={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', display: 'block' }}
             />
           </DialogContent>
