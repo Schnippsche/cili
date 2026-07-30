@@ -3,11 +3,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useEffect } from 'react';
-import type { TestimonialImageDto } from '../../types/api';
+import type { TestimonialAttachmentDto } from '../../types/api';
 import { publicImageUrl } from '../../api/publicTestimonials';
 
 interface Props {
-  images: TestimonialImageDto[];
+  images: TestimonialAttachmentDto[];
   index: number;
   onClose: () => void;
   onNavigate: (index: number) => void;

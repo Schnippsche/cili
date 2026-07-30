@@ -7,7 +7,8 @@ public record InitUploadRequest(
         @NotBlank @Size(max = 200) String mimeType,
         @Positive long totalSize,
         @Min(1) @Max(104857600) int chunkSize,
-        @NotNull Long folderId,
+        Long folderId,
+        Long testimonialId,
         Long fileLastModified,
         Long bulkImportItemId
 ) {}

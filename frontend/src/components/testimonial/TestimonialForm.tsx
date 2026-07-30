@@ -17,13 +17,13 @@ import {
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import {type ChangeEvent, useEffect, useRef, useState} from 'react';
-import type {TestimonialDto, TestimonialImageDto} from '../../types/api';
+import type {TestimonialDto, TestimonialAttachmentDto} from '../../types/api';
 import type {TestimonialFormData} from '../../api/testimonials';
 import {getThumbnailUrl} from '../../api/resources';
 import {useAuthenticatedUrl} from '../../hooks/useAuthenticatedUrl';
 
 interface ExistingImageThumbProps {
-  image: TestimonialImageDto;
+  image: TestimonialAttachmentDto;
   onRemove: () => void;
 }
 
@@ -148,7 +148,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
     setDeleteImageIds(prev => [...prev, imageId]);
   }
 
-  const existingImages = (initial?.images ?? []).filter(img => !deleteImageIds.includes(img.id));
+  const existingImages = (initial?.attachments ?? []).filter(img => !deleteImageIds.includes(img.id));
 
   return (
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">

@@ -265,16 +265,16 @@ public class TestimonialService {
     }
 
     private TestimonialDto toDto(Testimonial t) {
-        List<TestimonialImageDto> images = resourceRepository
+        List<TestimonialAttachmentDto> attachments = resourceRepository
             .findByTestimonialIdOrderByCreatedAtAsc(t.getId())
-            .stream().map(this::toImageDto).toList();
+            .stream().map(this::toAttachmentDto).toList();
         return new TestimonialDto(
             t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.getSource(),
-            t.getUserId(), t.getCreatedAt(), t.getUpdatedAt(), images);
+            t.getUserId(), t.getCreatedAt(), t.getUpdatedAt(), attachments);
     }
 
-    private TestimonialImageDto toImageDto(Resource r) {
-        return new TestimonialImageDto(r.getId(), r.getOriginalName(), r.getMimeType(), r.getSize(), r.getCreatedAt());
+    private TestimonialAttachmentDto toAttachmentDto(Resource r) {
+        return new TestimonialAttachmentDto(r.getId(), r.getOriginalName(), r.getMimeType(), r.getSize(), r.getCreatedAt());
     }
 
     private CiliUserDetails currentUser() {
@@ -310,12 +310,12 @@ public class TestimonialService {
     }
 
     private PublicTestimonialDto toPublicDto(Testimonial t) {
-        List<TestimonialImageDto> images = resourceRepository
+        List<TestimonialAttachmentDto> attachments = resourceRepository
             .findByTestimonialIdOrderByCreatedAtAsc(t.getId())
-            .stream().map(this::toImageDto).toList();
+            .stream().map(this::toAttachmentDto).toList();
         return new PublicTestimonialDto(
             t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.getSource(),
-            t.getCreatedAt(), t.getUpdatedAt(), images);
+            t.getCreatedAt(), t.getUpdatedAt(), attachments);
     }
 
     public byte[] getPublicThumbnailBytes(Long resourceId, String size) throws IOException {

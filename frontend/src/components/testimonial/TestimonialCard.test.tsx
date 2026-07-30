@@ -20,7 +20,7 @@ const mockTestimonial: TestimonialDto = {
   source: 'Mensch',
   createdAt: '2026-05-31T10:00:00',
   updatedAt: '2026-05-31T10:00:00',
-  images: [],
+  attachments: [],
 };
 
 function renderCard(props: Partial<Parameters<typeof TestimonialCard>[0]> = {}) {

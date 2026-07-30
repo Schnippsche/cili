@@ -6,14 +6,14 @@ import BookmarkRemoveOutlinedIcon from '@mui/icons-material/BookmarkRemoveOutlin
 import PersonIcon from '@mui/icons-material/Person';
 import PetsIcon from '@mui/icons-material/Pets';
 import { useState } from 'react';
-import type { TestimonialDto, TestimonialImageDto } from '../../types/api';
+import type { TestimonialDto, TestimonialAttachmentDto } from '../../types/api';
 import { getThumbnailUrl } from '../../api/resources';
 import { useAuthenticatedUrl } from '../../hooks/useAuthenticatedUrl';
 import TestimonialLightbox from './TestimonialLightbox';
 import AddToCollectionDialog from '../resource/AddToCollectionDialog';
 
 interface TileProps {
-  image: TestimonialImageDto;
+  image: TestimonialAttachmentDto;
   onClick: () => void;
 }
 
@@ -122,9 +122,9 @@ export default function TestimonialCard({ testimonial, currentUserId, isAdmin, c
           </Typography>
         )}
 
-        {testimonial.images.length > 0 && (
+        {testimonial.attachments.length > 0 && (
           <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 1.5 }}>
-            {testimonial.images.map((img, idx) => (
+            {testimonial.attachments.map((img, idx) => (
               <ImageTile
                 key={img.id}
                 image={img}
@@ -137,7 +137,7 @@ export default function TestimonialCard({ testimonial, currentUserId, isAdmin, c
 
       {lightboxIndex !== null && (
         <TestimonialLightbox
-          images={testimonial.images}
+          images={testimonial.attachments}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onNavigate={setLightboxIndex}

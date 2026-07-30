@@ -7,7 +7,7 @@ const base: PublicTestimonialDto = {
   text: 'Sehr empfehlenswert!',
   source: 'Mensch',
   createdAt: '2026-06-01T10:00:00', updatedAt: '2026-06-01T10:00:00',
-  images: [],
+  attachments: [],
 };
 
 describe('PublicTestimonialCard', () => {
@@ -44,7 +44,7 @@ describe('PublicTestimonialCard', () => {
   test('öffnet Lightbox beim Klick auf Bild', () => {
     const withImages: PublicTestimonialDto = {
       ...base,
-      images: [{ id: 10, originalName: 'foto.jpg', mimeType: 'image/jpeg', size: 1000, createdAt: '2026-06-01T10:00:00' }],
+      attachments: [{ id: 10, originalName: 'foto.jpg', mimeType: 'image/jpeg', size: 1000, createdAt: '2026-06-01T10:00:00' }],
     };
     render(<PublicTestimonialCard testimonial={withImages} />);
     const img = screen.getByRole('img', { name: 'foto.jpg' });
