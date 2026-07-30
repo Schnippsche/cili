@@ -91,9 +91,9 @@ export default function TestimonialList({ canWrite, canDelete, highlightId }: Re
 
   async function handleSave(data: TestimonialFormData) {
     if (editTarget) {
-      await updateMut.mutateAsync({ id: editTarget.id, req: data });
+      return await updateMut.mutateAsync({ id: editTarget.id, req: data });
     } else {
-      await createMut.mutateAsync(data);
+      return await createMut.mutateAsync(data);
     }
   }
 

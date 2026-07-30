@@ -5,6 +5,8 @@ import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import BookmarkRemoveOutlinedIcon from '@mui/icons-material/BookmarkRemoveOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import PetsIcon from '@mui/icons-material/Pets';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import { useState } from 'react';
 import type { TestimonialDto, TestimonialAttachmentDto } from '../../types/api';
 import { getThumbnailUrl } from '../../api/resources';
@@ -13,24 +15,82 @@ import TestimonialLightbox from './TestimonialLightbox';
 import AddToCollectionDialog from '../resource/AddToCollectionDialog';
 
 interface TileProps {
-  image: TestimonialAttachmentDto;
+  attachment: TestimonialAttachmentDto;
   onClick: () => void;
 }
 
-function ImageTile({ image, onClick }: Readonly<TileProps>) {
-  const url = useAuthenticatedUrl(getThumbnailUrl(image.id, 'small'));
+function AttachmentTile({ attachment, onClick }: Readonly<TileProps>) {
+  const url = useAuthenticatedUrl(getThumbnailUrl(attachment.id, 'small'));
+  const isImage = attachment.mimeType?.startsWith('image/');
+  const isVideo = attachment.mimeType?.startsWith('video/');
+  const isAudio = attachment.mimeType?.startsWith('audio/');
+
   return (
     <Box
-      component="img"
-      src={url ?? undefined}
-      alt={image.originalName}
       onClick={onClick}
       sx={{
-        width: 80, height: 80, objectFit: 'cover', borderRadius: 1,
-        cursor: 'pointer', bgcolor: 'action.hover',
+        position: 'relative',
+        width: 80,
+        height: 80,
+        borderRadius: 1,
+        cursor: 'pointer',
+        bgcolor: 'action.hover',
         '&:hover': { opacity: 0.85, transform: 'scale(1.03)', transition: 'all .15s' },
+        overflow: 'hidden',
       }}
-    />
+    >
+      {isImage && (
+        <Box
+          component="img"
+          src={url ?? undefined}
+          alt={attachment.originalName}
+          sx={{
+            width: 80,
+            height: 80,
+            objectFit: 'cover',
+          }}
+        />
+      )}
+      {isVideo && (
+        <>
+          <Box
+            component="img"
+            src={url ?? undefined}
+            alt={attachment.originalName}
+            sx={{
+              width: 80,
+              height: 80,
+              objectFit: 'cover',
+            }}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: 'rgba(0,0,0,0.3)',
+            }}
+          >
+            <PlayArrowIcon sx={{ fontSize: 32, color: 'white' }} />
+          </Box>
+        </>
+      )}
+      {isAudio && (
+        <Box
+          sx={{
+            width: 80,
+            height: 80,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <MusicNoteIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
+        </Box>
+      )}
+    </Box>
   );
 }
 
@@ -124,10 +184,10 @@ export default function TestimonialCard({ testimonial, currentUserId, isAdmin, c
 
         {testimonial.attachments.length > 0 && (
           <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 1.5 }}>
-            {testimonial.attachments.map((img, idx) => (
-              <ImageTile
-                key={img.id}
-                image={img}
+            {testimonial.attachments.map((attachment, idx) => (
+              <AttachmentTile
+                key={attachment.id}
+                attachment={attachment}
                 onClick={() => setLightboxIndex(idx)}
               />
             ))}

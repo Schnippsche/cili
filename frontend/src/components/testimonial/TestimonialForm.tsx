@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  LinearProgress,
   Stack,
   TextField,
   ToggleButton,
@@ -15,31 +16,79 @@ import {
   Typography,
 } from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import {type ChangeEvent, useEffect, useRef, useState} from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import type {TestimonialDto, TestimonialAttachmentDto} from '../../types/api';
 import type {TestimonialFormData} from '../../api/testimonials';
 import {getThumbnailUrl} from '../../api/resources';
 import {useAuthenticatedUrl} from '../../hooks/useAuthenticatedUrl';
+import {completeUpload, initUpload, uploadChunk} from '../../api/upload';
 
-interface ExistingImageThumbProps {
-  image: TestimonialAttachmentDto;
+interface ExistingAttachmentThumbProps {
+  attachment: TestimonialAttachmentDto;
   onRemove: () => void;
 }
 
-function ExistingImageThumb({image, onRemove}: Readonly<ExistingImageThumbProps>) {
-  const url = useAuthenticatedUrl(getThumbnailUrl(image.id, 'small'));
+function ExistingAttachmentThumb({attachment, onRemove}: Readonly<ExistingAttachmentThumbProps>) {
+  const url = useAuthenticatedUrl(getThumbnailUrl(attachment.id, 'small'));
+
+  const isImage = attachment.mimeType?.startsWith('image/');
+  const isVideo = attachment.mimeType?.startsWith('video/');
+  const isAudio = attachment.mimeType?.startsWith('audio/');
+
   return (
       <Box sx={{position: 'relative', width: 72, height: 72}}>
-        <Box component="img" src={url ?? undefined} alt={image.originalName}
-             sx={{
-               width: 72,
-               height: 72,
-               objectFit: 'cover',
-               borderRadius: 1,
-               bgcolor: 'action.hover'
-             }}/>
-        <Tooltip title="Bild entfernen">
+        {isImage && (
+          <Box component="img" src={url ?? undefined} alt={attachment.originalName}
+               sx={{
+                 width: 72,
+                 height: 72,
+                 objectFit: 'cover',
+                 borderRadius: 1,
+                 bgcolor: 'action.hover'
+               }}/>
+        )}
+        {isVideo && (
+          <>
+            <Box component="img" src={url ?? undefined} alt={attachment.originalName}
+                 sx={{
+                   width: 72,
+                   height: 72,
+                   objectFit: 'cover',
+                   borderRadius: 1,
+                   bgcolor: 'action.hover'
+                 }}/>
+            <Box sx={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: 'rgba(0,0,0,0.3)',
+              borderRadius: 1,
+            }}>
+              <PlayArrowIcon sx={{ fontSize: 32, color: 'white' }} />
+            </Box>
+          </>
+        )}
+        {isAudio && (
+          <Box sx={{
+            width: 72,
+            height: 72,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'action.hover',
+            borderRadius: 1,
+          }}>
+            <MusicNoteIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
+          </Box>
+        )}
+        <Tooltip title="Entfernen">
           <IconButton size="small" onClick={onRemove}
                       sx={{
                         position: 'absolute',
@@ -61,22 +110,34 @@ function ExistingImageThumb({image, onRemove}: Readonly<ExistingImageThumbProps>
 interface Props {
   open: boolean;
   initial?: TestimonialDto | null;
-  onSave: (data: TestimonialFormData) => Promise<void>;
+  onSave: (data: TestimonialFormData) => Promise<TestimonialDto>;
   onClose: () => void;
 }
 
+const CHUNK_SIZE = 5 * 1024 * 1024;
+
+export interface MediaUploadState {
+  progress: number;
+  status: 'uploading' | 'done' | 'error';
+  error?: string;
+}
+
 export default function TestimonialForm({open, initial, onSave, onClose}: Readonly<Props>) {
+  const qc = useQueryClient();
   const [authorName, setAuthorName] = useState('');
   const [tags, setTags] = useState('');
   const [text, setText] = useState('');
   const [source, setSource] = useState<'Mensch' | 'Tier' | ''>('');
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
   const [deleteAttachmentIds, setDeleteAttachmentIds] = useState<number[]>([]);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<{ authorName?: string; tags?: string; text?: string; source?: string }>({});
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [mediaUploads, setMediaUploads] = useState<Map<string, MediaUploadState>>(new Map());
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -86,6 +147,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
       setSource((initial?.source as 'Mensch' | 'Tier' | undefined) ?? '');
       setNewFiles([]);
       setNewPreviews([]);
+      setNewMediaFiles([]);
       setDeleteAttachmentIds([]);
       setErrors({});
       setSaveError(null);
@@ -112,12 +174,48 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
     return Object.keys(e).length === 0;
   }
 
+  const updateMediaUpload = (fileName: string, patch: Partial<MediaUploadState>) =>
+    setMediaUploads(prev => {
+      const copy = new Map(prev);
+      const state = copy.get(fileName) ?? { progress: 0, status: 'uploading' as const };
+      copy.set(fileName, { ...state, ...patch });
+      return copy;
+    });
+
+  const uploadMediaFile = async (testimonialId: number, file: File) => {
+    updateMediaUpload(file.name, { progress: 0, status: 'uploading' });
+    try {
+      const job = await initUpload({
+        fileName: file.name,
+        mimeType: file.type || 'application/octet-stream',
+        totalSize: file.size,
+        chunkSize: CHUNK_SIZE,
+        testimonialId,
+        fileLastModified: file.lastModified,
+      });
+      for (let i = 0; i < job.chunksTotal; i++) {
+        await uploadChunk(job.jobId, i, file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE));
+        updateMediaUpload(file.name, { progress: Math.round(((i + 1) / job.chunksTotal) * 100) });
+      }
+      await completeUpload(job.jobId);
+      updateMediaUpload(file.name, { status: 'done', progress: 100 });
+      qc.invalidateQueries({ queryKey: ['testimonial', testimonialId] });
+      qc.invalidateQueries({ queryKey: ['testimonials'] });
+    } catch (err) {
+      updateMediaUpload(file.name, {
+        status: 'error',
+        error: (err as { message?: string })?.message ?? 'Upload fehlgeschlagen',
+      });
+    }
+  };
+
   async function handleSave() {
     if (!validate()) return;
     setSaving(true);
     setSaveError(null);
     try {
-      await onSave({
+      // Step 1: Save testimonial with images and deletions
+      const testimonial = await onSave({
         authorName: authorName.trim(),
         tags: tags.trim() || null,
         text: text.trim(),
@@ -125,6 +223,24 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
         images: newFiles,
         deleteAttachmentIds,
       });
+
+      // Step 2: If we have media files to upload, upload them in parallel (max 3)
+      if (newMediaFiles.length > 0) {
+        const CONCURRENCY = 3;
+        const queue = newMediaFiles.map(f => () => uploadMediaFile(testimonial.id, f));
+        let idx = 0;
+        const runNext = () => {
+          if (idx >= queue.length) return;
+          const task = queue[idx++];
+          task().finally(runNext);
+        };
+        for (let i = 0; i < Math.min(CONCURRENCY, queue.length); i++) {
+          runNext();
+        }
+        // Wait a bit to let uploads start before closing dialog
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
       onClose();
     } catch (err: unknown) {
       const axiosMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -140,15 +256,29 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
+  function handleMediaFileChange(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []).filter(
+      f => f.type.startsWith('video/') || f.type.startsWith('audio/')
+    );
+    setNewMediaFiles(prev => [...prev, ...files]);
+    if (mediaInputRef.current) mediaInputRef.current.value = '';
+  }
+
   function removeNewFile(idx: number) {
     setNewFiles(prev => prev.filter((_, i) => i !== idx));
   }
 
-  function markImageForDelete(imageId: number) {
-    setDeleteAttachmentIds(prev => [...prev, imageId]);
+  function removeNewMediaFile(idx: number) {
+    setNewMediaFiles(prev => prev.filter((_, i) => i !== idx));
   }
 
-  const existingImages = (initial?.attachments ?? []).filter(img => !deleteAttachmentIds.includes(img.id));
+  function markAttachmentForDelete(attachmentId: number) {
+    setDeleteAttachmentIds(prev => [...prev, attachmentId]);
+  }
+
+  const existingAttachments = (initial?.attachments ?? []).filter(
+    att => !deleteAttachmentIds.includes(att.id)
+  );
 
   return (
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -194,12 +324,12 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
             </Stack>
             <input ref={fileInputRef} type="file" accept="image/*" multiple hidden
                    onChange={handleFileChange}/>
-            {(existingImages.length > 0 || newFiles.length > 0) && (
+            {(existingAttachments.filter(a => a.mimeType?.startsWith('image/')).length > 0 || newFiles.length > 0) && (
                 <Stack direction="row" flexWrap="wrap" gap={1}>
-                  {existingImages.map(img => (
-                      <ExistingImageThumb
-                          key={img.id} image={img}
-                          onRemove={() => markImageForDelete(img.id)}
+                  {existingAttachments.filter(a => a.mimeType?.startsWith('image/')).map(img => (
+                      <ExistingAttachmentThumb
+                          key={img.id} attachment={img}
+                          onRemove={() => markAttachmentForDelete(img.id)}
                       />
                   ))}
                   {newFiles.map((file, idx) => (
@@ -224,6 +354,58 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
                         </Tooltip>
                       </Box>
                   ))}
+                </Stack>
+            )}
+          </Box>
+
+          {/* Video/Audio section */}
+          <Box sx={{mb: 2}}>
+            <Stack direction="row" alignItems="center" gap={1} sx={{mb: 1}}>
+              <Typography variant="caption" color="text.secondary">Video/Audio</Typography>
+              <Tooltip title="Video/Audio hinzufügen (MP4, WebM, MP3, WAV, OGG, etc.)">
+                <IconButton size="small" onClick={() => mediaInputRef.current?.click()}>
+                  <AddIcon fontSize="small"/>
+                </IconButton>
+              </Tooltip>
+            </Stack>
+            <input ref={mediaInputRef} type="file" accept="video/*,audio/*" multiple hidden
+                   onChange={handleMediaFileChange}/>
+            {(existingAttachments.filter(a => a.mimeType?.startsWith('video/') || a.mimeType?.startsWith('audio/')).length > 0 || newMediaFiles.length > 0) && (
+                <Stack gap={1.5}>
+                  {existingAttachments.filter(a => a.mimeType?.startsWith('video/') || a.mimeType?.startsWith('audio/')).map(attachment => (
+                      <Box key={attachment.id} sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        <ExistingAttachmentThumb
+                            attachment={attachment}
+                            onRemove={() => markAttachmentForDelete(attachment.id)}
+                        />
+                        <Box sx={{flex: 1}}>
+                          <Typography variant="caption">{attachment.originalName}</Typography>
+                        </Box>
+                      </Box>
+                  ))}
+                  {newMediaFiles.map((file) => {
+                    const state = mediaUploads.get(file.name);
+                    return (
+                        <Box key={`${file.name}-${file.size}-${file.lastModified}`}>
+                          <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 0.5}}>
+                            <Typography variant="caption" sx={{flex: 1}}>{file.name}</Typography>
+                            {state?.status === 'error' && (
+                                <Typography variant="caption" color="error">{state.error}</Typography>
+                            )}
+                          </Box>
+                          {state?.status !== 'error' && (
+                              <LinearProgress
+                                  variant="determinate"
+                                  value={state?.progress ?? 0}
+                                  sx={{height: 6, borderRadius: 1}}
+                              />
+                          )}
+                          {state?.status === 'done' && (
+                              <Typography variant="caption" color="success.main">Fertig</Typography>
+                          )}
+                        </Box>
+                    );
+                  })}
                 </Stack>
             )}
           </Box>
