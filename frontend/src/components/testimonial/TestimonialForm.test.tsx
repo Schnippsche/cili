@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import TestimonialForm from './TestimonialForm';
+import TestimonialForm, { isVideoLikeFile } from './TestimonialForm';
 
 function renderForm(props: Parameters<typeof TestimonialForm>[0]) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -31,4 +31,22 @@ test('pre-fills fields when editing an existing entry', () => {
   renderForm({ open: true, initial, onSave: mockSave, onClose: vi.fn() });
   expect(screen.getByLabelText('Name')).toHaveValue('Anna');
   expect(screen.getByLabelText('Testimonial')).toHaveValue('Super Erfahrung!');
+});
+
+describe('isVideoLikeFile', () => {
+  test('erkennt Video- und Audio-MIME-Typen direkt', () => {
+    expect(isVideoLikeFile(new File(['x'], 'clip.mp4', { type: 'video/mp4' }))).toBe(true);
+    expect(isVideoLikeFile(new File(['x'], 'song.mp3', { type: 'audio/mpeg' }))).toBe(false);
+  });
+
+  test('ordnet Extension-Fallback-Dateien ohne MIME-Typ korrekt zu', () => {
+    expect(isVideoLikeFile(new File(['x'], 'clip.ogv', { type: '' }))).toBe(true);
+    expect(isVideoLikeFile(new File(['x'], 'clip.mkv', { type: '' }))).toBe(true);
+    expect(isVideoLikeFile(new File(['x'], 'clip.3gp', { type: '' }))).toBe(true);
+    expect(isVideoLikeFile(new File(['x'], 'song.oga', { type: '' }))).toBe(false);
+    expect(isVideoLikeFile(new File(['x'], 'song.flac', { type: '' }))).toBe(false);
+    expect(isVideoLikeFile(new File(['x'], 'song.opus', { type: '' }))).toBe(false);
+    expect(isVideoLikeFile(new File(['x'], 'song.wma', { type: '' }))).toBe(false);
+    expect(isVideoLikeFile(new File(['x'], 'song.m4a', { type: '' }))).toBe(false);
+  });
 });

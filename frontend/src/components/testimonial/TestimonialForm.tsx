@@ -136,6 +136,14 @@ function isMediaFile(file: File): boolean {
   return false;
 }
 
+const VIDEO_EXTENSION_FALLBACK = /\.(ogv|mkv|3gp)$/i;
+
+export function isVideoLikeFile(file: File): boolean {
+  if (file.type.startsWith('video/')) return true;
+  if (file.type.startsWith('audio/')) return false;
+  return VIDEO_EXTENSION_FALLBACK.test(file.name);
+}
+
 export interface MediaUploadState {
   progress: number;
   status: 'uploading' | 'done' | 'error';
