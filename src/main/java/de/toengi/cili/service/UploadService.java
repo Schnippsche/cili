@@ -471,6 +471,7 @@ public class UploadService {
         if (lower.endsWith(".csv")) return "text/csv";
         if (lower.endsWith(".xml")) return "text/xml";
         if (lower.endsWith(".ogg") || lower.endsWith(".oga")) return "audio/ogg";
+        if (lower.endsWith(".ogv")) return "video/ogg";
         return mimeType;
     }
 }

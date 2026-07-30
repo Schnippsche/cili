@@ -502,6 +502,12 @@ class UploadServiceTest {
                 .isEqualTo("audio/ogg");
     }
 
+    @Test
+    void normalizeMimeType_ogvUploadedAsApplicationOgg_correctedToVideoOgg() {
+        assertThat(UploadService.normalizeMimeType("clip.ogv", "application/ogg"))
+                .isEqualTo("video/ogg");
+    }
+
     // --- helper ---
 
     private UploadJob job(String id, Long userId, Long folderId, int chunksTotal, int chunkSize) {

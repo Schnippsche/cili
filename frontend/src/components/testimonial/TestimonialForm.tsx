@@ -122,6 +122,20 @@ interface Props {
 
 const CHUNK_SIZE = 5 * 1024 * 1024;
 
+// Manche Browser/Betriebssysteme melden für .ogg/.oga/.ogv keinen oder einen generischen
+// File.type ('', 'application/ogg', 'application/octet-stream') statt 'audio/'/'video/' —
+// ohne diesen Fallback würde handleMediaFileChange solche Dateien stillschweigend verwerfen,
+// obwohl der Backend-Normalizer (UploadService.normalizeMimeType) sie korrekt erkennt.
+const MEDIA_EXTENSION_FALLBACK = /\.(ogg|oga|ogv|mkv|m4a|flac|opus|wma|3gp)$/i;
+
+function isMediaFile(file: File): boolean {
+  if (file.type.startsWith('video/') || file.type.startsWith('audio/')) return true;
+  if (!file.type || file.type === 'application/ogg' || file.type === 'application/octet-stream') {
+    return MEDIA_EXTENSION_FALLBACK.test(file.name);
+  }
+  return false;
+}
+
 export interface MediaUploadState {
   progress: number;
   status: 'uploading' | 'done' | 'error';
@@ -263,9 +277,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
   }
 
   function handleMediaFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []).filter(
-      f => f.type.startsWith('video/') || f.type.startsWith('audio/')
-    );
+    const files = Array.from(e.target.files ?? []).filter(isMediaFile);
     setNewMediaFiles(prev => [...prev, ...files]);
     if (mediaInputRef.current) mediaInputRef.current.value = '';
   }
@@ -389,7 +401,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
                         </Box>
                       </Box>
                   ))}
-                  {newMediaFiles.map((file) => {
+                  {newMediaFiles.map((file, idx) => {
                     const state = mediaUploads.get(file.name);
                     return (
                         <Box key={`${file.name}-${file.size}-${file.lastModified}`}>
@@ -398,6 +410,12 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
                             {state?.status === 'error' && (
                                 <Typography variant="caption" color="error">{state.error}</Typography>
                             )}
+                            <Tooltip title="Entfernen">
+                              <IconButton size="small" onClick={() => removeNewMediaFile(idx)}
+                                          sx={{p: 0.25}}>
+                                <CloseIcon sx={{fontSize: 14}}/>
+                              </IconButton>
+                            </Tooltip>
                           </Box>
                           {state?.status !== 'error' && (
                               <LinearProgress
