@@ -72,7 +72,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
   const [source, setSource] = useState<'Mensch' | 'Tier' | ''>('');
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
-  const [deleteImageIds, setDeleteImageIds] = useState<number[]>([]);
+  const [deleteAttachmentIds, setDeleteAttachmentIds] = useState<number[]>([]);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<{ authorName?: string; tags?: string; text?: string; source?: string }>({});
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -86,7 +86,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
       setSource((initial?.source as 'Mensch' | 'Tier' | undefined) ?? '');
       setNewFiles([]);
       setNewPreviews([]);
-      setDeleteImageIds([]);
+      setDeleteAttachmentIds([]);
       setErrors({});
       setSaveError(null);
     }
@@ -123,7 +123,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
         text: text.trim(),
         source: source as 'Mensch' | 'Tier',
         images: newFiles,
-        deleteImageIds,
+        deleteAttachmentIds,
       });
       onClose();
     } catch (err: unknown) {
@@ -145,10 +145,10 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
   }
 
   function markImageForDelete(imageId: number) {
-    setDeleteImageIds(prev => [...prev, imageId]);
+    setDeleteAttachmentIds(prev => [...prev, imageId]);
   }
 
-  const existingImages = (initial?.attachments ?? []).filter(img => !deleteImageIds.includes(img.id));
+  const existingImages = (initial?.attachments ?? []).filter(img => !deleteAttachmentIds.includes(img.id));
 
   return (
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">

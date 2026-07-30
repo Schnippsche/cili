@@ -10,7 +10,7 @@ export interface TestimonialFormData {
   text: string;
   source: 'Mensch' | 'Tier';
   images?: File[];
-  deleteImageIds?: number[];
+  deleteAttachmentIds?: number[];
 }
 
 export async function listTestimonials(params?: {
@@ -33,7 +33,7 @@ function buildFormData(form: TestimonialFormData): FormData {
   fd.append('text', form.text);
   fd.append('source', form.source);
   form.images?.forEach(f => fd.append('images', f));
-  form.deleteImageIds?.forEach(id => fd.append('deleteImageIds', String(id)));
+  form.deleteAttachmentIds?.forEach(id => fd.append('deleteAttachmentIds', String(id)));
   return fd;
 }
 

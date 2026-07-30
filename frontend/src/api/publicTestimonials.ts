@@ -15,3 +15,7 @@ export function listPublicTestimonials(params?: {
 export function publicImageUrl(resourceId: number, size: 'small' | 'large'): string {
   return `/api/public/testimonials/images/${resourceId}?size=${size}`;
 }
+
+export function getPublicStreamUrl(testimonialId: number, resourceId: number): string {
+  return `/api/public/testimonials/${testimonialId}/stream/${resourceId}`;
+}
