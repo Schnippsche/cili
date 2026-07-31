@@ -6,7 +6,7 @@ Einrichtung:
   1. pip install telethon requests python-dotenv
   2. Telegram API-Zugangsdaten holen: https://my.telegram.org/apps
   3. .env-Datei anlegen (Vorlage: scripts/telegram_import.env.example) —
-     TG_SOURCE muss pro Telegram-Quelle eindeutig sein.
+     TG_SOURCE muss exakt "Mensch" oder "Tier" sein.
   4. Beim ersten Start: Telefonnummer + Code eingeben (Session wird danach gespeichert)
 
 Verwendung:
@@ -451,7 +451,7 @@ def _validate_config() -> None:
     if not TG_GROUP:
         sys.exit("Fehler: TG_GROUP muss gesetzt sein (Gruppenname, -link oder numerische ID).")
     if not TG_SOURCE:
-        sys.exit("Fehler: TG_SOURCE muss gesetzt sein (eindeutiger Bezeichner dieser Quelle, z.B. 'telegram-tiere').")
+        sys.exit("Fehler: TG_SOURCE muss gesetzt sein (exakt 'Mensch' oder 'Tier').")
     if not TG_IS_HUMAN and not TG_IS_ANIMAL:
         sys.exit(f"Fehler: TG_SOURCE muss 'Mensch' oder 'Tier' sein (aktuell: '{TG_SOURCE}').")
 
