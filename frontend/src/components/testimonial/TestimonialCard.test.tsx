@@ -86,6 +86,18 @@ describe('TestimonialCard', () => {
     expect(screen.queryByRole('button', { name: /löschen/i })).not.toBeInTheDocument();
   });
 
+  test('zeigt Mensch-Chip, aber keinen Tier-Chip, wenn nur human gesetzt ist', () => {
+    renderCard({ testimonial: mockTestimonial });
+    expect(screen.getByText('Mensch')).toBeInTheDocument();
+    expect(screen.queryByText('Tier')).not.toBeInTheDocument();
+  });
+
+  test('zeigt Tier-Chip, aber keinen Mensch-Chip, wenn nur animal gesetzt ist', () => {
+    renderCard({ testimonial: { ...mockTestimonial, human: false, animal: true } });
+    expect(screen.getByText('Tier')).toBeInTheDocument();
+    expect(screen.queryByText('Mensch')).not.toBeInTheDocument();
+  });
+
   test('zeigt beide Chips, wenn human und animal gesetzt sind', () => {
     renderCard({ testimonial: { ...mockTestimonial, human: true, animal: true } });
     expect(screen.getByText('Mensch')).toBeInTheDocument();
