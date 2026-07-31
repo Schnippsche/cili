@@ -42,6 +42,7 @@ export default function CollectionsPage() {
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
   const [renameTarget, setRenameTarget] = useState<CollectionDto | null>(null);
   const [renameName, setRenameName]     = useState('');
+  const [renameAsTemplate, setRenameAsTemplate] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<CollectionDto | null>(null);
   const [shareTarget, setShareTarget]   = useState<CollectionDto | null>(null);
   const [copyTarget, setCopyTarget]     = useState<CollectionDto | null>(null);
@@ -74,12 +75,12 @@ export default function CollectionsPage() {
     }
   };
 
-  const closeRenameDialog = () => { setRenameTarget(null); setRenameName(''); };
+  const closeRenameDialog = () => { setRenameTarget(null); setRenameName(''); setRenameAsTemplate(false); };
 
   const handleRename = () => {
     if (!renameTarget || !renameName.trim() || isDuplicateName(renameName, renameTarget.id)) return;
     renameMutation.mutate(
-      { id: renameTarget.id, req: { name: renameName.trim() } },
+      { id: renameTarget.id, req: { name: renameName.trim(), isTemplate: canMarkTemplate ? renameAsTemplate : undefined } },
       { onSuccess: closeRenameDialog }
     );
   };
@@ -150,10 +151,11 @@ export default function CollectionsPage() {
                     {c.isTemplate && <Chip label="Vorlage" size="small" color="primary" variant="outlined" />}
                   </Box>
                   <Box sx={{ display: 'flex' }}>
-                    <Tooltip title="Umbenennen">
+                    <Tooltip title="Bearbeiten">
                       <IconButton size="small" onClick={() => {
                         setRenameTarget(c);
                         setRenameName(c.name);
+                        setRenameAsTemplate(c.isTemplate);
                       }}>
                         <EditIcon fontSize="small" />
                       </IconButton>
@@ -262,9 +264,9 @@ export default function CollectionsPage() {
           </DialogActions>
         </Dialog>
 
-        {/* Dialog: Umbenennen */}
+        {/* Dialog: Bearbeiten */}
         <Dialog open={!!renameTarget} onClose={closeRenameDialog} maxWidth="xs" fullWidth>
-          <DialogTitle>Sammlung umbenennen</DialogTitle>
+          <DialogTitle>Sammlung bearbeiten</DialogTitle>
           <DialogContent>
             <TextField autoFocus fullWidth label="Neuer Name" value={renameName}
               onChange={e => setRenameName(e.target.value)}
@@ -272,6 +274,16 @@ export default function CollectionsPage() {
               error={!!renameName.trim() && isDuplicateName(renameName, renameTarget?.id)}
               helperText={renameName.trim() && isDuplicateName(renameName, renameTarget?.id) ? 'Dieser Name ist bereits vergeben' : ''}
               sx={{ mt: 1 }} />
+
+            {canMarkTemplate && (
+              <FormControlLabel
+                sx={{ mt: 1 }}
+                control={
+                  <Checkbox checked={renameAsTemplate} onChange={e => setRenameAsTemplate(e.target.checked)} />
+                }
+                label="Als Vorlage markieren"
+              />
+            )}
           </DialogContent>
           <DialogActions>
             <Button onClick={closeRenameDialog}>Abbrechen</Button>
