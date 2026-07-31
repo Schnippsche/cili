@@ -176,7 +176,7 @@ export interface CollectionDto {
   isTemplate: boolean;
   createdAt: string;
 }
-export interface CollectionNameRequest { name: string; }
+export interface CollectionNameRequest { name: string; isTemplate?: boolean; }
 export interface CreateCollectionRequest { name: string; isTemplate: boolean; }
 export interface AddToCollectionRequest { resourceId: number; }
 export interface AddTestimonialToCollectionRequest { testimonialId: number; }
