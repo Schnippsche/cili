@@ -217,6 +217,86 @@ class CollectionServiceTest {
     }
 
     @Test
+    void rename_setsTemplateWhenPermitted() {
+        Collection c = Collection.builder().id(10L).userId(userId).name("Alt").isTemplate(false).createdAt(LocalDateTime.now()).build();
+        when(collectionRepo.findByIdAndUserId(10L, userId)).thenReturn(Optional.of(c));
+        when(aclService.hasCollectionsPermission(userId, AclPermission.MANAGE_TEMPLATES)).thenReturn(true);
+        when(collectionRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(itemRepo.countByCollectionIdAndResourceIdIsNotNull(10L)).thenReturn(0L);
+
+        CollectionDto dto = service.rename(userId, UserRole.USER, 10L, "Alt", true);
+
+        assertThat(dto.isTemplate()).isTrue();
+    }
+
+    @Test
+    void rename_removesTemplateWhenPermitted() {
+        Collection c = Collection.builder().id(10L).userId(userId).name("Alt").isTemplate(true).createdAt(LocalDateTime.now()).build();
+        when(collectionRepo.findByIdAndUserId(10L, userId)).thenReturn(Optional.of(c));
+        when(aclService.hasCollectionsPermission(userId, AclPermission.MANAGE_TEMPLATES)).thenReturn(true);
+        when(collectionRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(itemRepo.countByCollectionIdAndResourceIdIsNotNull(10L)).thenReturn(0L);
+
+        CollectionDto dto = service.rename(userId, UserRole.USER, 10L, "Alt", false);
+
+        assertThat(dto.isTemplate()).isFalse();
+    }
+
+    @Test
+    void rename_withoutPermissionSettingTemplateFlag_throws403() {
+        Collection c = Collection.builder().id(10L).userId(userId).name("Alt").isTemplate(false).createdAt(LocalDateTime.now()).build();
+        when(collectionRepo.findByIdAndUserId(10L, userId)).thenReturn(Optional.of(c));
+        when(aclService.hasCollectionsPermission(userId, AclPermission.MANAGE_TEMPLATES)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.rename(userId, UserRole.USER, 10L, "Alt", true))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("403");
+        verify(collectionRepo, never()).save(any());
+    }
+
+    @Test
+    void rename_withoutPermissionRemovingTemplateFlag_throws403() {
+        // Bewusste Asymmetrie zu create() (siehe Spec): auch das "Entwidmen" einer
+        // Vorlage (true -> false) erfordert MANAGE_TEMPLATES, nicht nur das Setzen.
+        Collection c = Collection.builder().id(10L).userId(userId).name("Alt").isTemplate(true).createdAt(LocalDateTime.now()).build();
+        when(collectionRepo.findByIdAndUserId(10L, userId)).thenReturn(Optional.of(c));
+        when(aclService.hasCollectionsPermission(userId, AclPermission.MANAGE_TEMPLATES)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.rename(userId, UserRole.USER, 10L, "Alt", false))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("403");
+        verify(collectionRepo, never()).save(any());
+    }
+
+    @Test
+    void rename_adminChangesTemplateFlagOnForeignTemplate() {
+        Collection template = Collection.builder().id(10L).userId(otherUserId).name("Vorlage").isTemplate(true).createdAt(LocalDateTime.now()).build();
+        when(collectionRepo.findByIdAndUserId(10L, userId)).thenReturn(Optional.empty());
+        when(collectionRepo.findById(10L)).thenReturn(Optional.of(template));
+        when(aclService.hasCollectionsPermission(userId, AclPermission.MANAGE_TEMPLATES)).thenReturn(true);
+        when(collectionRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(itemRepo.countByCollectionIdAndResourceIdIsNotNull(10L)).thenReturn(0L);
+
+        CollectionDto dto = service.rename(userId, UserRole.ADMIN, 10L, "Vorlage", false);
+
+        assertThat(dto.isTemplate()).isFalse();
+    }
+
+    @Test
+    void rename_sameTemplateValueWithoutPermission_noOpIsAllowed() {
+        Collection c = Collection.builder().id(10L).userId(userId).name("Alt").isTemplate(true).createdAt(LocalDateTime.now()).build();
+        when(collectionRepo.findByIdAndUserId(10L, userId)).thenReturn(Optional.of(c));
+        when(collectionRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(itemRepo.countByCollectionIdAndResourceIdIsNotNull(10L)).thenReturn(0L);
+
+        // isTemplate bleibt true -> keine tatsächliche Änderung -> keine Berechtigungsprüfung nötig
+        CollectionDto dto = service.rename(userId, UserRole.USER, 10L, "Alt", true);
+
+        assertThat(dto.isTemplate()).isTrue();
+        verify(aclService, never()).hasCollectionsPermission(any(), any());
+    }
+
+    @Test
     void delete_ownerCanDelete() {
         Collection c = Collection.builder().id(10L).userId(userId).name("T").build();
         when(collectionRepo.findByIdAndUserId(10L, userId)).thenReturn(Optional.of(c));
