@@ -391,7 +391,7 @@ Den Link kannst du jederzeit **widerrufen** (sofort ungültig) oder **erneuern**
 
 ## 8. Erfahrungsberichte
 
-Erfahrungsberichte sind strukturierte Einträge mit Autorenname, Text und optionalen Tags sowie Bildern. Jeder Bericht ist außerdem eindeutig als **Mensch**- oder **Tier**-Erfahrungsbericht gekennzeichnet und wird entsprechend mit einem Symbol (👤 bzw. 🐾) versehen — sowohl in der Übersicht als auch in den Suchergebnissen.
+Erfahrungsberichte sind strukturierte Einträge mit Autorenname, Text und optionalen Tags sowie Anhängen (Bilder, Videos und Audiodateien). Jeder Bericht ist außerdem eindeutig als **Mensch**- oder **Tier**-Erfahrungsbericht gekennzeichnet und wird entsprechend mit einem Symbol (👤 bzw. 🐾) versehen — sowohl in der Übersicht als auch in den Suchergebnissen.
 
 ### Übersicht & Suche
 
@@ -407,7 +407,9 @@ Klicke auf **Neu** und fülle die Felder aus:
 - **Mensch / Tier** – Pflichtauswahl direkt unter dem Namensfeld, legt fest, ob es sich um einen Erfahrungsbericht zu einem Menschen oder einem Tier handelt
 - **Text** – Der eigentliche Bericht
 - **Tags** – Kommagetrennte Schlagwörter zur Kategorisierung
-- **Bilder** – Fotos können direkt angehängt werden
+- **Anhänge** – Über das **+-Symbol** lassen sich Bilder, Videos und Audiodateien anhängen, gemischt in einem Auswahldialog. Nicht unterstützte Dateien werden beim Auswählen übersprungen und als Hinweis eingeblendet.
+
+Bilder werden direkt mit dem Speichern des Berichts übernommen (max. 10 MB pro Bild). Video- und Audio-Dateien werden im Hintergrund hochgeladen — mit Fortschrittsbalken pro Datei und ohne feste Größenobergrenze; schlägt ein einzelner Video-/Audio-Upload fehl, bleibt der Bericht mit Text und Bildern trotzdem gespeichert, die betroffene Datei kann erneut versucht werden. Video-Anhänge erhalten automatisch ein Vorschaubild, Audio-Anhänge werden mit einem Noten-Symbol angezeigt. Beim Abspielen werden — sofern vorhanden — automatisch erkannte Untertitel eingeblendet, genau wie bei Videos in Ordnern.
 
 ### Erfahrungsberichte in Sammlungen
 

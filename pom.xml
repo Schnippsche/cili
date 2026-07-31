@@ -10,7 +10,7 @@
     </parent>
     <groupId>de.toengi</groupId>
     <artifactId>cili</artifactId>
-    <version>1.8</version>
+    <version>1.10</version>
     <packaging>war</packaging>
     <name>cili</name>
     <description>cili</description>
