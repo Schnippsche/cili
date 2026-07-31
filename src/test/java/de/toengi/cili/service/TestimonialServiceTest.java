@@ -85,10 +85,10 @@ class TestimonialServiceTest {
 
     @Test
     void create_savesWithCurrentUserId() {
-        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", "Tier", null);
+        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", false, true, null);
         var saved = Testimonial.builder()
             .id(1L).authorName("Max Mustermann").text("Sehr gute Erfahrung, gerne wieder.")
-            .source("Tier").userId(1L).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
+            .isHuman(false).isAnimal(true).userId(1L).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
         when(repository.save(any())).thenReturn(saved);
 
         var result = service.create(req, List.of());
@@ -99,8 +99,8 @@ class TestimonialServiceTest {
     }
 
     @Test
-    void create_withSource_persistsSourceOnEntity() {
-        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", "Mensch", null);
+    void create_withHumanCategory_persistsFlags() {
+        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", true, false, null);
         var captor = org.mockito.ArgumentCaptor.forClass(Testimonial.class);
         when(repository.save(captor.capture())).thenAnswer(inv -> {
             Testimonial t = inv.getArgument(0);
@@ -112,21 +112,31 @@ class TestimonialServiceTest {
 
         service.create(req, List.of());
 
-        assertThat(captor.getValue().getSource()).isEqualTo("Mensch");
+        assertThat(captor.getValue().isHuman()).isTrue();
+        assertThat(captor.getValue().isAnimal()).isFalse();
     }
 
     @Test
-    void create_withNullSource_throwsBadRequest() {
-        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", null, null);
+    void create_withBothCategories_persistsBothFlags() {
+        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", true, true, null);
+        var captor = org.mockito.ArgumentCaptor.forClass(Testimonial.class);
+        when(repository.save(captor.capture())).thenAnswer(inv -> {
+            Testimonial t = inv.getArgument(0);
+            t.setId(1L);
+            t.setCreatedAt(LocalDateTime.now());
+            t.setUpdatedAt(LocalDateTime.now());
+            return t;
+        });
 
-        assertThatThrownBy(() -> service.create(req, List.of()))
-            .isInstanceOf(CiliException.class)
-            .hasMessageContaining("source");
+        service.create(req, List.of());
+
+        assertThat(captor.getValue().isHuman()).isTrue();
+        assertThat(captor.getValue().isAnimal()).isTrue();
     }
 
     @Test
-    void create_withInvalidSource_throwsBadRequest() {
-        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", "InvalidSource", null);
+    void create_withNeitherCategory_throwsBadRequest() {
+        var req = new CreateTestimonialRequest("Max Mustermann", null, "Sehr gute Erfahrung, gerne wieder.", false, false, null);
 
         assertThatThrownBy(() -> service.create(req, List.of()))
             .isInstanceOf(CiliException.class)
@@ -165,9 +175,9 @@ class TestimonialServiceTest {
 
     @Test
     void update_byOwner_changesFields() {
-        var req = new UpdateTestimonialRequest("Neuer Name", null, "Aktualisierter Text mit mehr Inhalt.", "Mensch");
+        var req = new UpdateTestimonialRequest("Neuer Name", null, "Aktualisierter Text mit mehr Inhalt.", true, false);
         var t = Testimonial.builder().id(1L).userId(1L)
-            .authorName("Alter Name").text("Alter Text").source("Tier").build();
+            .authorName("Alter Name").text("Alter Text").isHuman(false).isAnimal(true).build();
         when(repository.findById(1L)).thenReturn(Optional.of(t));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -177,22 +187,38 @@ class TestimonialServiceTest {
     }
 
     @Test
-    void update_changesSource() {
-        var req = new UpdateTestimonialRequest("Max Mustermann", null, "Aktualisierter Text mit mehr Inhalt.", "Mensch");
+    void update_changesCategory() {
+        var req = new UpdateTestimonialRequest("Max Mustermann", null, "Aktualisierter Text mit mehr Inhalt.", true, false);
         var t = Testimonial.builder().id(1L).userId(1L)
-            .authorName("Max Mustermann").text("Alter Text").source("Tier").build();
+            .authorName("Max Mustermann").text("Alter Text").isHuman(false).isAnimal(true).build();
         when(repository.findById(1L)).thenReturn(Optional.of(t));
         var captor = org.mockito.ArgumentCaptor.forClass(Testimonial.class);
         when(repository.save(captor.capture())).thenAnswer(inv -> inv.getArgument(0));
 
         service.update(1L, req, List.of(), List.of());
 
-        assertThat(captor.getValue().getSource()).isEqualTo("Mensch");
+        assertThat(captor.getValue().isHuman()).isTrue();
+        assertThat(captor.getValue().isAnimal()).isFalse();
     }
 
     @Test
-    void update_withInvalidSource_throwsBadRequest() {
-        var req = new UpdateTestimonialRequest("Max Mustermann", null, "Aktualisierter Text mit mehr Inhalt.", "InvalidSource");
+    void update_changesToBothCategories_persistsBothFlags() {
+        var req = new UpdateTestimonialRequest("Max Mustermann", null, "Aktualisierter Text mit mehr Inhalt.", true, true);
+        var t = Testimonial.builder().id(1L).userId(1L)
+            .authorName("Max Mustermann").text("Alter Text").isHuman(true).isAnimal(false).build();
+        when(repository.findById(1L)).thenReturn(Optional.of(t));
+        var captor = org.mockito.ArgumentCaptor.forClass(Testimonial.class);
+        when(repository.save(captor.capture())).thenAnswer(inv -> inv.getArgument(0));
+
+        service.update(1L, req, List.of(), List.of());
+
+        assertThat(captor.getValue().isHuman()).isTrue();
+        assertThat(captor.getValue().isAnimal()).isTrue();
+    }
+
+    @Test
+    void update_withNeitherCategory_throwsBadRequest() {
+        var req = new UpdateTestimonialRequest("Max Mustermann", null, "Aktualisierter Text mit mehr Inhalt.", false, false);
         var t = Testimonial.builder().id(1L).userId(1L)
             .authorName("Max Mustermann").text("Alter Text").build();
         when(repository.findById(1L)).thenReturn(Optional.of(t));
@@ -229,7 +255,8 @@ class TestimonialServiceTest {
         service.list("testsuche", "Mensch", pageable);
 
         verify(repository).searchLike(List.of("testsuche"), "Mensch", pageable);
-        verify(repository, never()).findBySourceOrderByCreatedAtDesc(any(), any());
+        verify(repository, never()).findByIsHumanTrueOrderByCreatedAtDesc(any());
+        verify(repository, never()).findByIsAnimalTrueOrderByCreatedAtDesc(any());
     }
 
     @Test
@@ -242,15 +269,43 @@ class TestimonialServiceTest {
     }
 
     @Test
-    void list_withSource_delegatesToFindBySource() {
+    void list_withSourceMensch_delegatesToFindByIsHumanTrue() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(repository.findByIsHumanTrueOrderByCreatedAtDesc(pageable)).thenReturn(Page.empty());
+
+        service.list(null, "Mensch", pageable);
+
+        verify(repository).findByIsHumanTrueOrderByCreatedAtDesc(pageable);
+    }
+
+    @Test
+    void list_withSourceTier_delegatesToFindByIsAnimalTrue() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(repository.findByIsAnimalTrueOrderByCreatedAtDesc(pageable)).thenReturn(Page.empty());
+
+        service.list(null, "Tier", pageable);
+
+        verify(repository).findByIsAnimalTrueOrderByCreatedAtDesc(pageable);
+    }
+
+    @Test
+    void list_withUnknownSourceValue_returnsEmptyPageWithoutRepositoryCall() {
         Pageable pageable = PageRequest.of(0, 1);
-        when(repository.findBySourceOrderByCreatedAtDesc(eq("telegram-tiere"), eq(pageable)))
-            .thenReturn(Page.empty());
 
-        service.list(null, "telegram-tiere", pageable);
+        var result = service.list(null, "telegram-tiere", pageable);
 
-        verify(repository).findBySourceOrderByCreatedAtDesc("telegram-tiere", pageable);
-        verify(repository, never()).findAllByOrderByCreatedAtDesc(any(Pageable.class));
+        assertThat(result).isEmpty();
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void list_withUnknownSourceValueAndQuery_returnsEmptyPageWithoutRepositoryCall() {
+        Pageable pageable = PageRequest.of(0, 1);
+
+        var result = service.list("irgendwas", "telegram-tiere", pageable);
+
+        assertThat(result).isEmpty();
+        verifyNoInteractions(repository);
     }
 
     @Test
@@ -261,7 +316,8 @@ class TestimonialServiceTest {
         service.list(null, null, pageable);
 
         verify(repository).findAllByOrderByCreatedAtDesc(pageable);
-        verify(repository, never()).findBySourceOrderByCreatedAtDesc(any(), any());
+        verify(repository, never()).findByIsHumanTrueOrderByCreatedAtDesc(any());
+        verify(repository, never()).findByIsAnimalTrueOrderByCreatedAtDesc(any());
     }
 
     @Test
@@ -270,7 +326,7 @@ class TestimonialServiceTest {
         when(aclService.hasTestimonialsPermission(10L, AclPermission.WRITE)).thenReturn(false);
 
         assertThatThrownBy(() -> service.create(
-            new CreateTestimonialRequest("Name", null, "Text that is long enough", "Mensch", null), null))
+            new CreateTestimonialRequest("Name", null, "Text that is long enough", true, false, null), null))
             .isInstanceOf(AccessDeniedException.class);
     }
 

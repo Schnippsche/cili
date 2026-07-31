@@ -56,7 +56,7 @@ class TestimonialSearchIntegrationTest {
 
     private Testimonial saveTestimonial(String authorName, String text) {
         return testimonialRepository.save(Testimonial.builder()
-                .authorName(authorName).text(text).source("Mensch")
+                .authorName(authorName).text(text).isHuman(true).isAnimal(false)
                 .userId(adminUser.getId())
                 .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
                 .build());
