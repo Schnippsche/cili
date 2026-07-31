@@ -14,6 +14,11 @@ export interface TestimonialFormData {
   deleteAttachmentIds?: number[];
 }
 
+// `source` bleibt bewusst ein String-Filter ('Mensch'/'Tier'), unabhängig von den
+// human/animal-Booleans in TestimonialFormData/TestimonialDto: die Filter-Auswahl in der Liste
+// ist weiterhin einwertig, und scripts/telegram_import.py sendet als externer Client weiterhin
+// diesen Parameter beim Abfragen des letzten Imports. Backend übersetzt "Mensch"/"Tier" intern
+// inklusiv auf is_human/is_animal (siehe TestimonialService.list).
 export async function listTestimonials(params?: {
   q?: string;
   source?: 'Mensch' | 'Tier';
