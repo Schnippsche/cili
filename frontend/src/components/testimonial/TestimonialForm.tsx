@@ -196,7 +196,7 @@ const CHUNK_SIZE = 5 * 1024 * 1024;
 
 // Manche Browser/Betriebssysteme melden für .ogg/.oga/.ogv keinen oder einen generischen
 // File.type ('', 'application/ogg', 'application/octet-stream') statt 'audio/'/'video/' —
-// ohne diesen Fallback würde handleMediaFileChange solche Dateien stillschweigend verwerfen,
+// ohne diesen Fallback würde handleAttachmentFileChange solche Dateien stillschweigend verwerfen,
 // obwohl der Backend-Normalizer (UploadService.normalizeMimeType) sie korrekt erkennt.
 const MEDIA_EXTENSION_FALLBACK = /\.(ogg|oga|ogv|mkv|m4a|flac|opus|wma|3gp)$/i;
 
