@@ -65,7 +65,7 @@ public class CollectionController {
     public CollectionDto rename(@PathVariable Long id,
                                 @RequestBody CollectionNameRequest req,
                                 @AuthenticationPrincipal CiliUserDetails user) {
-        return collectionService.rename(user.getUserId(), user.getRole(), id, req.name());
+        return collectionService.rename(user.getUserId(), user.getRole(), id, req.name(), req.isTemplate());
     }
 
     @DeleteMapping("/api/collections/{id}")

@@ -98,7 +98,7 @@ public class CollectionService {
     }
 
     @Transactional
-    public CollectionDto rename(Long userId, UserRole role, Long collectionId, String newName) {
+    public CollectionDto rename(Long userId, UserRole role, Long collectionId, String newName, Boolean isTemplate) {
         Collection c = requireManageable(userId, role, collectionId);
         if (collectionRepo.existsByUserIdAndNameIgnoreCaseAndIdNot(userId, newName, collectionId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Eine Sammlung mit diesem Namen existiert bereits");

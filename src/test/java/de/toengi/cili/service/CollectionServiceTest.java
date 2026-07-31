@@ -180,14 +180,14 @@ class CollectionServiceTest {
         when(collectionRepo.save(any())).thenReturn(c);
         when(itemRepo.countByCollectionIdAndResourceIdIsNotNull(10L)).thenReturn(0L);
 
-        CollectionDto dto = service.rename(userId, UserRole.USER, 10L, "Neu");
+        CollectionDto dto = service.rename(userId, UserRole.USER, 10L, "Neu", null);
         assertThat(dto.name()).isEqualTo("Neu");
     }
 
     @Test
     void rename_foreignCollection_throws403() {
         when(collectionRepo.findByIdAndUserId(10L, otherUserId)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> service.rename(otherUserId, UserRole.USER, 10L, "x"))
+        assertThatThrownBy(() -> service.rename(otherUserId, UserRole.USER, 10L, "x", null))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("403");
     }
@@ -201,7 +201,7 @@ class CollectionServiceTest {
         when(collectionRepo.save(any())).thenReturn(template);
         when(itemRepo.countByCollectionIdAndResourceIdIsNotNull(10L)).thenReturn(0L);
 
-        CollectionDto dto = service.rename(userId, UserRole.ADMIN, 10L, "Neuer Name");
+        CollectionDto dto = service.rename(userId, UserRole.ADMIN, 10L, "Neuer Name", null);
         assertThat(dto).isNotNull();
     }
 
@@ -211,7 +211,7 @@ class CollectionServiceTest {
         when(collectionRepo.findByIdAndUserId(10L, userId)).thenReturn(Optional.empty());
         when(collectionRepo.findById(10L)).thenReturn(Optional.of(notTemplate));
 
-        assertThatThrownBy(() -> service.rename(userId, UserRole.ADMIN, 10L, "x"))
+        assertThatThrownBy(() -> service.rename(userId, UserRole.ADMIN, 10L, "x", null))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("403");
     }
