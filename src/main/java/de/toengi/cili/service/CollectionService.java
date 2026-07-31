@@ -103,7 +103,17 @@ public class CollectionService {
         if (collectionRepo.existsByUserIdAndNameIgnoreCaseAndIdNot(userId, newName, collectionId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Eine Sammlung mit diesem Namen existiert bereits");
         }
+        // Asymmetrisch zu create(): dort wird nur beim Setzen (isTemplate=true) geprüft.
+        // Hier wird bewusst auch das Entfernen des Vorlagen-Status (true -> false) geschützt,
+        // da eine bereits geteilte Vorlage genauso schützenswerten Zustand darstellt.
+        if (isTemplate != null && isTemplate != c.isTemplate()
+                && !aclService.hasCollectionsPermission(userId, AclPermission.MANAGE_TEMPLATES)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Keine Berechtigung, den Vorlagen-Status zu ändern");
+        }
         c.setName(newName);
+        if (isTemplate != null) {
+            c.setTemplate(isTemplate);
+        }
         c = collectionRepo.save(c);
         return toDto(c);
     }
