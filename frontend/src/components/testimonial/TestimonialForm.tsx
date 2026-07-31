@@ -273,7 +273,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
     if (tags.trim().length > 500) e.tags = 'Maximal 500 Zeichen';
     if (!text.trim() || text.trim().length < 10) e.text = 'Mindestens 10 Zeichen';
     else if (text.trim().length > 5000) e.text = 'Maximal 5000 Zeichen';
-    if (categories.length === 0) e.source = 'Bitte Mensch oder Tier auswählen';
+    if (categories.length === 0) e.source = 'Bitte mindestens eine Kategorie auswählen';
     setErrors(e);
     return Object.keys(e).length === 0;
   }
