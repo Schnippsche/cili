@@ -389,7 +389,17 @@ def get_cili_token() -> str:
 
 
 def get_last_cili_date(token: str) -> datetime | None:
-    """Gibt das createdAt des aktuellsten CILI-Erfahrungsberichts zurück (UTC, ohne tzinfo)."""
+    """Gibt das createdAt des aktuellsten CILI-Erfahrungsberichts zurück (UTC, ohne tzinfo).
+
+    Bekannte Einschränkung: der source-Filter ist seit der Mensch/Tier-Mehrfachauswahl
+    inklusiv (ein Bericht mit BEIDEN Kategorien erscheint unter source=Mensch UND
+    source=Tier). Ein manuell im Admin-UI angelegter Bericht mit beiden Kategorien und
+    einem sehr aktuellen createdAt kann daher den Cutoff für BEIDE Telegram-Quellen
+    gleichzeitig künstlich nach vorne verschieben (vorher konnte ein manueller Eintrag
+    nur die einzelne Quelle beeinflussen, der er zugeordnet war). Bereits vor dieser
+    Erweiterung bestehende, grundsätzliche Charakteristik dieses Cutoff-Mechanismus
+    (max. aus State-Datei und letztem Testimonial-Datum), keine neue Fehlerklasse.
+    """
     resp = _http_get_with_retry(
         f"{CILI_URL}/api/testimonials",
         headers={"Authorization": f"Bearer {token}"},
