@@ -21,7 +21,7 @@ function renderForm(props: Parameters<typeof TestimonialForm>[0]) {
 test('renders form with empty fields when no initial value', () => {
   const mockSave = vi.fn().mockResolvedValue({
     id: 1, authorName: '', tags: null, text: '', userId: 1,
-    source: 'Mensch', createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00', attachments: [],
+    human: true, animal: false, createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00', attachments: [],
   });
   renderForm({ open: true, onSave: mockSave, onClose: vi.fn() });
   expect(screen.getByLabelText('Name')).toHaveValue('');
@@ -31,7 +31,7 @@ test('renders form with empty fields when no initial value', () => {
 test('pre-fills fields when editing an existing entry', () => {
   const initial = {
     id: 1, authorName: 'Anna', tags: null, text: 'Super Erfahrung!', userId: 1,
-    source: 'Mensch', createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00', attachments: [],
+    human: true, animal: false, createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00', attachments: [],
   };
   const mockSave = vi.fn().mockResolvedValue(initial);
   renderForm({ open: true, initial, onSave: mockSave, onClose: vi.fn() });
@@ -61,7 +61,7 @@ describe('Anhänge-Upload (vereinheitlicht)', () => {
   function baseSave() {
     return vi.fn().mockResolvedValue({
       id: 1, authorName: '', tags: null, text: '', userId: 1,
-      source: 'Mensch', createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00', attachments: [],
+      human: true, animal: false, createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00', attachments: [],
     });
   }
 
@@ -99,7 +99,7 @@ describe('Anhänge-Upload (vereinheitlicht)', () => {
   test('rendert Kacheln gruppiert: bestehende Anhänge, dann neue Bilder, dann neue Video/Audio', async () => {
     const initial = {
       id: 1, authorName: 'Anna', tags: null, text: 'Super Erfahrung!', userId: 1,
-      source: 'Mensch', createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00',
+      human: true, animal: false, createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00',
       attachments: [
         { id: 10, originalName: 'bestand.jpg', mimeType: 'image/jpeg', size: 100, createdAt: '2026-05-31T10:00:00', thumbnailStatus: null, storedName: null },
         { id: 11, originalName: 'bestand.mp4', mimeType: 'video/mp4', size: 100, createdAt: '2026-05-31T10:00:00', thumbnailStatus: 'DONE' as const, storedName: 'stored.mp4' },
@@ -155,7 +155,7 @@ describe('Anhänge-Upload (vereinheitlicht)', () => {
 
     const savedTestimonial = {
       id: 5, authorName: 'Anna', tags: null, text: 'Super Erfahrung!', userId: 1,
-      source: 'Mensch', createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00', attachments: [],
+      human: true, animal: false, createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00', attachments: [],
     };
     const onSave = vi.fn().mockResolvedValue(savedTestimonial);
     renderForm({
@@ -181,7 +181,7 @@ describe('Anhänge-Upload (vereinheitlicht)', () => {
 
     const savedTestimonial = {
       id: 6, authorName: 'Anna', tags: null, text: 'Super Erfahrung! 1234567890', userId: 1,
-      source: 'Mensch', createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00', attachments: [],
+      human: true, animal: false, createdAt: '2026-05-31T10:00:00', updatedAt: '2026-05-31T10:00:00', attachments: [],
     };
     const onSave = vi.fn().mockResolvedValue(savedTestimonial);
     renderForm({ open: true, initial: savedTestimonial, onSave, onClose: vi.fn() });

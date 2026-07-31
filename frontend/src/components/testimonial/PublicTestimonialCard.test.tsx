@@ -6,7 +6,8 @@ import type { PublicTestimonialDto } from '../../types/api';
 const base: PublicTestimonialDto = {
   id: 1, authorName: 'Erika Muster', tags: null,
   text: 'Sehr empfehlenswert!',
-  source: 'Mensch',
+  human: true,
+  animal: false,
   createdAt: '2026-06-01T10:00:00', updatedAt: '2026-06-01T10:00:00',
   attachments: [],
 };

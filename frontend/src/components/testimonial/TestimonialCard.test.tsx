@@ -17,7 +17,8 @@ const mockTestimonial: TestimonialDto = {
   tags: null,
   text: 'Das war eine tolle Erfahrung.',
   userId: 1,
-  source: 'Mensch',
+  human: true,
+  animal: false,
   createdAt: '2026-05-31T10:00:00',
   updatedAt: '2026-05-31T10:00:00',
   attachments: [],
@@ -83,6 +84,12 @@ describe('TestimonialCard', () => {
     renderCard({ canDelete: false });
     expect(screen.getByRole('button', { name: /bearbeiten/i })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /löschen/i })).not.toBeInTheDocument();
+  });
+
+  test('zeigt beide Chips, wenn human und animal gesetzt sind', () => {
+    renderCard({ testimonial: { ...mockTestimonial, human: true, animal: true } });
+    expect(screen.getByText('Mensch')).toBeInTheDocument();
+    expect(screen.getByText('Tier')).toBeInTheDocument();
   });
 
   test('shows mehr-anzeigen toggle when text exceeds 200 chars', () => {
