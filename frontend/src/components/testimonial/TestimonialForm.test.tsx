@@ -75,7 +75,7 @@ describe('Anhänge-Upload (vereinheitlicht)', () => {
     expect(document.body.querySelectorAll('input[type="file"]')).toHaveLength(1);
     expect(screen.getByRole('button', { name: 'Bilder, Video oder Audio hinzufügen' })).toBeInTheDocument();
     const input = screen.getByTestId('attachment-input') as HTMLInputElement;
-    expect(input.accept).toBe('image/*,video/*,audio/*');
+    expect(input.accept).toBe('image/jpeg,image/png,image/gif,image/webp,image/bmp,video/*,audio/*');
     expect(input.multiple).toBe(true);
   });
 

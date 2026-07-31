@@ -428,7 +428,8 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
                 </IconButton>
               </Tooltip>
             </Stack>
-            <input ref={attachmentInputRef} type="file" accept="image/*,video/*,audio/*" multiple hidden
+            <input ref={attachmentInputRef} type="file"
+                   accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,video/*,audio/*" multiple hidden
                    data-testid="attachment-input"
                    onChange={handleAttachmentFileChange}/>
             {(existingAttachments.length > 0 || newFiles.length > 0 || newMediaFiles.length > 0) && (
