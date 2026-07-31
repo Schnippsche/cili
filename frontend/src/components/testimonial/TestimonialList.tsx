@@ -182,7 +182,14 @@ export default function TestimonialList({canWrite, canDelete, highlightId}: Read
               setPage(0);
             }}
             size="small"
-            sx={{mb: 2}}
+            sx={{
+              mb: 2,
+              '& .MuiToggleButton-root.Mui-selected': {
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                '&:hover': {bgcolor: 'primary.dark'},
+              },
+            }}
         >
           <ToggleButton value="">Beide</ToggleButton>
           <ToggleButton value="Mensch">Mensch</ToggleButton>

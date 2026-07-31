@@ -403,7 +403,14 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
               value={categories}
               onChange={(_, val: string[]) => setCategories(val)}
               size="small"
-              sx={{mb: 2}}
+              sx={{
+                mb: 2,
+                '& .MuiToggleButton-root.Mui-selected': {
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText',
+                  '&:hover': {bgcolor: 'primary.dark'},
+                },
+              }}
           >
             <ToggleButton value="Mensch">Mensch</ToggleButton>
             <ToggleButton value="Tier">Tier</ToggleButton>
