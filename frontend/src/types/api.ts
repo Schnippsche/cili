@@ -112,7 +112,8 @@ export interface TestimonialDto {
   authorName: string;
   tags: string | null;
   text: string;
-  source: string;
+  human: boolean;
+  animal: boolean;
   userId: number;
   createdAt: string;
   updatedAt: string;
@@ -124,7 +125,8 @@ export interface PublicTestimonialDto {
   authorName: string;
   tags: string | null;
   text: string;
-  source: string;
+  human: boolean;
+  animal: boolean;
   createdAt: string;
   updatedAt: string;
   attachments: TestimonialAttachmentDto[];
@@ -134,14 +136,16 @@ export interface CreateTestimonialRequest {
   authorName: string;
   tags: string | null;
   text: string;
-  source: string;
+  human: boolean;
+  animal: boolean;
 }
 
 export interface UpdateTestimonialRequest {
   authorName: string;
   tags: string | null;
   text: string;
-  source: string;
+  human: boolean;
+  animal: boolean;
 }
 
 export interface TestimonialSearchHitDto {
@@ -149,7 +153,8 @@ export interface TestimonialSearchHitDto {
   authorName: string;
   tags: string | null;
   text: string;
-  source: string | null;
+  human: boolean;
+  animal: boolean;
   createdAt: string;
 }
 

@@ -8,7 +8,8 @@ export interface TestimonialFormData {
   authorName: string;
   tags: string | null;
   text: string;
-  source: 'Mensch' | 'Tier';
+  human: boolean;
+  animal: boolean;
   images?: File[];
   deleteAttachmentIds?: number[];
 }
@@ -31,7 +32,8 @@ function buildFormData(form: TestimonialFormData): FormData {
   fd.append('authorName', form.authorName);
   if (form.tags) fd.append('tags', form.tags);
   fd.append('text', form.text);
-  fd.append('source', form.source);
+  fd.append('human', String(form.human));
+  fd.append('animal', String(form.animal));
   form.images?.forEach(f => fd.append('images', f));
   form.deleteAttachmentIds?.forEach(id => fd.append('deleteAttachmentIds', String(id)));
   return fd;
