@@ -440,15 +440,18 @@ CREATE TABLE IF NOT EXISTS `testimonials`
     `id`          bigint                                  NOT NULL AUTO_INCREMENT,
     `author_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     `text`        text COLLATE utf8mb4_unicode_ci         NOT NULL,
+    `is_human`    tinyint(1)                              NOT NULL,
+    `is_animal`   tinyint(1)                              NOT NULL,
     `tags`        varchar(500) COLLATE utf8mb4_unicode_ci          DEFAULT NULL,
-    `source`      varchar(100) COLLATE utf8mb4_unicode_ci          DEFAULT NULL,
     `user_id`     bigint                                  NOT NULL,
     `created_at`  datetime(6)                             NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     `updated_at`  datetime(6)                             NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     PRIMARY KEY (`id`),
     KEY `idx_testimonials_user` (`user_id`),
     FULLTEXT KEY `ft_testimonials` (`author_name`, `text`, `tags`),
-    CONSTRAINT `fk_testimonials_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    CONSTRAINT `fk_testimonials_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+    CONSTRAINT `chk_testimonials_category` CHECK ((
+        `is_human` = 1 OR `is_animal` = 1))
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1006
   DEFAULT CHARSET = utf8mb4
