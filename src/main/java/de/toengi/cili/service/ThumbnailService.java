@@ -250,6 +250,10 @@ public class ThumbnailService {
             cmd.add("-vf");
             cmd.add(scaleFilter);
         }
+        // image2-Muxer erwartet ohne -update sonst ein Sequenz-Pattern (z.B. %03d) und
+        // warnt andernfalls bei jedem Einzelbild-Export, obwohl die Ausgabe korrekt ist.
+        cmd.add("-update");
+        cmd.add("1");
         cmd.add(output.toString());
         log.debug("[THUMBNAIL] FFmpeg image command: {}", cmd);
         int rc = commandRunner.run(cmd);
