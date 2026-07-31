@@ -334,7 +334,7 @@ Die Kopie ist sofort verfügbar und vollständig unabhängig vom Original. Auch 
 
 ### Sammlung umbenennen
 
-Klicke auf das **Bearbeiten-Symbol** (Stift) einer Sammlung, trage den neuen Namen ein und bestätige mit **Speichern**. Der Name muss eindeutig sein.
+Klicke auf das **Bearbeiten-Symbol** (Stift) einer Sammlung, trage den neuen Namen ein und bestätige mit **Speichern**. Der Name muss eindeutig sein. Wenn du berechtigt bist, Vorlagen zu erstellen (siehe unten), kannst du im selben Dialog auch die Option **Als Vorlage markieren** setzen oder entfernen.
 
 ### Dateien zu einer Sammlung hinzufügen
 
