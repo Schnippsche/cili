@@ -227,7 +227,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
   const [authorName, setAuthorName] = useState('');
   const [tags, setTags] = useState('');
   const [text, setText] = useState('');
-  const [source, setSource] = useState<'Mensch' | 'Tier' | ''>('');
+  const [categories, setCategories] = useState<string[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
   const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
@@ -244,7 +244,10 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
       setAuthorName(initial?.authorName ?? '');
       setTags(initial?.tags ?? '');
       setText(initial?.text ?? '');
-      setSource((initial?.source as 'Mensch' | 'Tier' | undefined) ?? '');
+      setCategories([
+        ...(initial?.human ? ['Mensch'] : []),
+        ...(initial?.animal ? ['Tier'] : []),
+      ]);
       setNewFiles([]);
       setNewPreviews([]);
       setNewMediaFiles([]);
@@ -270,7 +273,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
     if (tags.trim().length > 500) e.tags = 'Maximal 500 Zeichen';
     if (!text.trim() || text.trim().length < 10) e.text = 'Mindestens 10 Zeichen';
     else if (text.trim().length > 5000) e.text = 'Maximal 5000 Zeichen';
-    if (!source) e.source = 'Bitte Mensch oder Tier auswählen';
+    if (categories.length === 0) e.source = 'Bitte Mensch oder Tier auswählen';
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -320,7 +323,8 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
         authorName: authorName.trim(),
         tags: tags.trim() || null,
         text: text.trim(),
-        source: source as 'Mensch' | 'Tier',
+        human: categories.includes('Mensch'),
+        animal: categories.includes('Tier'),
         images: newFiles,
         deleteAttachmentIds,
       });
@@ -396,9 +400,8 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
               fullWidth sx={{mt: 1, mb: 2}}
           />
           <ToggleButtonGroup
-              value={source}
-              exclusive
-              onChange={(_, val) => val && setSource(val)}
+              value={categories}
+              onChange={(_, val: string[]) => setCategories(val)}
               size="small"
               sx={{mb: 2}}
           >
