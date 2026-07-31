@@ -51,8 +51,6 @@ public class TestimonialService {
     private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
         "image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp"
     );
-    private static final Set<String> VALID_SOURCES = Set.of("Mensch", "Tier");
-
     private final TestimonialRepository repository;
     private final ResourceRepository resourceRepository;
     private final StorageService storageService;
@@ -68,13 +66,16 @@ public class TestimonialService {
         if (!aclService.hasTestimonialsPermission(user.getUserId(), AclPermission.READ)) {
             throw new AccessDeniedException("Kein Zugriff auf Erfahrungsberichte");
         }
+        if (source != null && !source.isBlank()
+                && !"Mensch".equals(source) && !"Tier".equals(source)) {
+            return Page.empty(pageable);
+        }
         if (q != null && !q.isBlank()) {
             log.info("Erfahrungsberichte-Suche: user='{}' query='{}'", user.getUsername(), q.trim());
             return repository.searchLike(parseTerms(q), source, pageable).map(this::toDto);
         }
-        if (source != null && !source.isBlank()) {
-            return repository.findBySourceOrderByCreatedAtDesc(source, pageable).map(this::toDto);
-        }
+        if ("Mensch".equals(source)) return repository.findByIsHumanTrueOrderByCreatedAtDesc(pageable).map(this::toDto);
+        if ("Tier".equals(source))   return repository.findByIsAnimalTrueOrderByCreatedAtDesc(pageable).map(this::toDto);
         return repository.findAllByOrderByCreatedAtDesc(pageable).map(this::toDto);
     }
 
@@ -96,12 +97,13 @@ public class TestimonialService {
             throw new AccessDeniedException("Keine Berechtigung zum Erstellen");
         }
         validate(req.authorName(), req.text());
-        validateSource(req.source());
+        validateCategory(req.human(), req.animal());
         Testimonial t = Testimonial.builder()
             .authorName(req.authorName().trim())
             .tags(req.tags() != null && !req.tags().isBlank() ? req.tags().trim() : null)
             .text(req.text().trim())
-            .source(req.source())
+            .isHuman(req.human())
+            .isAnimal(req.animal())
             .userId(user.getUserId())
             .createdAt(req.createdAt())
             .build();
@@ -119,13 +121,14 @@ public class TestimonialService {
             throw new AccessDeniedException("Keine Berechtigung zum Bearbeiten");
         }
         validate(req.authorName(), req.text());
-        validateSource(req.source());
+        validateCategory(req.human(), req.animal());
         Testimonial t = findOrThrow(id);
         checkOwnerOrAdmin(t);
         t.setAuthorName(req.authorName().trim());
         t.setTags(req.tags() != null && !req.tags().isBlank() ? req.tags().trim() : null);
         t.setText(req.text().trim());
-        t.setSource(req.source());
+        t.setHuman(req.human());
+        t.setAnimal(req.animal());
         if (deleteResourceIds != null) {
             deleteResourceIds.forEach(resourceId ->
                 resourceRepository.findById(resourceId)
@@ -258,11 +261,10 @@ public class TestimonialService {
             throw new CiliException("Text muss mindestens 10 Zeichen lang sein", HttpStatus.BAD_REQUEST);
     }
 
-    private void validateSource(String source) {
-        if (source == null || source.isBlank())
-            throw new CiliException("source ist erforderlich; muss 'Mensch' oder 'Tier' sein", HttpStatus.BAD_REQUEST);
-        if (!VALID_SOURCES.contains(source))
-            throw new CiliException("source muss 'Mensch' oder 'Tier' sein", HttpStatus.BAD_REQUEST);
+    private void validateCategory(boolean human, boolean animal) {
+        if (!human && !animal) {
+            throw new CiliException("Mindestens eine Kategorie (Mensch oder Tier) muss ausgewählt sein", HttpStatus.BAD_REQUEST);
+        }
     }
 
     private Testimonial findOrThrow(Long id) {
@@ -290,7 +292,7 @@ public class TestimonialService {
             .map(r -> toAttachmentDto(r, thumbsByResourceId.get(r.getId())))
             .toList();
         return new TestimonialDto(
-            t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.getSource(),
+            t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.isHuman(), t.isAnimal(),
             t.getUserId(), t.getCreatedAt(), t.getUpdatedAt(), attachments);
     }
 
@@ -344,7 +346,7 @@ public class TestimonialService {
             .map(r -> toAttachmentDto(r, thumbsByResourceId.get(r.getId())))
             .toList();
         return new PublicTestimonialDto(
-            t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.getSource(),
+            t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.isHuman(), t.isAnimal(),
             t.getCreatedAt(), t.getUpdatedAt(), attachments);
     }
 

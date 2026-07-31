@@ -7,6 +7,7 @@ public record TestimonialSearchHitDto(
     String authorName,
     String tags,
     String text,
-    String source,
+    boolean human,
+    boolean animal,
     LocalDateTime createdAt
 ) {}

@@ -21,8 +21,11 @@ public class Testimonial {
     @Column(length = 500)
     private String tags;
 
-    @Column(length = 100)
-    private String source;
+    @Column(name = "is_human", nullable = false)
+    private boolean isHuman;
+
+    @Column(name = "is_animal", nullable = false)
+    private boolean isAnimal;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String text;

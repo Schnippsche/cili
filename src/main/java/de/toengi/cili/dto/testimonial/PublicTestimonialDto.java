@@ -8,7 +8,8 @@ public record PublicTestimonialDto(
     String authorName,
     String tags,
     String text,
-    String source,
+    boolean human,
+    boolean animal,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
     List<TestimonialAttachmentDto> attachments

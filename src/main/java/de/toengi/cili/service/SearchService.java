@@ -157,7 +157,7 @@ public class SearchService {
         Pageable tPageable = PageRequest.of(testimonialPage, TESTIMONIAL_PAGE_SIZE);
         return testimonialRepository.searchLike(terms, null, tPageable)
                 .map(t -> new TestimonialSearchHitDto(
-                    t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.getSource(), t.getCreatedAt()));
+                    t.getId(), t.getAuthorName(), t.getTags(), t.getText(), t.isHuman(), t.isAnimal(), t.getCreatedAt()));
     }
 
     public FacetsResponse getFacets(String q) {

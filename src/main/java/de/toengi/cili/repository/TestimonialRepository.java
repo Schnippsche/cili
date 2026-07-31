@@ -13,7 +13,9 @@ public interface TestimonialRepository extends JpaRepository<Testimonial, Long>,
 
     Page<Testimonial> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
-    Page<Testimonial> findBySourceOrderByCreatedAtDesc(String source, Pageable pageable);
+    Page<Testimonial> findByIsHumanTrueOrderByCreatedAtDesc(Pageable pageable);
+
+    Page<Testimonial> findByIsAnimalTrueOrderByCreatedAtDesc(Pageable pageable);
 
     List<Testimonial> findAllByOrderByCreatedAtDesc();
 

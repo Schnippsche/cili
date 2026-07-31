@@ -55,8 +55,10 @@ public class TestimonialRepositoryImpl implements TestimonialRepositoryCustom {
                 + "            WHERE res.testimonial_id = testimonials.id AND LOWER(st.text_content) LIKE ?" + (base + 3) + ")"
                 + ")");
         }
-        if (source != null && !source.isBlank()) {
-            clauses.add("source = ?" + (terms.size() * 4 + 1));
+        if ("Mensch".equals(source)) {
+            clauses.add("is_human = 1");
+        } else if ("Tier".equals(source)) {
+            clauses.add("is_animal = 1");
         }
         if (clauses.isEmpty()) return "";
         return "WHERE " + String.join(" AND ", clauses);
@@ -71,8 +73,8 @@ public class TestimonialRepositoryImpl implements TestimonialRepositoryCustom {
             query.setParameter(base + 2, pattern);
             query.setParameter(base + 3, pattern);
         }
-        if (source != null && !source.isBlank()) {
-            query.setParameter(terms.size() * 4 + 1, source);
-        }
+        // Kein Parameter-Binding mehr für source nötig — "Mensch"/"Tier" werden
+        // in buildWhere() als literale Spalten-Klauseln (is_human=1/is_animal=1)
+        // eingefügt, nicht als Query-Parameter.
     }
 }
