@@ -61,6 +61,13 @@ public class TestimonialService {
 
     @PreAuthorize("isAuthenticated()")
     @Transactional(readOnly = true)
+    // "source" bleibt als String-Filter-Parameter erhalten (statt auf zwei Boolean-Params
+    // umgestellt zu werden), da scripts/telegram_import.py als externer API-Client weiterhin
+    // exakt "Mensch"/"Tier" sendet. Semantik hat sich geändert: früher exakter Spaltenvergleich,
+    // jetzt "hat dieses Flag gesetzt" (inklusiv — ein Bericht mit beiden Flags erscheint unter
+    // beiden Filterwerten). Die Validierung MUSS vor der q-Verzweigung erfolgen, sonst würde ein
+    // unbekannter source-Wert (z.B. veraltetes "Menschen") in Kombination mit einer Suchanfrage q
+    // ungefiltert an searchLike() durchgereicht statt eine leere Seite zu liefern.
     public Page<TestimonialDto> list(String q, String source, Pageable pageable) {
         CiliUserDetails user = currentUser();
         if (!aclService.hasTestimonialsPermission(user.getUserId(), AclPermission.READ)) {
@@ -68,6 +75,7 @@ public class TestimonialService {
         }
         if (source != null && !source.isBlank()
                 && !"Mensch".equals(source) && !"Tier".equals(source)) {
+            log.debug("Erfahrungsberichte-Filter: unbekannter source-Wert '{}' -> leere Seite", source);
             return Page.empty(pageable);
         }
         if (q != null && !q.isBlank()) {

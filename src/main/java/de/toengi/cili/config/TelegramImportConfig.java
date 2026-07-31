@@ -33,7 +33,7 @@ public class TelegramImportConfig {
 
     @Getter @Setter
     public static class Source {
-        /** Stabiler Bezeichner — identisch zu TG_SOURCE im Skript und ProcessingJob.source/Testimonial.source */
+        /** Stabiler Bezeichner — identisch zu TG_SOURCE im Skript und ProcessingJob.source (Testimonial.source existiert seit der Mensch/Tier-Mehrfachauswahl nicht mehr, siehe isHuman/isAnimal) */
         private String name;
 
         /** Anzeige-Label fürs Admin-Frontend */
