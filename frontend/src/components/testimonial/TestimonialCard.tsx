@@ -130,11 +130,8 @@ export default function TestimonialCard({ testimonial, currentUserId, isAdmin, c
         {/* Zeile 1: Author links, Aktionsbuttons rechts */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Stack direction="row" alignItems="center" gap={1}>
-            {testimonial.source === 'Tier' ? (
-              <Chip icon={<PetsIcon />} label="Tier" size="small" color="success" />
-            ) : (
-              <Chip icon={<PersonIcon />} label="Mensch" size="small" color="primary" />
-            )}
+            {testimonial.human && <Chip icon={<PersonIcon />} label="Mensch" size="small" color="primary" />}
+            {testimonial.animal && <Chip icon={<PetsIcon />} label="Tier" size="small" color="success" />}
             <Typography variant="subtitle1" fontWeight="bold">{testimonial.authorName}</Typography>
           </Stack>
           <Box sx={{ flexShrink: 0, ml: 1 }}>

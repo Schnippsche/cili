@@ -103,11 +103,8 @@ export default function PublicTestimonialCard({ testimonial }: Readonly<Props>) 
     <Card variant="outlined" sx={{ mb: 2 }}>
       <CardContent>
         <Stack direction="row" alignItems="center" gap={1}>
-          {testimonial.source === 'Tier' ? (
-            <Chip icon={<PetsIcon />} label="Tier" size="small" color="success" />
-          ) : (
-            <Chip icon={<PersonIcon />} label="Mensch" size="small" color="primary" />
-          )}
+          {testimonial.human && <Chip icon={<PersonIcon />} label="Mensch" size="small" color="primary" />}
+          {testimonial.animal && <Chip icon={<PetsIcon />} label="Tier" size="small" color="success" />}
           <Typography variant="subtitle1" fontWeight="bold">{testimonial.authorName}</Typography>
         </Stack>
 

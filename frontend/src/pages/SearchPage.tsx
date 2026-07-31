@@ -216,11 +216,8 @@ export default function SearchPage() {
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                                 <span>{t.authorName}</span>
                                 <Chip label="Testimonial" size="small" variant="outlined" color="secondary" />
-                                {t.source === 'Tier' ? (
-                                  <Chip icon={<PetsIcon />} label="Tier" size="small" color="success" />
-                                ) : t.source === 'Mensch' ? (
-                                  <Chip icon={<PersonIcon />} label="Mensch" size="small" color="primary" />
-                                ) : null}
+                                {t.human && <Chip icon={<PersonIcon />} label="Mensch" size="small" color="primary" />}
+                                {t.animal && <Chip icon={<PetsIcon />} label="Tier" size="small" color="success" />}
                                 {t.tags?.split(',').map(tag => tag.trim()).filter(Boolean).map(tag => (
                                   <Chip key={tag} label={tag} size="small" color="info" sx={{ opacity: 0.85 }} />
                                 ))}
