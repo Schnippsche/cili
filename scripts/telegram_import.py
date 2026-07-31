@@ -98,7 +98,9 @@ MAX_RUNTIME_MINUTES  = float(os.getenv("MAX_RUNTIME_MINUTES", "45"))
 WEBINAR_FOLDER_ID  = os.getenv("WEBINAR_FOLDER_ID", "")
 WEBINAR_MAX_HEIGHT = int(os.getenv("WEBINAR_MAX_HEIGHT", "720"))
 
-TG_SOURCE   = os.getenv("TG_SOURCE", "")   # eindeutiger Bezeichner dieser Quelle, z.B. "telegram-tiere"
+TG_SOURCE   = os.getenv("TG_SOURCE", "")   # muss exakt "Mensch" oder "Tier" sein
+TG_IS_HUMAN = TG_SOURCE == "Mensch"
+TG_IS_ANIMAL = TG_SOURCE == "Tier"
 
 # Bewusst NICHT pro Quelle aufgeteilt — alle Telegram-Quellen nutzen denselben Account
 # und damit dieselbe Telethon-Session. Zwei Prozesse dürfen diese Datei nie gleichzeitig
@@ -408,7 +410,8 @@ def post_testimonial(token: str, author: str, text: str, tags: str,
         "authorName": author[:200],
         "text": text[:50000],
         "createdAt": created_at.strftime("%Y-%m-%dT%H:%M:%S"),
-        "source": TG_SOURCE,
+        "human": "true" if TG_IS_HUMAN else "false",
+        "animal": "true" if TG_IS_ANIMAL else "false",
     }
     if tags:
         data["tags"] = tags[:500]
@@ -449,6 +452,8 @@ def _validate_config() -> None:
         sys.exit("Fehler: TG_GROUP muss gesetzt sein (Gruppenname, -link oder numerische ID).")
     if not TG_SOURCE:
         sys.exit("Fehler: TG_SOURCE muss gesetzt sein (eindeutiger Bezeichner dieser Quelle, z.B. 'telegram-tiere').")
+    if not TG_IS_HUMAN and not TG_IS_ANIMAL:
+        sys.exit(f"Fehler: TG_SOURCE muss 'Mensch' oder 'Tier' sein (aktuell: '{TG_SOURCE}').")
 
 
 async def _resolve_group(client: TelegramClient):
