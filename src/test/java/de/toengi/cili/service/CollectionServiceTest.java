@@ -419,8 +419,8 @@ class CollectionServiceTest {
         Collection c = Collection.builder().id(10L).userId(userId).name("T").build();
         CollectionItem item1 = CollectionItem.builder().collectionId(10L).testimonialId(1L).build();
         CollectionItem item2 = CollectionItem.builder().collectionId(10L).testimonialId(2L).build();
-        TestimonialDto dto1 = new TestimonialDto(1L, "A", null, "textA", "Mensch", userId, LocalDateTime.now(), LocalDateTime.now(), List.of());
-        TestimonialDto dto2 = new TestimonialDto(2L, "B", null, "textB", "Mensch", userId, LocalDateTime.now(), LocalDateTime.now(), List.of());
+        TestimonialDto dto1 = new TestimonialDto(1L, "A", null, "textA", true, false, userId, LocalDateTime.now(), LocalDateTime.now(), List.of());
+        TestimonialDto dto2 = new TestimonialDto(2L, "B", null, "textB", true, false, userId, LocalDateTime.now(), LocalDateTime.now(), List.of());
 
         when(collectionRepo.findByIdAndUserId(10L, userId)).thenReturn(Optional.of(c));
         when(aclService.hasTestimonialsPermission(userId, AclPermission.READ)).thenReturn(true);

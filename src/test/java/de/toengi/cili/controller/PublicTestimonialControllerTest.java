@@ -35,7 +35,7 @@ class PublicTestimonialControllerTest {
     @Test
     void listAll_delegatesToService() {
         PublicTestimonialDto dto = new PublicTestimonialDto(
-            1L, "Anna", null, "Super Erfahrung", null,
+            1L, "Anna", null, "Super Erfahrung", true, false,
             LocalDateTime.now(), LocalDateTime.now(), List.of());
         when(testimonialService.listAllPublic(any(Pageable.class))).thenReturn(List.of(dto));
 
