@@ -73,6 +73,7 @@ resize_videos.ps1
 
 ### Planning docs ###
 docs/superpowers/
+.superpowers/
 /scripts/youtube-cookies.txt
 
 ### Secrets & personal data ###
