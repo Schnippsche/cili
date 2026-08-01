@@ -1,17 +1,17 @@
 import axiosClient from './axiosClient';
-import { BASE } from './base';
-import type { ShareTokenDto, ShareConfigDto, ShareInfoDto } from '../types/api';
+import {BASE} from './base';
+import type {ShareConfigDto, ShareInfoDto, ShareTokenDto} from '../types/api';
 
 export async function createShare(resourceId: number): Promise<ShareTokenDto> {
-  const { data } = await axiosClient.post<ShareTokenDto>(`/resources/${resourceId}/share`);
+  const {data} = await axiosClient.post<ShareTokenDto>(`/resources/${resourceId}/share`);
   return data;
 }
 
 // 200 = token exists, 204 = no token
 export async function getShare(resourceId: number): Promise<ShareTokenDto | null> {
-  const { status, data } = await axiosClient.get<ShareTokenDto>(
-    `/resources/${resourceId}/share`,
-    { validateStatus: s => s === 200 || s === 204 },
+  const {status, data} = await axiosClient.get<ShareTokenDto>(
+      `/resources/${resourceId}/share`,
+      {validateStatus: s => s === 200 || s === 204},
   );
   return status === 200 ? data : null;
 }
@@ -21,13 +21,17 @@ export async function revokeShare(resourceId: number): Promise<void> {
 }
 
 export async function getShareConfig(): Promise<ShareConfigDto> {
-  const { data } = await axiosClient.get<ShareConfigDto>('/share/config');
+  const {data} = await axiosClient.get<ShareConfigDto>('/share/config');
   return data;
 }
 
 // Intentionally uses native fetch — axiosClient injects JWT and has a refresh interceptor
 // that would trigger an unwanted logout on the public share page.
-export class ShareExpiredError extends Error { constructor() { super('EXPIRED'); } }
+export class ShareExpiredError extends Error {
+  constructor() {
+    super('EXPIRED');
+  }
+}
 
 export async function getShareInfo(token: string): Promise<ShareInfoDto> {
   const res = await fetch(`${BASE}/api/share/${token}/info`);

@@ -1,8 +1,8 @@
-import { useCallback, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { completeUpload, initUpload, uploadChunk } from '../api/upload';
-import { getResource, uploadSubtitle } from '../api/resources';
-import type { ResourceDto } from '../types/api';
+import {useCallback, useState} from 'react';
+import {useQueryClient} from '@tanstack/react-query';
+import {completeUpload, initUpload, uploadChunk} from '../api/upload';
+import {getResource, uploadSubtitle} from '../api/resources';
+import type {ResourceDto} from '../types/api';
 
 const CHUNK_SIZE = 5 * 1024 * 1024;
 const SUBTITLE_EXTS = new Set(['srt', 'vtt']);
@@ -77,15 +77,22 @@ export function useUpload(folderId: number) {
   const qc = useQueryClient();
 
   const update = (id: string, patch: Partial<UploadEntry>) =>
-    setUploads(prev => prev.map(u => u.id === id ? { ...u, ...patch } : u));
+      setUploads(prev => prev.map(u => u.id === id ? {...u, ...patch} : u));
 
   const doSubtitleUpload = useCallback(async (eid: string, resourceId: number, sub: File) => {
-    setUploads(prev => prev.map(u => u.id === eid ? { ...u, subtitleStatus: 'uploading' as const } : u));
+    setUploads(prev => prev.map(u => u.id === eid ? {
+      ...u,
+      subtitleStatus: 'uploading' as const
+    } : u));
     try {
       await uploadSubtitle(resourceId, extractLang(sub.name), null, subtitleFormat(sub.name), sub);
-      setUploads(prev => prev.map(u => u.id === eid ? { ...u, subtitleStatus: 'done' as const } : u));
+      setUploads(prev => prev.map(u => u.id === eid ? {...u, subtitleStatus: 'done' as const} : u));
     } catch {
-      setUploads(prev => prev.map(u => u.id === eid ? { ...u, subtitleStatus: 'error' as const, subtitleError: 'Untertitel-Upload fehlgeschlagen' } : u));
+      setUploads(prev => prev.map(u => u.id === eid ? {
+        ...u,
+        subtitleStatus: 'error' as const,
+        subtitleError: 'Untertitel-Upload fehlgeschlagen'
+      } : u));
     }
   }, []);
 
@@ -100,7 +107,7 @@ export function useUpload(folderId: number) {
       }
       if (resource.mimeType === 'audio/mpeg') break;
     }
-    qc.invalidateQueries({ queryKey: ['resources', 'folder', folderId] });
+    qc.invalidateQueries({queryKey: ['resources', 'folder', folderId]});
   }, [folderId, qc]);
 
   const uploadFile = useCallback(async (file: File, pairedSubtitle?: File) => {
@@ -124,11 +131,16 @@ export function useUpload(folderId: number) {
       });
       for (let i = 0; i < job.chunksTotal; i++) {
         await uploadChunk(job.jobId, i, file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE));
-        update(eid, { progress: Math.round(((i + 1) / job.chunksTotal) * 100) });
+        update(eid, {progress: Math.round(((i + 1) / job.chunksTotal) * 100)});
       }
       const done = await completeUpload(job.jobId);
-      update(eid, { status: 'done', progress: 100, resourceId: done.resourceId, codecWarning: done.codecWarning });
-      qc.invalidateQueries({ queryKey: ['resources', 'folder', folderId] });
+      update(eid, {
+        status: 'done',
+        progress: 100,
+        resourceId: done.resourceId,
+        codecWarning: done.codecWarning
+      });
+      qc.invalidateQueries({queryKey: ['resources', 'folder', folderId]});
       if (isAudioFile(file.name, file.type)) {
         void pollAudioNormalization(done.resourceId);
       }
@@ -136,25 +148,47 @@ export function useUpload(folderId: number) {
         await doSubtitleUpload(eid, done.resourceId, pairedSubtitle);
       }
     } catch (err) {
-      update(eid, { status: 'error', error: (err as { message?: string })?.message ?? 'Upload fehlgeschlagen' });
+      update(eid, {
+        status: 'error',
+        error: (err as { message?: string })?.message ?? 'Upload fehlgeschlagen'
+      });
     }
   }, [folderId, qc, doSubtitleUpload, pollAudioNormalization]);
 
   const uploadSubtitleOnly = useCallback(async (sub: File) => {
     const eid = `${sub.name}-${Date.now()}`;
-    setUploads(prev => [...prev, { id: eid, fileName: sub.name, progress: 100, status: 'uploading', subtitleStatus: 'uploading' }]);
+    setUploads(prev => [...prev, {
+      id: eid,
+      fileName: sub.name,
+      progress: 100,
+      status: 'uploading',
+      subtitleStatus: 'uploading'
+    }]);
     try {
       const resources = qc.getQueryData<ResourceDto[]>(['resources', 'folder', folderId]);
       const base = baseName(sub.name);
       const match = resources?.find(r => isVideoFile(r.originalName) && baseName(r.originalName) === base);
       if (!match) {
-        setUploads(prev => prev.map(u => u.id === eid ? { ...u, status: 'error' as const, error: `Kein passendes Video für "${sub.name}" gefunden` } : u));
+        setUploads(prev => prev.map(u => u.id === eid ? {
+          ...u,
+          status: 'error' as const,
+          error: `Kein passendes Video für "${sub.name}" gefunden`
+        } : u));
         return;
       }
       await uploadSubtitle(match.id, extractLang(sub.name), null, subtitleFormat(sub.name), sub);
-      setUploads(prev => prev.map(u => u.id === eid ? { ...u, status: 'done' as const, subtitleStatus: 'done' as const, resourceId: match.id } : u));
+      setUploads(prev => prev.map(u => u.id === eid ? {
+        ...u,
+        status: 'done' as const,
+        subtitleStatus: 'done' as const,
+        resourceId: match.id
+      } : u));
     } catch {
-      setUploads(prev => prev.map(u => u.id === eid ? { ...u, status: 'error' as const, error: 'Untertitel-Upload fehlgeschlagen' } : u));
+      setUploads(prev => prev.map(u => u.id === eid ? {
+        ...u,
+        status: 'error' as const,
+        error: 'Untertitel-Upload fehlgeschlagen'
+      } : u));
     }
   }, [folderId, qc]);
 
@@ -193,5 +227,5 @@ export function useUpload(folderId: number) {
 
   const clearCompleted = useCallback(() => setUploads(prev => prev.filter(u => u.status === 'uploading')), []);
 
-  return { uploads, uploadFile, uploadFiles, clearCompleted };
+  return {uploads, uploadFile, uploadFiles, clearCompleted};
 }

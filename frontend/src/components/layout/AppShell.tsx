@@ -1,10 +1,10 @@
-import { Box, Toolbar } from '@mui/material';
-import { type ReactNode, useEffect, useState } from 'react';
+import {Box, Toolbar} from '@mui/material';
+import {type ReactNode, useEffect, useState} from 'react';
 import TopBar from './TopBar';
 import Sidebar from './Sidebar';
-import { useIsMobile } from '../../hooks/useIsMobile';
+import {useIsMobile} from '../../hooks/useIsMobile';
 
-export default function AppShell({ children }: Readonly<{ children: ReactNode }>) {
+export default function AppShell({children}: Readonly<{ children: ReactNode }>) {
   const isMobile = useIsMobile();
 
   const [open, setOpen] = useState(() => {
@@ -29,13 +29,13 @@ export default function AppShell({ children }: Readonly<{ children: ReactNode }>
   }
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <TopBar onMenuClick={handleMenuClick} />
-      <Sidebar open={open} isMobile={isMobile} onClose={() => setOpen(false)} />
-      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, md: 3 }, minHeight: '100vh' }}>
-        <Toolbar />
-        {children}
+      <Box sx={{display: 'flex'}}>
+        <TopBar onMenuClick={handleMenuClick}/>
+        <Sidebar open={open} isMobile={isMobile} onClose={() => setOpen(false)}/>
+        <Box component="main" sx={{flexGrow: 1, p: {xs: 2, md: 3}, minHeight: '100vh'}}>
+          <Toolbar/>
+          {children}
+        </Box>
       </Box>
-    </Box>
   );
 }

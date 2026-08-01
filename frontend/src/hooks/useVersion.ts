@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { getVersion } from '../api/version';
+import {useQuery} from '@tanstack/react-query';
+import {getVersion} from '../api/version';
 
 export function useVersion() {
   return useQuery({

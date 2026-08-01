@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Box, IconButton, InputBase, MenuItem, Select, Tooltip, Typography } from '@mui/material';
+import {type ReactNode, useEffect, useMemo, useRef, useState} from 'react';
+import {Box, IconButton, InputBase, MenuItem, Select, Tooltip, Typography} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import type { SubtitleTrackDto } from '../../types/api';
-import { getSubtitleText } from '../../api/resources';
-import { useLanguageOptions } from '../../hooks/useLanguageOptions';
+import type {SubtitleTrackDto} from '../../types/api';
+import {getSubtitleText} from '../../api/resources';
+import {useLanguageOptions} from '../../hooks/useLanguageOptions';
 
-export interface Cue { startTime: number; endTime: number; text: string; }
+export interface Cue {
+  startTime: number;
+  endTime: number;
+  text: string;
+}
 
 
 /**
@@ -33,7 +37,7 @@ function parseSubtitle(content: string): Cue[] {
     const m = lines[i].match(/^(\d{1,2}:\d{2}:\d{2}[.,]\d{3})\s*-->\s*(\d{1,2}:\d{2}:\d{2}[.,]\d{3})/);
     if (m) {
       const startTime = parseTime(m[1]);
-      const endTime   = parseTime(m[2]);
+      const endTime = parseTime(m[2]);
       const text: string[] = [];
       i++;
       while (i < lines.length && lines[i].trim() !== '') {
@@ -41,7 +45,7 @@ function parseSubtitle(content: string): Cue[] {
         i++;
       }
       const joined = text.join(' ').trim();
-      if (joined) cues.push({ startTime, endTime, text: joined });
+      if (joined) cues.push({startTime, endTime, text: joined});
     }
     i++;
   }
@@ -58,8 +62,8 @@ function formatTime(t: number): string {
   const m = Math.floor((t % 3600) / 60);
   const s = Math.floor(t % 60);
   return h > 0
-    ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-    : `${m}:${String(s).padStart(2, '0')}`;
+      ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+      : `${m}:${String(s).padStart(2, '0')}`;
 }
 
 function highlight(text: string, query: string): ReactNode {
@@ -67,13 +71,18 @@ function highlight(text: string, query: string): ReactNode {
   const idx = text.toLowerCase().indexOf(query.toLowerCase());
   if (idx < 0) return text;
   return (
-    <>
-      {text.slice(0, idx)}
-      <Box component="mark" sx={{ bgcolor: 'warning.main', color: 'warning.contrastText', borderRadius: '2px', px: '1px' }}>
-        {text.slice(idx, idx + query.length)}
-      </Box>
-      {text.slice(idx + query.length)}
-    </>
+      <>
+        {text.slice(0, idx)}
+        <Box component="mark" sx={{
+          bgcolor: 'warning.main',
+          color: 'warning.contrastText',
+          borderRadius: '2px',
+          px: '1px'
+        }}>
+          {text.slice(idx, idx + query.length)}
+        </Box>
+        {text.slice(idx + query.length)}
+      </>
   );
 }
 
@@ -89,14 +98,22 @@ interface Props {
   loadText?: (track: SubtitleTrackDto) => Promise<string>;
 }
 
-export default function TranscriptPanel({ tracks, getCurrentTime, onSeek, searchQuery, initialLanguage, initialTime, loadText }: Readonly<Props>) {
-  const { data: languageOptions = [] } = useLanguageOptions();
+export default function TranscriptPanel({
+                                          tracks,
+                                          getCurrentTime,
+                                          onSeek,
+                                          searchQuery,
+                                          initialLanguage,
+                                          initialTime,
+                                          loadText
+                                        }: Readonly<Props>) {
+  const {data: languageOptions = []} = useLanguageOptions();
   const langLabel = (code: string) =>
-    languageOptions.find(l => l.code.toLowerCase() === code.toLowerCase())?.label ?? code.toUpperCase();
+      languageOptions.find(l => l.code.toLowerCase() === code.toLowerCase())?.label ?? code.toUpperCase();
 
   const initialTrack = initialLanguage
-    ? (tracks.find(t => t.languageCode === initialLanguage) ?? tracks[0])
-    : tracks[0];
+      ? (tracks.find(t => t.languageCode === initialLanguage) ?? tracks[0])
+      : tracks[0];
   const [selectedTrackId, setSelectedTrackId] = useState<number>(initialTrack?.id ?? 0);
   const isOff = selectedTrackId === -1;
 
@@ -108,7 +125,10 @@ export default function TranscriptPanel({ tracks, getCurrentTime, onSeek, search
     let last = -1;
     const tick = () => {
       const t = Math.floor(getCurrentTime() * 10) / 10;
-      if (t !== last) { last = t; setCurrentTime(t); }
+      if (t !== last) {
+        last = t;
+        setCurrentTime(t);
+      }
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
@@ -119,8 +139,8 @@ export default function TranscriptPanel({ tracks, getCurrentTime, onSeek, search
   useEffect(() => {
     if ((initialTime != null || initialLanguage != null) && isOff) {
       const target = initialLanguage
-        ? (tracks.find(t => t.languageCode === initialLanguage) ?? tracks[0])
-        : tracks[0];
+          ? (tracks.find(t => t.languageCode === initialLanguage) ?? tracks[0])
+          : tracks[0];
       if (target) setSelectedTrackId(target.id);
     }
   }, [initialTime, initialLanguage]);
@@ -143,18 +163,18 @@ export default function TranscriptPanel({ tracks, getCurrentTime, onSeek, search
     setPinnedCueIdx(null);
     didAutoSeek.current = false;
     const load = loadText
-      ? loadText(selectedTrack)
-      : getSubtitleText(selectedTrack.resourceId, selectedTrack.id);
+        ? loadText(selectedTrack)
+        : getSubtitleText(selectedTrack.resourceId, selectedTrack.id);
     load
-      .then(setRawText)
-      .catch(() => setRawText(''));
+    .then(setRawText)
+    .catch(() => setRawText(''));
   }, [selectedTrack?.id]);
 
   const cues = useMemo(() => rawText ? parseSubtitle(rawText) : [], [rawText]);
 
   const playingCueIdx = useMemo(
-    () => cues.findIndex(c => currentTime >= c.startTime && currentTime < c.endTime),
-    [cues, currentTime]
+      () => cues.findIndex(c => currentTime >= c.startTime && currentTime < c.endTime),
+      [cues, currentTime]
   );
 
   // Release the pin once playback has actually advanced into the clicked cue.
@@ -184,7 +204,7 @@ export default function TranscriptPanel({ tracks, getCurrentTime, onSeek, search
     if (targetIdx >= 0) {
       setPinnedCueIdx(targetIdx);
       const el = listRef.current?.querySelector<HTMLElement>(`[data-cue-idx="${targetIdx}"]`);
-      el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      el?.scrollIntoView({block: 'center', behavior: 'smooth'});
     }
   }, [cues, searchQuery, initialTime]);
 
@@ -192,7 +212,7 @@ export default function TranscriptPanel({ tracks, getCurrentTime, onSeek, search
   useEffect(() => {
     if (activeCueIdx < 0 || !listRef.current) return;
     const el = listRef.current.querySelector<HTMLElement>(`[data-cue-idx="${activeCueIdx}"]`);
-    el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    el?.scrollIntoView({block: 'nearest', behavior: 'smooth'});
   }, [activeCueIdx]);
 
 
@@ -207,7 +227,7 @@ export default function TranscriptPanel({ tracks, getCurrentTime, onSeek, search
 
   function scrollToCue(cueIdx: number) {
     const el = listRef.current?.querySelector<HTMLElement>(`[data-cue-idx="${cueIdx}"]`);
-    el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    el?.scrollIntoView({block: 'center', behavior: 'smooth'});
   }
 
   function handleSearch() {
@@ -223,88 +243,133 @@ export default function TranscriptPanel({ tracks, getCurrentTime, onSeek, search
   if (!tracks.length) return null;
 
   return (
-    <Box sx={{ mt: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.75, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Typography variant="caption" color="text.secondary">Untertitel</Typography>
-        <Box
-          component="form"
-          onSubmit={e => { e.preventDefault(); handleSearch(); }}
-          sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, mx: 0.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 1, px: 0.5, height: 24, opacity: isOff ? 0.4 : 1 }}
-        >
-          <InputBase
-            value={localQuery}
-            onChange={e => { setLocalQuery(e.target.value); setLocalMatchIdx(-1); setHighlightedCueIdx(null); }}
-            placeholder="Suchen…"
-            disabled={isOff}
-            inputProps={{ 'aria-label': 'Untertitel durchsuchen' }}
-            sx={{ flex: 1, fontSize: '0.72rem', px: 0.5 }}
-          />
-          <Tooltip title="Suchen">
+      <Box sx={{
+        mt: 1.5,
+        border: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 1,
+        overflow: 'hidden'
+      }}>
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          px: 1.5,
+          py: 0.75,
+          bgcolor: 'action.hover',
+          borderBottom: '1px solid',
+          borderColor: 'divider'
+        }}>
+          <Typography variant="caption" color="text.secondary">Untertitel</Typography>
+          <Box
+              component="form"
+              onSubmit={e => {
+                e.preventDefault();
+                handleSearch();
+              }}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                flexGrow: 1,
+                mx: 0.5,
+                bgcolor: 'background.paper',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                px: 0.5,
+                height: 24,
+                opacity: isOff ? 0.4 : 1
+              }}
+          >
+            <InputBase
+                value={localQuery}
+                onChange={e => {
+                  setLocalQuery(e.target.value);
+                  setLocalMatchIdx(-1);
+                  setHighlightedCueIdx(null);
+                }}
+                placeholder="Suchen…"
+                disabled={isOff}
+                inputProps={{'aria-label': 'Untertitel durchsuchen'}}
+                sx={{flex: 1, fontSize: '0.72rem', px: 0.5}}
+            />
+            <Tooltip title="Suchen">
             <span>
-              <IconButton type="submit" size="small" sx={{ p: 0.25 }} disabled={isOff || !localQuery.trim()}>
-                <SearchIcon sx={{ fontSize: '0.95rem' }} />
+              <IconButton type="submit" size="small" sx={{p: 0.25}}
+                          disabled={isOff || !localQuery.trim()}>
+                <SearchIcon sx={{fontSize: '0.95rem'}}/>
               </IconButton>
             </span>
-          </Tooltip>
+            </Tooltip>
+          </Box>
+          <Select
+              size="small"
+              value={selectedTrackId}
+              onChange={e => setSelectedTrackId(Number(e.target.value))}
+              sx={{fontSize: '0.75rem', height: 28}}
+          >
+            {tracks.map(t => (
+                <MenuItem key={t.id} value={t.id}>{langLabel(t.languageCode)}</MenuItem>
+            ))}
+            <MenuItem value={-1}>Untertitel aus</MenuItem>
+          </Select>
         </Box>
-        <Select
-          size="small"
-          value={selectedTrackId}
-          onChange={e => setSelectedTrackId(Number(e.target.value))}
-          sx={{ fontSize: '0.75rem', height: 28 }}
-        >
-          {tracks.map(t => (
-            <MenuItem key={t.id} value={t.id}>{langLabel(t.languageCode)}</MenuItem>
-          ))}
-          <MenuItem value={-1}>Untertitel aus</MenuItem>
-        </Select>
-      </Box>
-      {!isOff && <Box ref={listRef} sx={{ maxHeight: 220, overflowY: 'auto', p: 0.5 }}>
-        {rawText === null && (
-          <Typography variant="caption" color="text.secondary" sx={{ p: 1, display: 'block' }}>Lade…</Typography>
-        )}
-        {cues.map((cue, idx) => {
-          const isActive            = idx === activeCueIdx;
-          const isLocalCurrentMatch = idx === highlightedCueIdx;
-          const isPropMatch         = !localQuery.trim() && searchQuery
-            ? cue.text.toLowerCase().includes(searchQuery.toLowerCase())
-            : false;
-          let bgColor: string = 'transparent';
-          if (isActive) bgColor = 'primary.main';
-          else if (isLocalCurrentMatch) bgColor = 'warning.main';
-          else if (isPropMatch) bgColor = 'warning.light';
+        {!isOff && <Box ref={listRef} sx={{maxHeight: 220, overflowY: 'auto', p: 0.5}}>
+          {rawText === null && (
+              <Typography variant="caption" color="text.secondary"
+                          sx={{p: 1, display: 'block'}}>Lade…</Typography>
+          )}
+          {cues.map((cue, idx) => {
+            const isActive = idx === activeCueIdx;
+            const isLocalCurrentMatch = idx === highlightedCueIdx;
+            const isPropMatch = !localQuery.trim() && searchQuery
+                ? cue.text.toLowerCase().includes(searchQuery.toLowerCase())
+                : false;
+            let bgColor: string = 'transparent';
+            if (isActive) bgColor = 'primary.main';
+            else if (isLocalCurrentMatch) bgColor = 'warning.main';
+            else if (isPropMatch) bgColor = 'warning.light';
 
-          let hoverBgColor: string = 'action.hover';
-          if (isActive) hoverBgColor = 'primary.dark';
-          else if (isLocalCurrentMatch) hoverBgColor = 'warning.dark';
-          const showHighlight = (isLocalCurrentMatch || isPropMatch) && !isActive;
-          const activeQuery = isLocalCurrentMatch ? localQuery : (searchQuery ?? '');
-          return (
-            <Box
-              key={idx}
-              data-cue-idx={idx}
-              onClick={() => { setPinnedCueIdx(idx); onSeek(cue.startTime); }}
-              sx={{
-                display: 'flex', gap: 1, alignItems: 'baseline',
-                px: 1, py: 0.4, borderRadius: 0.5, cursor: 'pointer',
-                bgcolor: bgColor,
-                color: isActive ? 'primary.contrastText' : 'text.primary',
-                '&:hover': { bgcolor: hoverBgColor },
-              }}
-            >
-              <Typography variant="caption" sx={{ flexShrink: 0, opacity: 0.7, fontVariantNumeric: 'tabular-nums', minWidth: 36 }}>
-                {formatTime(cue.startTime)}
-              </Typography>
-              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                {showHighlight ? highlight(cue.text, activeQuery) : cue.text}
-              </Typography>
-            </Box>
-          );
-        })}
-        {rawText !== null && cues.length === 0 && (
-          <Typography variant="caption" color="text.secondary" sx={{ p: 1, display: 'block' }}>Kein Transkript verfügbar.</Typography>
-        )}
-      </Box>}
-    </Box>
+            let hoverBgColor: string = 'action.hover';
+            if (isActive) hoverBgColor = 'primary.dark';
+            else if (isLocalCurrentMatch) hoverBgColor = 'warning.dark';
+            const showHighlight = (isLocalCurrentMatch || isPropMatch) && !isActive;
+            const activeQuery = isLocalCurrentMatch ? localQuery : (searchQuery ?? '');
+            return (
+                <Box
+                    key={idx}
+                    data-cue-idx={idx}
+                    onClick={() => {
+                      setPinnedCueIdx(idx);
+                      onSeek(cue.startTime);
+                    }}
+                    sx={{
+                      display: 'flex', gap: 1, alignItems: 'baseline',
+                      px: 1, py: 0.4, borderRadius: 0.5, cursor: 'pointer',
+                      bgcolor: bgColor,
+                      color: isActive ? 'primary.contrastText' : 'text.primary',
+                      '&:hover': {bgcolor: hoverBgColor},
+                    }}
+                >
+                  <Typography variant="caption" sx={{
+                    flexShrink: 0,
+                    opacity: 0.7,
+                    fontVariantNumeric: 'tabular-nums',
+                    minWidth: 36
+                  }}>
+                    {formatTime(cue.startTime)}
+                  </Typography>
+                  <Typography variant="body2" sx={{fontSize: '0.8rem'}}>
+                    {showHighlight ? highlight(cue.text, activeQuery) : cue.text}
+                  </Typography>
+                </Box>
+            );
+          })}
+          {rawText !== null && cues.length === 0 && (
+              <Typography variant="caption" color="text.secondary" sx={{p: 1, display: 'block'}}>Kein
+                Transkript verfügbar.</Typography>
+          )}
+        </Box>}
+      </Box>
   );
 }

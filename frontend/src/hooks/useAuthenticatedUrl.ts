@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import axiosClient from '../api/axiosClient';
 
 export function useAuthenticatedUrl(url: string | null, retries = 0): string | null {
@@ -12,18 +12,18 @@ export function useAuthenticatedUrl(url: string | null, retries = 0): string | n
     const timers: ReturnType<typeof setTimeout>[] = [];
 
     const tryFetch = () => {
-      axiosClient.get(url, { responseType: 'blob' })
-        .then(response => {
-          if (cancelled) return;
-          objectUrl = URL.createObjectURL(response.data);
-          setBlobUrl(objectUrl);
-        })
-        .catch(() => {
-          if (cancelled || attempt >= retries) return;
-          attempt++;
-          const t = setTimeout(tryFetch, 3000 * attempt);
-          timers.push(t);
-        });
+      axiosClient.get(url, {responseType: 'blob'})
+      .then(response => {
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(response.data);
+        setBlobUrl(objectUrl);
+      })
+      .catch(() => {
+        if (cancelled || attempt >= retries) return;
+        attempt++;
+        const t = setTimeout(tryFetch, 3000 * attempt);
+        timers.push(t);
+      });
     };
 
     tryFetch();

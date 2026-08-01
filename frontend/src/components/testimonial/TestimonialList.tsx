@@ -55,7 +55,10 @@ export default function TestimonialList({canWrite, canDelete, highlightId}: Read
     queryKey: ['testimonial', highlightId],
     queryFn: () => getTestimonial(highlightId!),
     enabled: highlightId != null,
-    refetchInterval: (query) => hasPendingThumbnail(query.state.data ? [query.state.data] : []) ? 3000 : false,
+    refetchInterval: (query) => {
+      const items = query.state.data ? [query.state.data] : [];
+      return hasPendingThumbnail(items) ? 3000 : false;
+    },
   });
 
   useEffect(() => {

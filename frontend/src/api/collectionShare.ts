@@ -1,22 +1,24 @@
 import axiosClient from './axiosClient';
-import { BASE } from './base';
-import type { CollectionShareTokenDto, CollectionShareInfoDto } from '../types/api';
+import {BASE} from './base';
+import type {CollectionShareInfoDto, CollectionShareTokenDto} from '../types/api';
 
 export class CollectionShareExpiredError extends Error {
-  constructor() { super('EXPIRED'); }
+  constructor() {
+    super('EXPIRED');
+  }
 }
 
 // ── Authenticated (collection owner) ────────────────────────────────────────
 
 export async function createCollectionShare(collectionId: number): Promise<CollectionShareTokenDto> {
-  const { data } = await axiosClient.post<CollectionShareTokenDto>(`/collections/${collectionId}/share`);
+  const {data} = await axiosClient.post<CollectionShareTokenDto>(`/collections/${collectionId}/share`);
   return data;
 }
 
 export async function getCollectionShare(collectionId: number): Promise<CollectionShareTokenDto | null> {
-  const { status, data } = await axiosClient.get<CollectionShareTokenDto>(
-    `/collections/${collectionId}/share`,
-    { validateStatus: s => s === 200 || s === 204 },
+  const {status, data} = await axiosClient.get<CollectionShareTokenDto>(
+      `/collections/${collectionId}/share`,
+      {validateStatus: s => s === 200 || s === 204},
   );
   return status === 200 ? data : null;
 }

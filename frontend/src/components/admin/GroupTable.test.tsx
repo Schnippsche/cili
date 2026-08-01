@@ -1,13 +1,13 @@
-import { render, screen, within } from '@testing-library/react';
+import {render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import GroupTable from './GroupTable';
-import type { AclEntryDto, GroupDto, PageResponse } from '../../types/api';
+import type {AclEntryDto, GroupDto, PageResponse} from '../../types/api';
 import * as adminApi from '../../api/admin';
 
 vi.mock('../../api/admin');
-vi.mock('../../hooks/useIsMobile', () => ({ useIsMobile: () => false }));
+vi.mock('../../hooks/useIsMobile', () => ({useIsMobile: () => false}));
 
 const mockGroup: GroupDto = {
   id: 1, name: 'Testgruppe', description: null, system: false,
@@ -20,20 +20,47 @@ const mockGroupPage: PageResponse<GroupDto> = {
 };
 
 const mockFolders: adminApi.FolderItem[] = [
-  { id: 10, name: 'Apple', path: '/Apple' },
-  { id: 20, name: 'Zebra', path: '/Zebra' },
+  {id: 10, name: 'Apple', path: '/Apple'},
+  {id: 20, name: 'Zebra', path: '/Zebra'},
 ];
 
 // Folder 10 (Apple) has 2 entries, Folder 20 (Zebra) has 1
 const mockEntries: AclEntryDto[] = [
-  { id: 1, subjectType: 'GROUP', subjectId: 1, resourceType: 'FOLDER', resourceId: 20, permission: 'READ',  grantType: 'ALLOW', inheritable: true },
-  { id: 2, subjectType: 'GROUP', subjectId: 1, resourceType: 'FOLDER', resourceId: 10, permission: 'WRITE', grantType: 'ALLOW', inheritable: false },
-  { id: 3, subjectType: 'GROUP', subjectId: 1, resourceType: 'FOLDER', resourceId: 10, permission: 'READ',  grantType: 'ALLOW', inheritable: true },
+  {
+    id: 1,
+    subjectType: 'GROUP',
+    subjectId: 1,
+    resourceType: 'FOLDER',
+    resourceId: 20,
+    permission: 'READ',
+    grantType: 'ALLOW',
+    inheritable: true
+  },
+  {
+    id: 2,
+    subjectType: 'GROUP',
+    subjectId: 1,
+    resourceType: 'FOLDER',
+    resourceId: 10,
+    permission: 'WRITE',
+    grantType: 'ALLOW',
+    inheritable: false
+  },
+  {
+    id: 3,
+    subjectType: 'GROUP',
+    subjectId: 1,
+    resourceType: 'FOLDER',
+    resourceId: 10,
+    permission: 'READ',
+    grantType: 'ALLOW',
+    inheritable: true
+  },
 ];
 
 function renderGroupTable() {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}><GroupTable /></QueryClientProvider>);
+  const qc = new QueryClient({defaultOptions: {queries: {retry: false}}});
+  return render(<QueryClientProvider client={qc}><GroupTable/></QueryClientProvider>);
 }
 
 async function openPermissionsDialog() {
@@ -47,7 +74,9 @@ async function openPermissionsDialog() {
 }
 
 describe('PermissionsDialog — grouped table', () => {
-  beforeEach(() => { vi.clearAllMocks(); });
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('shows one row per folder, not one per entry', async () => {
     await openPermissionsDialog();

@@ -21,8 +21,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import {type ChangeEvent, useEffect, useRef, useState} from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import type {TestimonialDto, TestimonialAttachmentDto} from '../../types/api';
+import {useQueryClient} from '@tanstack/react-query';
+import type {TestimonialAttachmentDto, TestimonialDto} from '../../types/api';
 import type {TestimonialFormData} from '../../api/testimonials';
 import {getThumbnailUrl} from '../../api/resources';
 import {useAuthenticatedUrl} from '../../hooks/useAuthenticatedUrl';
@@ -39,60 +39,61 @@ function ExistingAttachmentThumb({attachment, onRemove}: Readonly<ExistingAttach
   const isAudio = attachment.mimeType?.startsWith('audio/');
   // Video-Poster erst laden wenn DONE — storedName als Cache-Busting-Parameter sorgt dafür,
   // dass die URL sich beim Übergang PENDING→DONE ändert und useAuthenticatedUrl neu fetcht.
+  const cacheBuster = attachment.thumbnailStatus === 'DONE' ? attachment.storedName ?? undefined : undefined;
   const thumbSrc = isImage || attachment.thumbnailStatus === 'DONE'
-    ? getThumbnailUrl(attachment.id, 'small', attachment.thumbnailStatus === 'DONE' ? attachment.storedName ?? undefined : undefined)
-    : null;
+      ? getThumbnailUrl(attachment.id, 'small', cacheBuster)
+      : null;
   const url = useAuthenticatedUrl(thumbSrc, isImage ? 3 : 0);
 
   const thumb = (
       <Box sx={{position: 'relative', width: 72, height: 72}}>
         {isImage && (
-          <Box component="img" src={url ?? undefined} alt={attachment.originalName}
-               sx={{
-                 width: 72,
-                 height: 72,
-                 objectFit: 'cover',
-                 borderRadius: 1,
-                 bgcolor: 'action.hover'
-               }}/>
+            <Box component="img" src={url ?? undefined} alt={attachment.originalName}
+                 sx={{
+                   width: 72,
+                   height: 72,
+                   objectFit: 'cover',
+                   borderRadius: 1,
+                   bgcolor: 'action.hover'
+                 }}/>
         )}
         {isVideo && (
-          <>
-            {url && (
-              <Box component="img" src={url} alt={attachment.originalName}
-                   sx={{
-                     width: 72,
-                     height: 72,
-                     objectFit: 'cover',
-                     borderRadius: 1,
-                     bgcolor: 'action.hover'
-                   }}/>
-            )}
+            <>
+              {url && (
+                  <Box component="img" src={url} alt={attachment.originalName}
+                       sx={{
+                         width: 72,
+                         height: 72,
+                         objectFit: 'cover',
+                         borderRadius: 1,
+                         bgcolor: 'action.hover'
+                       }}/>
+              )}
+              <Box sx={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'rgba(0,0,0,0.3)',
+                borderRadius: 1,
+              }}>
+                <PlayArrowIcon sx={{fontSize: 32, color: 'white'}}/>
+              </Box>
+            </>
+        )}
+        {isAudio && (
             <Box sx={{
-              position: 'absolute',
-              inset: 0,
+              width: 72,
+              height: 72,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              bgcolor: 'rgba(0,0,0,0.3)',
+              bgcolor: 'action.hover',
               borderRadius: 1,
             }}>
-              <PlayArrowIcon sx={{ fontSize: 32, color: 'white' }} />
+              <MusicNoteIcon sx={{fontSize: 40, color: 'text.secondary'}}/>
             </Box>
-          </>
-        )}
-        {isAudio && (
-          <Box sx={{
-            width: 72,
-            height: 72,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: 'action.hover',
-            borderRadius: 1,
-          }}>
-            <MusicNoteIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
-          </Box>
         )}
         <Tooltip title="Entfernen">
           <IconButton size="small" onClick={onRemove}
@@ -234,7 +235,12 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
   const [deleteAttachmentIds, setDeleteAttachmentIds] = useState<number[]>([]);
   const [rejectedFileNames, setRejectedFileNames] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState<{ authorName?: string; tags?: string; text?: string; source?: string }>({});
+  const [errors, setErrors] = useState<{
+    authorName?: string;
+    tags?: string;
+    text?: string;
+    source?: string
+  }>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [mediaUploads, setMediaUploads] = useState<Map<string, MediaUploadState>>(new Map());
   const attachmentInputRef = useRef<HTMLInputElement>(null);
@@ -279,15 +285,15 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
   }
 
   const updateMediaUpload = (fileName: string, patch: Partial<MediaUploadState>) =>
-    setMediaUploads(prev => {
-      const copy = new Map(prev);
-      const state = copy.get(fileName) ?? { progress: 0, status: 'uploading' as const };
-      copy.set(fileName, { ...state, ...patch });
-      return copy;
-    });
+      setMediaUploads(prev => {
+        const copy = new Map(prev);
+        const state = copy.get(fileName) ?? {progress: 0, status: 'uploading' as const};
+        copy.set(fileName, {...state, ...patch});
+        return copy;
+      });
 
   const uploadMediaFile = async (testimonialId: number, file: File) => {
-    updateMediaUpload(file.name, { progress: 0, status: 'uploading' });
+    updateMediaUpload(file.name, {progress: 0, status: 'uploading'});
     try {
       const job = await initUpload({
         fileName: file.name,
@@ -299,12 +305,12 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
       });
       for (let i = 0; i < job.chunksTotal; i++) {
         await uploadChunk(job.jobId, i, file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE));
-        updateMediaUpload(file.name, { progress: Math.round(((i + 1) / job.chunksTotal) * 100) });
+        updateMediaUpload(file.name, {progress: Math.round(((i + 1) / job.chunksTotal) * 100)});
       }
       await completeUpload(job.jobId);
-      updateMediaUpload(file.name, { status: 'done', progress: 100 });
-      qc.invalidateQueries({ queryKey: ['testimonial', testimonialId] });
-      qc.invalidateQueries({ queryKey: ['testimonials'] });
+      updateMediaUpload(file.name, {status: 'done', progress: 100});
+      qc.invalidateQueries({queryKey: ['testimonial', testimonialId]});
+      qc.invalidateQueries({queryKey: ['testimonials']});
     } catch (err) {
       updateMediaUpload(file.name, {
         status: 'error',
@@ -348,7 +354,9 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
 
       onClose();
     } catch (err: unknown) {
-      const axiosMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      const axiosMsg = (err as {
+        response?: { data?: { message?: string } }
+      })?.response?.data?.message;
       setSaveError(axiosMsg ?? 'Beim Speichern ist ein Fehler aufgetreten.');
     } finally {
       setSaving(false);
@@ -387,12 +395,12 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
   }
 
   const existingAttachments = (initial?.attachments ?? []).filter(
-    att => !deleteAttachmentIds.includes(att.id)
+      att => !deleteAttachmentIds.includes(att.id)
   );
 
   return (
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-        <DialogTitle>{initial ? 'Testimonial bearbeiten' : 'Neues Testimonial'}</DialogTitle>
+        <DialogTitle>{initial ? 'Erfahrungsbericht bearbeiten' : 'Neuen Erfahrungsbericht'}</DialogTitle>
         <DialogContent>
           <TextField
               label="Name" value={authorName} onChange={e => setAuthorName(e.target.value)}
@@ -403,20 +411,26 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
               value={categories}
               onChange={(_, val: string[]) => setCategories(val)}
               size="small"
-              sx={{
-                mb: 2,
-                '& .MuiToggleButton-root.Mui-selected': {
-                  bgcolor: 'primary.main',
-                  color: 'primary.contrastText',
-                  '&:hover': {bgcolor: 'primary.dark'},
-                },
-              }}
+              sx={{mb: 2}}
           >
-            <ToggleButton value="Mensch">Mensch</ToggleButton>
-            <ToggleButton value="Tier">Tier</ToggleButton>
+            <ToggleButton value="Mensch" sx={{
+              '&.Mui-selected': {
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                '&:hover': {bgcolor: 'primary.dark'},
+              },
+            }}>Mensch</ToggleButton>
+            <ToggleButton value="Tier" sx={{
+              '&.Mui-selected': {
+                bgcolor: 'success.main',
+                color: 'success.contrastText',
+                '&:hover': {bgcolor: 'success.dark'},
+              },
+            }}>Tier</ToggleButton>
           </ToggleButtonGroup>
           {errors.source && (
-              <Typography color="error" variant="caption" sx={{display: 'block', mt: -1.5, mb: 1.5}}>
+              <Typography color="error" variant="caption"
+                          sx={{display: 'block', mt: -1.5, mb: 1.5}}>
                 {errors.source}
               </Typography>
           )}
@@ -439,7 +453,8 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
               </Tooltip>
             </Stack>
             <input ref={attachmentInputRef} type="file"
-                   accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,video/*,audio/*" multiple hidden
+                   accept="image/jpeg,image/png,image/gif,image/webp,image/bmp,video/*,audio/*"
+                   multiple hidden
                    data-testid="attachment-input"
                    onChange={handleAttachmentFileChange}/>
             {(existingAttachments.length > 0 || newFiles.length > 0 || newMediaFiles.length > 0) && (
@@ -485,7 +500,7 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
           </Box>
 
           <TextField
-              label="Testimonial" value={text} onChange={e => setText(e.target.value)}
+              label="Erfahrungsbericht" value={text} onChange={e => setText(e.target.value)}
               error={!!errors.text} helperText={errors.text}
               multiline minRows={5} maxRows={15} fullWidth
           />

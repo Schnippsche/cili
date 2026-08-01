@@ -1,8 +1,5 @@
 import axiosClient from './axiosClient';
-import type {
-  TestimonialDto,
-  SpringPage,
-} from '../types/api';
+import type {SpringPage, TestimonialDto,} from '../types/api';
 
 export interface TestimonialFormData {
   authorName: string;
@@ -25,9 +22,9 @@ export async function listTestimonials(params?: {
   page?: number;
   size?: number;
 }): Promise<SpringPage<TestimonialDto>> {
-  const { data } = await axiosClient.get<SpringPage<TestimonialDto>>(
-    '/testimonials',
-    { params },
+  const {data} = await axiosClient.get<SpringPage<TestimonialDto>>(
+      '/testimonials',
+      {params},
   );
   return data;
 }
@@ -45,17 +42,17 @@ function buildFormData(form: TestimonialFormData): FormData {
 }
 
 export async function createTestimonial(form: TestimonialFormData): Promise<TestimonialDto> {
-  const { data } = await axiosClient.post<TestimonialDto>('/testimonials', buildFormData(form));
+  const {data} = await axiosClient.post<TestimonialDto>('/testimonials', buildFormData(form));
   return data;
 }
 
 export async function updateTestimonial(id: number, form: TestimonialFormData): Promise<TestimonialDto> {
-  const { data } = await axiosClient.put<TestimonialDto>(`/testimonials/${id}`, buildFormData(form));
+  const {data} = await axiosClient.put<TestimonialDto>(`/testimonials/${id}`, buildFormData(form));
   return data;
 }
 
 export async function getTestimonial(id: number): Promise<TestimonialDto> {
-  const { data } = await axiosClient.get<TestimonialDto>(`/testimonials/${id}`);
+  const {data} = await axiosClient.get<TestimonialDto>(`/testimonials/${id}`);
   return data;
 }
 

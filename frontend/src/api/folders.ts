@@ -1,29 +1,35 @@
 import axiosClient from './axiosClient';
-import type { BreadcrumbItemDto, CreateFolderRequest, EffectivePermissionsResponse, FolderDto, UpdateFolderRequest } from '../types/api';
+import type {
+  BreadcrumbItemDto,
+  CreateFolderRequest,
+  EffectivePermissionsResponse,
+  FolderDto,
+  UpdateFolderRequest
+} from '../types/api';
 
 export async function getFolderChildren(folderId?: number): Promise<FolderDto[]> {
   const url = folderId != null ? `/folders/${folderId}/children` : '/folders/root';
-  const { data } = await axiosClient.get<FolderDto[]>(url);
+  const {data} = await axiosClient.get<FolderDto[]>(url);
   return data;
 }
 
 export async function getFolder(id: number): Promise<FolderDto> {
-  const { data } = await axiosClient.get<FolderDto>(`/folders/${id}`);
+  const {data} = await axiosClient.get<FolderDto>(`/folders/${id}`);
   return data;
 }
 
 export async function getFolderBreadcrumb(id: number): Promise<BreadcrumbItemDto[]> {
-  const { data } = await axiosClient.get<BreadcrumbItemDto[]>(`/folders/${id}/breadcrumb`);
+  const {data} = await axiosClient.get<BreadcrumbItemDto[]>(`/folders/${id}/breadcrumb`);
   return data;
 }
 
 export async function createFolder(req: CreateFolderRequest): Promise<FolderDto> {
-  const { data } = await axiosClient.post<FolderDto>('/folders', req);
+  const {data} = await axiosClient.post<FolderDto>('/folders', req);
   return data;
 }
 
 export async function updateFolder(id: number, req: UpdateFolderRequest): Promise<FolderDto> {
-  const { data } = await axiosClient.patch<FolderDto>(`/folders/${id}`, req);
+  const {data} = await axiosClient.patch<FolderDto>(`/folders/${id}`, req);
   return data;
 }
 
@@ -32,7 +38,7 @@ export async function trashFolder(id: number): Promise<void> {
 }
 
 export async function getEffectivePermissions(folderId: number): Promise<EffectivePermissionsResponse> {
-  const { data } = await axiosClient.get<EffectivePermissionsResponse>(`/acl/folders/${folderId}/effective-permissions`);
+  const {data} = await axiosClient.get<EffectivePermissionsResponse>(`/acl/folders/${folderId}/effective-permissions`);
   return data;
 }
 
@@ -45,12 +51,12 @@ export async function removeFolderFavorite(id: number): Promise<void> {
 }
 
 export async function getTrash(): Promise<FolderDto[]> {
-  const { data } = await axiosClient.get<FolderDto[]>('/folders/trash');
+  const {data} = await axiosClient.get<FolderDto[]>('/folders/trash');
   return data;
 }
 
 export async function restoreFolder(id: number): Promise<FolderDto> {
-  const { data } = await axiosClient.post<FolderDto>(`/folders/${id}/restore`);
+  const {data} = await axiosClient.post<FolderDto>(`/folders/${id}/restore`);
   return data;
 }
 
@@ -59,8 +65,8 @@ export async function purgeFolder(id: number): Promise<void> {
 }
 
 export async function moveFolder(id: number, newParentId: number): Promise<FolderDto> {
-  const { data } = await axiosClient.put<FolderDto>(`/folders/${id}/move`, null, {
-    params: { newParentId },
+  const {data} = await axiosClient.put<FolderDto>(`/folders/${id}/move`, null, {
+    params: {newParentId},
   });
   return data;
 }

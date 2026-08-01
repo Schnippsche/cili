@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { getCollectionsEffectivePermissions, getTestimonialsEffectivePermissions } from '../api/acl';
+import {useQuery} from '@tanstack/react-query';
+import {getCollectionsEffectivePermissions, getTestimonialsEffectivePermissions} from '../api/acl';
 
 export function useTestimonialsPermissions() {
   return useQuery({

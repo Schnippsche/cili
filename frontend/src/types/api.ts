@@ -1,84 +1,385 @@
 // ── Auth ─────────────────────────────────────────────────────────────────
-export interface LoginRequest { username: string; password: string; }
-export interface LoginUserInfo { id: number; username: string; displayName: string | null; role: 'ADMIN' | 'USER'; }
-export interface LoginResponse { accessToken: string; refreshToken: string; expiresIn: number; user: LoginUserInfo; }
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginUserInfo {
+  id: number;
+  username: string;
+  displayName: string | null;
+  role: 'ADMIN' | 'USER';
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  user: LoginUserInfo;
+}
 
 // ── User ─────────────────────────────────────────────────────────────────
-export interface UserDto { id: number; username: string; email: string; displayName: string | null; memberId: number | null; url: string | null; phone: string | null; active: boolean; role: string; createdAt: string; }
-export interface CreateUserRequest { username: string; email: string; password: string; role?: string; displayName?: string; memberId?: number; url?: string; phone?: string; }
-export interface UpdateUserRequest { email?: string; password?: string; displayName?: string; memberId?: number; url?: string; phone?: string; role?: string; active?: boolean; }
+export interface UserDto {
+  id: number;
+  username: string;
+  email: string;
+  displayName: string | null;
+  memberId: number | null;
+  url: string | null;
+  phone: string | null;
+  active: boolean;
+  role: string;
+  createdAt: string;
+}
+
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  password: string;
+  role?: string;
+  displayName?: string;
+  memberId?: number;
+  url?: string;
+  phone?: string;
+}
+
+export interface UpdateUserRequest {
+  email?: string;
+  password?: string;
+  displayName?: string;
+  memberId?: number;
+  url?: string;
+  phone?: string;
+  role?: string;
+  active?: boolean;
+}
 
 // ── Group ────────────────────────────────────────────────────────────────
-export interface GroupDto { id: number; name: string; description: string | null; system: boolean; memberCount: number; createdAt: string; }
-export interface CreateGroupRequest { name: string; description?: string; }
-export interface UpdateGroupRequest { name?: string; description?: string; }
+export interface GroupDto {
+  id: number;
+  name: string;
+  description: string | null;
+  system: boolean;
+  memberCount: number;
+  createdAt: string;
+}
+
+export interface CreateGroupRequest {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateGroupRequest {
+  name?: string;
+  description?: string;
+}
 
 // ── ACL ──────────────────────────────────────────────────────────────────
-export type AclPermission = 'READ' | 'WRITE' | 'DELETE' | 'DOWNLOAD' | 'UPLOAD' | 'SHARE' | 'MANAGE_METADATA' | 'MANAGE_SUBTITLES' | 'TRANSLATE_SUBTITLES' | 'ADMIN' | 'MANAGE_TEMPLATES';
-export interface CreateAclEntryRequest { subjectType: 'USER' | 'GROUP'; subjectId: number; resourceType: 'FOLDER' | 'RESOURCE' | 'GLOBAL'; resourceId?: number; permission: AclPermission; grantType?: 'ALLOW' | 'DENY'; inheritable?: boolean; }
-export interface AclEntryDto { id: number; subjectType: string; subjectId: number; resourceType: string; resourceId: number | null; permission: AclPermission; grantType: string; inheritable: boolean; }
-export interface EffectivePermissionsResponse { permissions: AclPermission[]; }
+export type AclPermission =
+    'READ'
+    | 'WRITE'
+    | 'DELETE'
+    | 'DOWNLOAD'
+    | 'UPLOAD'
+    | 'SHARE'
+    | 'MANAGE_METADATA'
+    | 'MANAGE_SUBTITLES'
+    | 'TRANSLATE_SUBTITLES'
+    | 'ADMIN'
+    | 'MANAGE_TEMPLATES';
+
+export interface CreateAclEntryRequest {
+  subjectType: 'USER' | 'GROUP';
+  subjectId: number;
+  resourceType: 'FOLDER' | 'RESOURCE' | 'GLOBAL';
+  resourceId?: number;
+  permission: AclPermission;
+  grantType?: 'ALLOW' | 'DENY';
+  inheritable?: boolean;
+}
+
+export interface AclEntryDto {
+  id: number;
+  subjectType: string;
+  subjectId: number;
+  resourceType: string;
+  resourceId: number | null;
+  permission: AclPermission;
+  grantType: string;
+  inheritable: boolean;
+}
+
+export interface EffectivePermissionsResponse {
+  permissions: AclPermission[];
+}
 
 // ── Folder ───────────────────────────────────────────────────────────────
-export interface FolderDto { id: number; name: string; parentId: number | null; path: string; description: string | null; trashed: boolean; trashedAt: string | null; createdBy: number; createdAt: string; updatedAt: string; }
-export interface BreadcrumbItemDto { id: number; name: string; }
-export interface CreateFolderRequest { name: string; parentId?: number; description?: string; }
-export interface UpdateFolderRequest { name?: string; description?: string; }
+export interface FolderDto {
+  id: number;
+  name: string;
+  parentId: number | null;
+  path: string;
+  description: string | null;
+  trashed: boolean;
+  trashedAt: string | null;
+  createdBy: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BreadcrumbItemDto {
+  id: number;
+  name: string;
+}
+
+export interface CreateFolderRequest {
+  name: string;
+  parentId?: number;
+  description?: string;
+}
+
+export interface UpdateFolderRequest {
+  name?: string;
+  description?: string;
+}
 
 // ── Resource ─────────────────────────────────────────────────────────────
-export interface MetadataDto { title: string | null; description: string | null; tags: string | null; categories: string | null; language: string | null; }
-export interface AiSummaryDto { languageCode: string; summary: string; createdAt: string; }
-export interface ResourceDto { id: number; folderId: number; originalName: string; storedName: string; mimeType: string; size: number; checksum: string | null; uploaderId: number; storageType: string; fileDate: string | null; sortOrder: number | null; createdAt: string; updatedAt: string; metadata: MetadataDto | null; thumbnailStatus: 'DONE' | 'PENDING' | 'PROCESSING' | 'FAILED' | null; hasAnalyzableSubtitles: boolean; }
-export interface UpdateResourceRequest { originalName: string; }
-export interface UpdateMetadataRequest { title?: string; description?: string; tags?: string; categories?: string; language?: string; }
+export interface MetadataDto {
+  title: string | null;
+  description: string | null;
+  tags: string | null;
+  categories: string | null;
+  language: string | null;
+}
+
+export interface AiSummaryDto {
+  languageCode: string;
+  summary: string;
+  createdAt: string;
+}
+
+export interface ResourceDto {
+  id: number;
+  folderId: number;
+  originalName: string;
+  storedName: string;
+  mimeType: string;
+  size: number;
+  checksum: string | null;
+  uploaderId: number;
+  storageType: string;
+  fileDate: string | null;
+  sortOrder: number | null;
+  createdAt: string;
+  updatedAt: string;
+  metadata: MetadataDto | null;
+  thumbnailStatus: 'DONE' | 'PENDING' | 'PROCESSING' | 'FAILED' | null;
+  hasAnalyzableSubtitles: boolean;
+}
+
+export interface UpdateResourceRequest {
+  originalName: string;
+}
+
+export interface UpdateMetadataRequest {
+  title?: string;
+  description?: string;
+  tags?: string;
+  categories?: string;
+  language?: string;
+}
 
 // ── Subtitles ────────────────────────────────────────────────────────────
-export interface SubtitleTrackDto { id: number; resourceId: number; languageCode: string; label: string | null; format: 'SRT' | 'VTT'; createdAt: string; hasTextContent: boolean; }
+export interface SubtitleTrackDto {
+  id: number;
+  resourceId: number;
+  languageCode: string;
+  label: string | null;
+  format: 'SRT' | 'VTT';
+  createdAt: string;
+  hasTextContent: boolean;
+}
 
 // ── Upload ───────────────────────────────────────────────────────────────
-export interface InitUploadRequest { fileName: string; mimeType: string; totalSize: number; chunkSize: number; folderId?: number; testimonialId?: number; fileLastModified?: number; bulkImportItemId?: number; }
-export interface UploadJobDto { jobId: string; chunksTotal: number; chunksReceived: number; status: string; }
-export interface CompleteUploadResponse { resourceId: number; codecWarning?: string; }
+export interface InitUploadRequest {
+  fileName: string;
+  mimeType: string;
+  totalSize: number;
+  chunkSize: number;
+  folderId?: number;
+  testimonialId?: number;
+  fileLastModified?: number;
+  bulkImportItemId?: number;
+}
+
+export interface UploadJobDto {
+  jobId: string;
+  chunksTotal: number;
+  chunksReceived: number;
+  status: string;
+}
+
+export interface CompleteUploadResponse {
+  resourceId: number;
+  codecWarning?: string;
+}
 
 // ── Bulk Import ──────────────────────────────────────────────────────────
-export interface BulkImportEntry { relativePath: string; fileSize: number; mimeType: string; fileLastModified: number | null; }
-export interface CreateBulkImportRequest { targetFolderId: number; rootName: string; entries: BulkImportEntry[]; }
+export interface BulkImportEntry {
+  relativePath: string;
+  fileSize: number;
+  mimeType: string;
+  fileLastModified: number | null;
+}
+
+export interface CreateBulkImportRequest {
+  targetFolderId: number;
+  rootName: string;
+  entries: BulkImportEntry[];
+}
+
 export type BulkImportItemStatus = 'PENDING' | 'UPLOADING' | 'DONE' | 'SKIPPED' | 'FAILED';
-export interface BulkImportItemDto { id: number; relativePath: string; resolvedFolderId: number | null; status: BulkImportItemStatus; skipReason: string | null; errorMessage: string | null; resourceId: number | null; }
+
+export interface BulkImportItemDto {
+  id: number;
+  relativePath: string;
+  resolvedFolderId: number | null;
+  status: BulkImportItemStatus;
+  skipReason: string | null;
+  errorMessage: string | null;
+  resourceId: number | null;
+}
+
 export type BulkImportJobStatus = 'RUNNING' | 'COMPLETED' | 'COMPLETED_WITH_ERRORS';
-export interface BulkImportJobDto { jobId: string; rootName: string; targetFolderId: number; status: BulkImportJobStatus; filesTotal: number; filesDone: number; filesSkipped: number; filesFailed: number; items: BulkImportItemDto[]; }
-export interface CreateBulkImportResponse { jobId: string; items: BulkImportItemDto[]; }
+
+export interface BulkImportJobDto {
+  jobId: string;
+  rootName: string;
+  targetFolderId: number;
+  status: BulkImportJobStatus;
+  filesTotal: number;
+  filesDone: number;
+  filesSkipped: number;
+  filesFailed: number;
+  items: BulkImportItemDto[];
+}
+
+export interface CreateBulkImportResponse {
+  jobId: string;
+  items: BulkImportItemDto[];
+}
 
 // ── Search ───────────────────────────────────────────────────────────────
-export interface SnippetDto { text: string; timestamp: string | null; timestampSeconds: number | null; language: string; }
+export interface SnippetDto {
+  text: string;
+  timestamp: string | null;
+  timestampSeconds: number | null;
+  language: string;
+}
+
 export interface SearchHitDto {
-  resourceId: number; name: string; title: string | null; mimeType: string; size: number; folderId: number;
-  folderPath: string | null; uploadedAt: string; score: number; snippets: SnippetDto[];
-  thumbnailStatus: string | null; storedName: string;
+  resourceId: number;
+  name: string;
+  title: string | null;
+  mimeType: string;
+  size: number;
+  folderId: number;
+  folderPath: string | null;
+  uploadedAt: string;
+  score: number;
+  snippets: SnippetDto[];
+  thumbnailStatus: string | null;
+  storedName: string;
 }
+
 export interface SearchResponse {
-  hits: SearchHitDto[]; totalHits: number; page: number; size: number;
-  testimonialHits: TestimonialSearchHitDto[]; testimonialTotalHits: number; testimonialPage: number; testimonialSize: number;
+  hits: SearchHitDto[];
+  totalHits: number;
+  page: number;
+  size: number;
+  testimonialHits: TestimonialSearchHitDto[];
+  testimonialTotalHits: number;
+  testimonialPage: number;
+  testimonialSize: number;
 }
-export interface FacetDto { value: string; count: number; }
-export interface FacetsResponse { mimeTypes: FacetDto[]; languages: FacetDto[]; }
+
+export interface FacetDto {
+  value: string;
+  count: number;
+}
+
+export interface FacetsResponse {
+  mimeTypes: FacetDto[];
+  languages: FacetDto[];
+}
 
 // ── Share ─────────────────────────────────────────────────────────────────
-export interface ShareTokenDto { resourceId: number; token: string; createdAt: string; expiresAt: string; validityDays: number; }
-export interface ShareConfigDto { validityDays: number; baseUrl?: string; }
-export interface ShareInfoDto  { originalName: string; mimeType: string; subtitles: SubtitleTrackDto[]; }
+export interface ShareTokenDto {
+  resourceId: number;
+  token: string;
+  createdAt: string;
+  expiresAt: string;
+  validityDays: number;
+}
+
+export interface ShareConfigDto {
+  validityDays: number;
+  baseUrl?: string;
+}
+
+export interface ShareInfoDto {
+  originalName: string;
+  mimeType: string;
+  subtitles: SubtitleTrackDto[];
+}
 
 // ── Jobs ─────────────────────────────────────────────────────────────────
 export type JobStatus = 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED' | 'CANCELLED';
-export type JobType = 'THUMBNAIL' | 'TRANSCODE' | 'VIDEO_TRANSCODE' | 'WAV_EXTRACT' | 'WHISPER_TRANSCRIBE' | 'OCR' | 'PREVIEW' | 'VIDEO_ANALYSIS' | 'SUBTITLE_TRANSLATE' | 'DOCUMENT_TRANSLATE' | 'VIDEO_URL_IMPORT';
-export interface ProcessingJobDto { id: number; resourceId: number; type: JobType; source: string | null; status: JobStatus; attempts: number; maxAttempts: number; errorMessage: string | null; result: string | null; startedAt: string | null; finishedAt: string | null; createdAt: string; updatedAt: string; }
-export interface TelegramSourceDto { name: string; label: string; }
+export type JobType =
+    'THUMBNAIL'
+    | 'TRANSCODE'
+    | 'VIDEO_TRANSCODE'
+    | 'WAV_EXTRACT'
+    | 'WHISPER_TRANSCRIBE'
+    | 'OCR'
+    | 'PREVIEW'
+    | 'VIDEO_ANALYSIS'
+    | 'SUBTITLE_TRANSLATE'
+    | 'DOCUMENT_TRANSLATE'
+    | 'VIDEO_URL_IMPORT';
+
+export interface ProcessingJobDto {
+  id: number;
+  resourceId: number;
+  type: JobType;
+  source: string | null;
+  status: JobStatus;
+  attempts: number;
+  maxAttempts: number;
+  errorMessage: string | null;
+  result: string | null;
+  startedAt: string | null;
+  finishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TelegramSourceDto {
+  name: string;
+  label: string;
+}
 
 // ── Language ─────────────────────────────────────────────────────────────
-export interface LanguageOptionDto { code: string; label: string; translationSupported: boolean; }
+export interface LanguageOptionDto {
+  code: string;
+  label: string;
+  translationSupported: boolean;
+}
 
 // ── Version ──────────────────────────────────────────────────────────────
-export interface VersionResponse { version: string; }
+export interface VersionResponse {
+  version: string;
+}
 
 // ── Common ───────────────────────────────────────────────────────────────
 // Matches the flat de.toengi.cili.dto.common.PageResponse record (admin/acl/job endpoints).
@@ -162,15 +463,19 @@ export interface TestimonialSearchHitDto {
 export type ReportJobStatus = 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED';
 
 export interface ReportJobDto {
-  jobId:        number;
-  status:       ReportJobStatus;
+  jobId: number;
+  status: ReportJobStatus;
   errorMessage: string | null;
-  createdAt:    string;
-  finishedAt:   string | null;
+  createdAt: string;
+  finishedAt: string | null;
 }
 
 // ── Logs ─────────────────────────────────────────────────────────────────
-export interface LogResponse { lines: string[]; totalLines: number; lastModified: string; }
+export interface LogResponse {
+  lines: string[];
+  totalLines: number;
+  lastModified: string;
+}
 
 // ── Collections / Sammlungen ─────────────────────────────────────────────
 export interface CollectionDto {
@@ -181,11 +486,29 @@ export interface CollectionDto {
   isTemplate: boolean;
   createdAt: string;
 }
-export interface CollectionNameRequest { name: string; isTemplate?: boolean; }
-export interface CreateCollectionRequest { name: string; isTemplate: boolean; }
-export interface AddToCollectionRequest { resourceId: number; }
-export interface AddTestimonialToCollectionRequest { testimonialId: number; }
-export interface CreateFromTemplateRequest { templateId: number; name: string; }
+
+export interface CollectionNameRequest {
+  name: string;
+  isTemplate?: boolean;
+}
+
+export interface CreateCollectionRequest {
+  name: string;
+  isTemplate: boolean;
+}
+
+export interface AddToCollectionRequest {
+  resourceId: number;
+}
+
+export interface AddTestimonialToCollectionRequest {
+  testimonialId: number;
+}
+
+export interface CreateFromTemplateRequest {
+  templateId: number;
+  name: string;
+}
 
 // ── Collection Share ──────────────────────────────────────────────────────
 export interface CollectionShareTokenDto {

@@ -7,7 +7,8 @@ export async function extractBlobErrorMessage(err: unknown): Promise<string> {
       try {
         const parsed = JSON.parse(await data.text()) as { message?: string };
         if (parsed.message) return parsed.message;
-      } catch { /* keine JSON-Fehlerantwort */ }
+      } catch { /* keine JSON-Fehlerantwort */
+      }
     }
   }
   return 'Ein unbekannter Fehler ist aufgetreten.';

@@ -1,10 +1,10 @@
-import { renderHook } from '@testing-library/react';
-import { useIsMobile } from './useIsMobile';
+import {renderHook} from '@testing-library/react';
+import {useIsMobile} from './useIsMobile';
 
 describe('useIsMobile', () => {
   it('returns false when viewport is wide (desktop default)', () => {
     // setup.ts mock returns matches: false by default
-    const { result } = renderHook(() => useIsMobile());
+    const {result} = renderHook(() => useIsMobile());
     expect(result.current).toBe(false);
   });
 
@@ -19,7 +19,7 @@ describe('useIsMobile', () => {
       removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
     });
-    const { result } = renderHook(() => useIsMobile());
+    const {result} = renderHook(() => useIsMobile());
     expect(result.current).toBe(true);
   });
 });

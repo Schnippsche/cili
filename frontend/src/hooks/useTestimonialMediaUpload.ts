@@ -1,6 +1,6 @@
-import { useCallback, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { completeUpload, initUpload, uploadChunk } from '../api/upload';
+import {useCallback, useState} from 'react';
+import {useQueryClient} from '@tanstack/react-query';
+import {completeUpload, initUpload, uploadChunk} from '../api/upload';
 
 const CHUNK_SIZE = 5 * 1024 * 1024;
 
@@ -15,15 +15,15 @@ export function useTestimonialMediaUpload(testimonialId: number) {
   const qc = useQueryClient();
 
   const update = (fileName: string, patch: Partial<TestimonialUploadState>) =>
-    setUploads(prev => {
-      const copy = new Map(prev);
-      const state = copy.get(fileName) ?? { progress: 0, status: 'uploading' as const };
-      copy.set(fileName, { ...state, ...patch });
-      return copy;
-    });
+      setUploads(prev => {
+        const copy = new Map(prev);
+        const state = copy.get(fileName) ?? {progress: 0, status: 'uploading' as const};
+        copy.set(fileName, {...state, ...patch});
+        return copy;
+      });
 
   const uploadFile = useCallback(async (file: File) => {
-    update(file.name, { progress: 0, status: 'uploading' });
+    update(file.name, {progress: 0, status: 'uploading'});
     try {
       const job = await initUpload({
         fileName: file.name,
@@ -35,12 +35,12 @@ export function useTestimonialMediaUpload(testimonialId: number) {
       });
       for (let i = 0; i < job.chunksTotal; i++) {
         await uploadChunk(job.jobId, i, file.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE));
-        update(file.name, { progress: Math.round(((i + 1) / job.chunksTotal) * 100) });
+        update(file.name, {progress: Math.round(((i + 1) / job.chunksTotal) * 100)});
       }
       await completeUpload(job.jobId);
-      update(file.name, { status: 'done', progress: 100 });
-      qc.invalidateQueries({ queryKey: ['testimonial', testimonialId] });
-      qc.invalidateQueries({ queryKey: ['testimonials'] });
+      update(file.name, {status: 'done', progress: 100});
+      qc.invalidateQueries({queryKey: ['testimonial', testimonialId]});
+      qc.invalidateQueries({queryKey: ['testimonials']});
     } catch (err) {
       update(file.name, {
         status: 'error',
@@ -58,5 +58,5 @@ export function useTestimonialMediaUpload(testimonialId: number) {
     // In practice, the component should handle retry differently
   }, [uploads]);
 
-  return { uploads, uploadFile, retry };
+  return {uploads, uploadFile, retry};
 }

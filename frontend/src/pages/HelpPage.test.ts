@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { slugify } from './HelpPage';
+import {describe, expect, it} from 'vitest';
+import {slugify} from './HelpPage';
 
 describe('slugify (HelpPage anchor ids)', () => {
   it('matches the GitHub-style double-dash anchors used in the HANDBUCH.md table of contents', () => {

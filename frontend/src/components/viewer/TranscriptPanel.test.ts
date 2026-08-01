@@ -1,10 +1,10 @@
-import { findCueIndexForTimestamp, type Cue } from './TranscriptPanel';
+import {type Cue, findCueIndexForTimestamp} from './TranscriptPanel';
 
 // Cues from the reported bug (00:17:38.500 … 00:18:01.760)
 const cues: Cue[] = [
-  { startTime: 1058.5,  endTime: 1065.38, text: 'A' },
-  { startTime: 1065.38, endTime: 1076.02, text: 'B' },   // index 1
-  { startTime: 1076.02, endTime: 1081.76, text: 'C' },   // index 2 (target)
+  {startTime: 1058.5, endTime: 1065.38, text: 'A'},
+  {startTime: 1065.38, endTime: 1076.02, text: 'B'},   // index 1
+  {startTime: 1076.02, endTime: 1081.76, text: 'C'},   // index 2 (target)
 ];
 
 describe('findCueIndexForTimestamp', () => {
@@ -19,8 +19,8 @@ describe('findCueIndexForTimestamp', () => {
 
   it('handles whole-second cue starts', () => {
     const whole: Cue[] = [
-      { startTime: 10, endTime: 20, text: 'A' },
-      { startTime: 20, endTime: 30, text: 'B' },
+      {startTime: 10, endTime: 20, text: 'A'},
+      {startTime: 20, endTime: 30, text: 'B'},
     ];
     expect(findCueIndexForTimestamp(whole, 20)).toBe(1);
   });

@@ -1,5 +1,5 @@
 import axiosClient from './axiosClient';
-import type { CompleteUploadResponse, InitUploadRequest, UploadJobDto } from '../types/api';
+import type {CompleteUploadResponse, InitUploadRequest, UploadJobDto} from '../types/api';
 
 /**
  * Initialize a file upload.
@@ -9,20 +9,20 @@ export async function initUpload(req: InitUploadRequest): Promise<UploadJobDto> 
   if ((!req.folderId && !req.testimonialId) || (req.folderId && req.testimonialId)) {
     throw new Error('Exactly one of folderId or testimonialId must be provided');
   }
-  const { data } = await axiosClient.post<UploadJobDto>('/uploads/init', req);
+  const {data} = await axiosClient.post<UploadJobDto>('/uploads/init', req);
   return data;
 }
 
 export async function uploadChunk(jobId: string, chunkIndex: number, chunk: Blob): Promise<UploadJobDto> {
-  const { data } = await axiosClient.put<UploadJobDto>(
-    `/uploads/${jobId}/chunk/${chunkIndex}`, chunk,
-    { headers: { 'Content-Type': 'application/octet-stream' } }
+  const {data} = await axiosClient.put<UploadJobDto>(
+      `/uploads/${jobId}/chunk/${chunkIndex}`, chunk,
+      {headers: {'Content-Type': 'application/octet-stream'}}
   );
   return data;
 }
 
 export async function completeUpload(jobId: string): Promise<CompleteUploadResponse> {
-  const { data } = await axiosClient.post<CompleteUploadResponse>(`/uploads/${jobId}/complete`);
+  const {data} = await axiosClient.post<CompleteUploadResponse>(`/uploads/${jobId}/complete`);
   return data;
 }
 

@@ -1,21 +1,14 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-} from '@mui/material';
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { changePassword } from '../../api/auth';
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField,} from '@mui/material';
+import {useState} from 'react';
+import {useMutation} from '@tanstack/react-query';
+import {changePassword} from '../../api/auth';
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
 
-export default function ChangePasswordDialog({ open, onClose }: Props) {
+export default function ChangePasswordDialog({open, onClose}: Props) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -40,51 +33,51 @@ export default function ChangePasswordDialog({ open, onClose }: Props) {
   const canSubmit = currentPassword.length > 0 && newPassword.length >= 8 && newPassword === confirmPassword && !mutation.isPending;
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Passwort ändern</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-        <TextField
-          label="Aktuelles Passwort"
-          type="password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          autoComplete="current-password"
-          fullWidth
-          error={mutation.isError}
-          helperText={mutation.isError ? 'Aktuelles Passwort ist falsch.' : undefined}
-        />
-        <TextField
-          label="Neues Passwort"
-          type="password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          autoComplete="new-password"
-          fullWidth
-          error={tooShort}
-          helperText={tooShort ? 'Mindestens 8 Zeichen erforderlich.' : undefined}
-        />
-        <TextField
-          label="Neues Passwort bestätigen"
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          autoComplete="new-password"
-          fullWidth
-          error={mismatch}
-          helperText={mismatch ? 'Passwörter stimmen nicht überein.' : undefined}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} disabled={mutation.isPending}>Abbrechen</Button>
-        <Button
-          variant="contained"
-          onClick={() => mutation.mutate()}
-          disabled={!canSubmit}
-          loading={mutation.isPending}
-        >
-          Speichern
-        </Button>
-      </DialogActions>
-    </Dialog>
+      <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+        <DialogTitle>Passwort ändern</DialogTitle>
+        <DialogContent sx={{display: 'flex', flexDirection: 'column', gap: 2, mt: 1}}>
+          <TextField
+              label="Aktuelles Passwort"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              autoComplete="current-password"
+              fullWidth
+              error={mutation.isError}
+              helperText={mutation.isError ? 'Aktuelles Passwort ist falsch.' : undefined}
+          />
+          <TextField
+              label="Neues Passwort"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              autoComplete="new-password"
+              fullWidth
+              error={tooShort}
+              helperText={tooShort ? 'Mindestens 8 Zeichen erforderlich.' : undefined}
+          />
+          <TextField
+              label="Neues Passwort bestätigen"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+              fullWidth
+              error={mismatch}
+              helperText={mismatch ? 'Passwörter stimmen nicht überein.' : undefined}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} disabled={mutation.isPending}>Abbrechen</Button>
+          <Button
+              variant="contained"
+              onClick={() => mutation.mutate()}
+              disabled={!canSubmit}
+              loading={mutation.isPending}
+          >
+            Speichern
+          </Button>
+        </DialogActions>
+      </Dialog>
   );
 }

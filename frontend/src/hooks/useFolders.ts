@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import * as api from '../api/folders';
-import type { CreateFolderRequest, UpdateFolderRequest } from '../types/api';
+import type {CreateFolderRequest, UpdateFolderRequest} from '../types/api';
 
 export function useFolderChildren(folderId?: number) {
   return useQuery({
@@ -29,17 +29,17 @@ export function useCreateFolder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (req: CreateFolderRequest) => api.createFolder(req),
-    onSuccess: (folder) => qc.invalidateQueries({ queryKey: ['folders', 'children', folder.parentId ?? 'root'] }),
+    onSuccess: (folder) => qc.invalidateQueries({queryKey: ['folders', 'children', folder.parentId ?? 'root']}),
   });
 }
 
 export function useUpdateFolder() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, req }: { id: number; req: UpdateFolderRequest }) => api.updateFolder(id, req),
-    onSuccess: (_, { id }) => {
-      qc.invalidateQueries({ queryKey: ['folders', id] });
-      qc.invalidateQueries({ queryKey: ['folders', 'children'] });
+    mutationFn: ({id, req}: { id: number; req: UpdateFolderRequest }) => api.updateFolder(id, req),
+    onSuccess: (_, {id}) => {
+      qc.invalidateQueries({queryKey: ['folders', id]});
+      qc.invalidateQueries({queryKey: ['folders', 'children']});
     },
   });
 }
@@ -56,7 +56,7 @@ export function useTrashFolder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => api.trashFolder(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['folders', 'children'] }),
+    onSuccess: () => qc.invalidateQueries({queryKey: ['folders', 'children']}),
   });
 }
 
@@ -72,8 +72,8 @@ export function useRestoreFolder() {
   return useMutation({
     mutationFn: (id: number) => api.restoreFolder(id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['folders', 'trash'] });
-      qc.invalidateQueries({ queryKey: ['folders', 'children'] });
+      qc.invalidateQueries({queryKey: ['folders', 'trash']});
+      qc.invalidateQueries({queryKey: ['folders', 'children']});
     },
   });
 }
@@ -82,18 +82,18 @@ export function usePurgeFolder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => api.purgeFolder(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['folders', 'trash'] }),
+    onSuccess: () => qc.invalidateQueries({queryKey: ['folders', 'trash']}),
   });
 }
 
 export function useMoveFolder() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, newParentId }: { id: number; newParentId: number }) =>
-      api.moveFolder(id, newParentId),
+    mutationFn: ({id, newParentId}: { id: number; newParentId: number }) =>
+        api.moveFolder(id, newParentId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['folders', 'children'] });
-      qc.invalidateQueries({ queryKey: ['folders'] }); // invalidiert breadcrumbs + folder details
+      qc.invalidateQueries({queryKey: ['folders', 'children']});
+      qc.invalidateQueries({queryKey: ['folders']}); // invalidiert breadcrumbs + folder details
     },
   });
 }

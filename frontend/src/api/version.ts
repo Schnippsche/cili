@@ -1,7 +1,7 @@
 import axiosClient from './axiosClient';
-import type { VersionResponse } from '../types/api';
+import type {VersionResponse} from '../types/api';
 
 export async function getVersion(): Promise<VersionResponse> {
-  const { data } = await axiosClient.get<VersionResponse>('/public/version');
+  const {data} = await axiosClient.get<VersionResponse>('/public/version');
   return data;
 }

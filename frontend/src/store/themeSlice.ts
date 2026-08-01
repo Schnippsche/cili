@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {createSlice} from '@reduxjs/toolkit';
 
 type ThemeMode = 'light' | 'dark';
 
@@ -6,7 +6,7 @@ const stored = localStorage.getItem('themeMode') as ThemeMode | null;
 
 const themeSlice = createSlice({
   name: 'theme',
-  initialState: { mode: (stored ?? 'light') as ThemeMode },
+  initialState: {mode: (stored ?? 'light') as ThemeMode},
   reducers: {
     toggleTheme(state) {
       state.mode = state.mode === 'light' ? 'dark' : 'light';
@@ -15,5 +15,5 @@ const themeSlice = createSlice({
   },
 });
 
-export const { toggleTheme } = themeSlice.actions;
+export const {toggleTheme} = themeSlice.actions;
 export default themeSlice.reducer;

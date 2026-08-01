@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { Box } from '@mui/material';
+import {useEffect, useRef} from 'react';
+import {Box} from '@mui/material';
 import videojs from 'video.js';
 import type Player from 'video.js/dist/types/player';
 import 'video.js/dist/video-js.css';
@@ -31,9 +31,17 @@ interface Props {
   onPlayerReady?: (player: Player) => void;
 }
 
-export default function VideoPlayer({ src, mimeType = 'video/mp4', audioOnly = false, subtitles = [], initialTime, onReady, onPlayerReady }: Readonly<Props>) {
+export default function VideoPlayer({
+                                      src,
+                                      mimeType = 'video/mp4',
+                                      audioOnly = false,
+                                      subtitles = [],
+                                      initialTime,
+                                      onReady,
+                                      onPlayerReady
+                                    }: Readonly<Props>) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const playerRef    = useRef<Player | null>(null);
+  const playerRef = useRef<Player | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -42,8 +50,13 @@ export default function VideoPlayer({ src, mimeType = 'video/mp4', audioOnly = f
     containerRef.current.appendChild(el);
     const player = videojs(el, {
       controls: true, fill: true, language: 'de',
-      sources: [{ src, type: mimeType }],
-      tracks: subtitles.map(s => ({ src: s.src, kind: 'subtitles' as const, label: s.label, srclang: s.language })),
+      sources: [{src, type: mimeType}],
+      tracks: subtitles.map(s => ({
+        src: s.src,
+        kind: 'subtitles' as const,
+        label: s.label,
+        srclang: s.language
+      })),
     });
     playerRef.current = player;
     player.ready(() => {
@@ -51,17 +64,21 @@ export default function VideoPlayer({ src, mimeType = 'video/mp4', audioOnly = f
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const trackList = player.textTracks() as any as TextTrack[];
         const firstTrack = Array.from(trackList).find(
-          t => t.kind === 'subtitles' || t.kind === 'captions'
+            t => t.kind === 'subtitles' || t.kind === 'captions'
         );
         if (firstTrack) firstTrack.mode = 'showing';
       }
       if (initialTime != null && initialTime > 0) {
-        player.one('loadedmetadata', () => { player.currentTime(initialTime); });
+        player.one('loadedmetadata', () => {
+          player.currentTime(initialTime);
+        });
       }
       onPlayerReady?.(player);
       onReady?.(
-        (t) => { playerRef.current?.currentTime(t); },
-        () => playerRef.current?.currentTime() ?? 0,
+          (t) => {
+            playerRef.current?.currentTime(t);
+          },
+          () => playerRef.current?.currentTime() ?? 0,
       );
     });
     return () => {
@@ -73,27 +90,33 @@ export default function VideoPlayer({ src, mimeType = 'video/mp4', audioOnly = f
   const audioHeight = subtitles.length > 0 ? '360px' : '112px';
 
   return (
-    <Box
-      ref={containerRef}
-      data-vjs-player
-      sx={audioOnly ? {
-        width: '100%',
-        position: 'relative',
-        height: audioHeight,
-        mb: 1,
-        '& .video-js': { width: '100%', height: audioHeight },
-        // push subtitle text up from the control bar
-        '& .vjs-text-track-display': { bottom: '3em !important' },
-        '& .vjs-menu-button-popup .vjs-menu': { width: '13em !important', left: '-6em !important' },
-      } : {
-        width: '100%',
-        height: 0,
-        paddingBottom: 'min(56.25%, 75vh)',
-        position: 'relative',
-        '& .video-js': { position: 'absolute', inset: 0, width: '100%', height: '100%' },
-        '& .vjs-text-track-display': { fontSize: '65% !important' },
-        '& .vjs-menu-button-popup .vjs-menu': { width: '13em !important', left: '-6em !important' },
-      }}
-    />
+      <Box
+          ref={containerRef}
+          data-vjs-player
+          sx={audioOnly ? {
+            width: '100%',
+            position: 'relative',
+            height: audioHeight,
+            mb: 1,
+            '& .video-js': {width: '100%', height: audioHeight},
+            // push subtitle text up from the control bar
+            '& .vjs-text-track-display': {bottom: '3em !important'},
+            '& .vjs-menu-button-popup .vjs-menu': {
+              width: '13em !important',
+              left: '-6em !important'
+            },
+          } : {
+            width: '100%',
+            height: 0,
+            paddingBottom: 'min(56.25%, 75vh)',
+            position: 'relative',
+            '& .video-js': {position: 'absolute', inset: 0, width: '100%', height: '100%'},
+            '& .vjs-text-track-display': {fontSize: '65% !important'},
+            '& .vjs-menu-button-popup .vjs-menu': {
+              width: '13em !important',
+              left: '-6em !important'
+            },
+          }}
+      />
   );
 }

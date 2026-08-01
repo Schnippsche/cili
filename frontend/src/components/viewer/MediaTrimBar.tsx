@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Box, Button, CircularProgress, Stack, TextField } from '@mui/material';
+import {useEffect, useRef, useState} from 'react';
+import {Box, Button, CircularProgress, Stack, TextField} from '@mui/material';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import ContentCutIcon from '@mui/icons-material/ContentCut';
 import type Player from 'video.js/dist/types/player';
@@ -42,7 +42,12 @@ function parseTimecodeRaw(text: string): number | null {
   return (h * 3600 + m * 60 + s) * 1000;
 }
 
-export default function MediaTrimBar({ player, creating, defaultTitle, onCreateClip }: Readonly<Props>) {
+export default function MediaTrimBar({
+                                       player,
+                                       creating,
+                                       defaultTitle,
+                                       onCreateClip
+                                     }: Readonly<Props>) {
   const [durationMs, setDurationMs] = useState(0);
   const [startMs, setStartMs] = useState(0);
   const [endMs, setEndMs] = useState(0);
@@ -71,7 +76,9 @@ export default function MediaTrimBar({ player, creating, defaultTitle, onCreateC
     };
     if (player.duration()) initRange();
     player.one('loadedmetadata', initRange);
-    return () => { player.off('loadedmetadata', initRange); };
+    return () => {
+      player.off('loadedmetadata', initRange);
+    };
   }, [player]);
 
   useEffect(() => {
@@ -83,7 +90,9 @@ export default function MediaTrimBar({ player, creating, defaultTitle, onCreateC
       }
     };
     player.on('timeupdate', onTimeUpdate);
-    return () => { player.off('timeupdate', onTimeUpdate); };
+    return () => {
+      player.off('timeupdate', onTimeUpdate);
+    };
   }, [player]);
 
   if (!player || durationMs === 0) return null;
@@ -118,39 +127,40 @@ export default function MediaTrimBar({ player, creating, defaultTitle, onCreateC
   const canAct = !creating && startValid && endValid;
 
   return (
-    <Box sx={{ mt: 1, px: 1 }}>
-      <Stack direction="row" spacing={2} alignItems="center">
-        <TextField
-          label="Start"
-          size="small"
-          value={startText}
-          onChange={(e) => handleStartChange(e.target.value)}
-          sx={{ width: 96 }}
-        />
-        <TextField
-          label="Ende"
-          size="small"
-          value={endText}
-          onChange={(e) => handleEndChange(e.target.value)}
-          sx={{ width: 96 }}
-        />
-        <Button size="small" disabled={!canAct} startIcon={<PlayCircleOutlineIcon />} onClick={handlePreview}>
-          Vorschau
-        </Button>
-        <Button
-          size="small"
-          variant="contained"
-          disabled={!canAct || endMs <= startMs}
-          startIcon={creating ? <CircularProgress size={14} /> : <ContentCutIcon />}
-          onClick={() => onCreateClip(
-            startMs,
-            endMs,
-            `${defaultTitle} Ausschnitt ${formatTimecode(startMs, useHours)} - ${formatTimecode(endMs, useHours)}`,
-          )}
-        >
-          {creating ? 'Clip wird erstellt…' : 'Clip erstellen'}
-        </Button>
-      </Stack>
-    </Box>
+      <Box sx={{mt: 1, px: 1}}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <TextField
+              label="Start"
+              size="small"
+              value={startText}
+              onChange={(e) => handleStartChange(e.target.value)}
+              sx={{width: 96}}
+          />
+          <TextField
+              label="Ende"
+              size="small"
+              value={endText}
+              onChange={(e) => handleEndChange(e.target.value)}
+              sx={{width: 96}}
+          />
+          <Button size="small" disabled={!canAct} startIcon={<PlayCircleOutlineIcon/>}
+                  onClick={handlePreview}>
+            Vorschau
+          </Button>
+          <Button
+              size="small"
+              variant="contained"
+              disabled={!canAct || endMs <= startMs}
+              startIcon={creating ? <CircularProgress size={14}/> : <ContentCutIcon/>}
+              onClick={() => onCreateClip(
+                  startMs,
+                  endMs,
+                  `${defaultTitle} Ausschnitt ${formatTimecode(startMs, useHours)} - ${formatTimecode(endMs, useHours)}`,
+              )}
+          >
+            {creating ? 'Clip wird erstellt…' : 'Clip erstellen'}
+          </Button>
+        </Stack>
+      </Box>
   );
 }
