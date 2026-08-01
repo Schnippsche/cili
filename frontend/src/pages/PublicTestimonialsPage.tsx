@@ -40,8 +40,44 @@ export default function PublicTestimonialsPage() {
 
         <TestimonialDisclaimer/>
 
+        <ToggleButtonGroup
+            value={sourceFilter}
+            exclusive
+            onChange={(_, val) => {
+              setSourceFilter(val ?? '');
+              setPage(0);
+            }}
+            size="small"
+            sx={{mb: 2}}
+        >
+          <ToggleButton value="">Beide</ToggleButton>
+          <ToggleButton value="Mensch">Mensch</ToggleButton>
+          <ToggleButton value="Tier">Tier</ToggleButton>
+        </ToggleButtonGroup>
+
+        <TextField
+            size="small"
+            placeholder="Suchen nach Name, Text oder Schlagwort…"
+            value={q}
+            onChange={e => {
+              setQ(e.target.value);
+              setPage(0);
+            }}
+            fullWidth
+            sx={{mb: 1}}
+            slotProps={{
+              input: {
+                startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small"/>
+                    </InputAdornment>
+                ),
+              },
+            }}
+        />
+
         {isLoading && (
-            <Box sx={{display: 'flex', justifyContent: 'center', mt: 6}}>
+            <Box sx={{display: 'flex', justifyContent: 'center', mt: 3}}>
               <CircularProgress/>
             </Box>
         )}
@@ -51,42 +87,6 @@ export default function PublicTestimonialsPage() {
 
         {!isLoading && !error && (
             <>
-              <ToggleButtonGroup
-                  value={sourceFilter}
-                  exclusive
-                  onChange={(_, val) => {
-                    setSourceFilter(val ?? '');
-                    setPage(0);
-                  }}
-                  size="small"
-                  sx={{mb: 2}}
-              >
-                <ToggleButton value="">Beide</ToggleButton>
-                <ToggleButton value="Mensch">Mensch</ToggleButton>
-                <ToggleButton value="Tier">Tier</ToggleButton>
-              </ToggleButtonGroup>
-
-              <TextField
-                  size="small"
-                  placeholder="Suchen nach Name, Text oder Schlagwort…"
-                  value={q}
-                  onChange={e => {
-                    setQ(e.target.value);
-                    setPage(0);
-                  }}
-                  fullWidth
-                  sx={{mb: 1}}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                          <InputAdornment position="start">
-                            <SearchIcon fontSize="small"/>
-                          </InputAdornment>
-                      ),
-                    },
-                  }}
-              />
-
               {data && (
                   <Typography variant="caption" color="text.secondary"
                               sx={{mb: 2, display: 'block'}}>
