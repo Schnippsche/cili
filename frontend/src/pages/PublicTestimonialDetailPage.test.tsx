@@ -65,3 +65,11 @@ test('zeigt einen Link zurück zur Übersicht', async () => {
   await waitFor(() => expect(screen.getByText('Anna')).toBeInTheDocument());
   expect(screen.getByRole('link', {name: /zurück zur übersicht/i})).toHaveAttribute('href', '/erfahrungsberichte');
 });
+
+test('zeigt den Hinweis auf subjektive Erfahrungsberichte', async () => {
+  vi.mocked(publicTestimonialsApi.getPublicTestimonial).mockResolvedValue(mockTestimonial);
+
+  renderPage();
+
+  expect(screen.getByText(/kein.*wissenschaftlichen Nachweis der Wirksamkeit/i)).toBeInTheDocument();
+});

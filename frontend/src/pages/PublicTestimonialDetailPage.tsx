@@ -3,6 +3,7 @@ import {useParams, Link as RouterLink} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import {getPublicTestimonial} from '../api/publicTestimonials';
 import PublicTestimonialCard from '../components/testimonial/PublicTestimonialCard';
+import TestimonialDisclaimer from '../components/testimonial/TestimonialDisclaimer';
 
 export default function PublicTestimonialDetailPage() {
   const {id} = useParams<{ id: string }>();
@@ -22,6 +23,8 @@ export default function PublicTestimonialDetailPage() {
         <Typography variant="body2" sx={{mb: 2}}>
           <RouterLink to="/erfahrungsberichte">← Zurück zur Übersicht</RouterLink>
         </Typography>
+
+        <TestimonialDisclaimer/>
 
         {isLoading && (
             <Box sx={{display: 'flex', justifyContent: 'center', mt: 6}}>
