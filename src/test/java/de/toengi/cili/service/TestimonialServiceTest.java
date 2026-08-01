@@ -28,6 +28,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -421,5 +422,71 @@ class TestimonialServiceTest {
 
         assertThatThrownBy(() -> service.getPublicById(99L))
             .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void listAllPublic_noFilters_returnsPageOfPublicDtos() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Testimonial t = Testimonial.builder().id(1L).authorName("Anna").text("Super Erfahrung!")
+            .userId(1L).isHuman(true).isAnimal(false)
+            .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
+        when(repository.findAllByOrderByCreatedAtDesc(pageable)).thenReturn(new PageImpl<>(List.of(t), pageable, 1));
+
+        Page<PublicTestimonialDto> result = service.listAllPublic(null, null, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).authorName()).isEqualTo("Anna");
+        assertThat(result.getTotalElements()).isEqualTo(1);
+    }
+
+    @Test
+    void listAllPublic_doesNotRequireAuthentication() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(repository.findAllByOrderByCreatedAtDesc(pageable)).thenReturn(Page.empty());
+
+        assertThatNoException().isThrownBy(() -> service.listAllPublic(null, null, pageable));
+
+        verifyNoInteractions(aclService);
+    }
+
+    @Test
+    void listAllPublic_withQuery_callsSearchLike() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(repository.searchLike(anyList(), isNull(), eq(pageable))).thenReturn(Page.empty());
+
+        service.listAllPublic("testsuche", null, pageable);
+
+        verify(repository).searchLike(List.of("testsuche"), null, pageable);
+        verify(repository, never()).findAllByOrderByCreatedAtDesc(any());
+    }
+
+    @Test
+    void listAllPublic_withSourceMensch_delegatesToFindByIsHumanTrue() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(repository.findByIsHumanTrueOrderByCreatedAtDesc(pageable)).thenReturn(Page.empty());
+
+        service.listAllPublic(null, "Mensch", pageable);
+
+        verify(repository).findByIsHumanTrueOrderByCreatedAtDesc(pageable);
+    }
+
+    @Test
+    void listAllPublic_withSourceTier_delegatesToFindByIsAnimalTrue() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(repository.findByIsAnimalTrueOrderByCreatedAtDesc(pageable)).thenReturn(Page.empty());
+
+        service.listAllPublic(null, "Tier", pageable);
+
+        verify(repository).findByIsAnimalTrueOrderByCreatedAtDesc(pageable);
+    }
+
+    @Test
+    void listAllPublic_withUnknownSource_returnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<PublicTestimonialDto> result = service.listAllPublic(null, "Menschen", pageable);
+
+        assertThat(result.getContent()).isEmpty();
+        verifyNoInteractions(repository);
     }
 }

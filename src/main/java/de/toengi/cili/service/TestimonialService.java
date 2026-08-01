@@ -330,9 +330,17 @@ public class TestimonialService {
     }
 
     @Transactional(readOnly = true)
-    public List<PublicTestimonialDto> listAllPublic(Pageable pageable) {
-        return repository.findAllByOrderByCreatedAtDesc(pageable)
-                .stream().map(this::toPublicDto).toList();
+    public Page<PublicTestimonialDto> listAllPublic(String q, String source, Pageable pageable) {
+        if (source != null && !source.isBlank()
+                && !"Mensch".equals(source) && !"Tier".equals(source)) {
+            return Page.empty(pageable);
+        }
+        if (q != null && !q.isBlank()) {
+            return repository.searchLike(parseTerms(q), source, pageable).map(this::toPublicDto);
+        }
+        if ("Mensch".equals(source)) return repository.findByIsHumanTrueOrderByCreatedAtDesc(pageable).map(this::toPublicDto);
+        if ("Tier".equals(source))   return repository.findByIsAnimalTrueOrderByCreatedAtDesc(pageable).map(this::toPublicDto);
+        return repository.findAllByOrderByCreatedAtDesc(pageable).map(this::toPublicDto);
     }
 
     @Transactional(readOnly = true)

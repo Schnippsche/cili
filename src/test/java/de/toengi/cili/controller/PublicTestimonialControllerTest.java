@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -37,13 +39,26 @@ class PublicTestimonialControllerTest {
         PublicTestimonialDto dto = new PublicTestimonialDto(
             1L, "Anna", null, "Super Erfahrung", true, false,
             LocalDateTime.now(), LocalDateTime.now(), List.of());
-        when(testimonialService.listAllPublic(any(Pageable.class))).thenReturn(List.of(dto));
+        Pageable pageable = PageRequest.of(0, 50);
+        when(testimonialService.listAllPublic(isNull(), isNull(), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(dto), pageable, 1));
 
-        List<PublicTestimonialDto> result = controller.listAll(0, 50);
+        Page<PublicTestimonialDto> result = controller.listAll(null, null, 0, 50);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).authorName()).isEqualTo("Anna");
-        verify(testimonialService).listAllPublic(PageRequest.of(0, 50));
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).authorName()).isEqualTo("Anna");
+        verify(testimonialService).listAllPublic(null, null, pageable);
+    }
+
+    @Test
+    void listAll_passesQueryAndSourceThrough() {
+        Pageable pageable = PageRequest.of(0, 50);
+        when(testimonialService.listAllPublic(eq("hund"), eq("Tier"), any(Pageable.class)))
+            .thenReturn(Page.empty());
+
+        controller.listAll("hund", "Tier", 0, 50);
+
+        verify(testimonialService).listAllPublic("hund", "Tier", pageable);
     }
 
     @Test

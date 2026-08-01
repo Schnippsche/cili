@@ -65,4 +65,41 @@ class PublicTestimonialIntegrationTest {
         mockMvc.perform(get("/api/public/testimonials/{id}", 999999L))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void listAll_anonymousRequest_returnsSpringPageShape() throws Exception {
+        testimonialRepository.save(Testimonial.builder()
+                .authorName("Anna Mustermann").text("Sehr zufrieden mit dem Produkt.")
+                .isHuman(true).isAnimal(false)
+                .userId(owner.getId())
+                .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
+                .build());
+
+        mockMvc.perform(get("/api/public/testimonials"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].authorName").value("Anna Mustermann"))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
+    }
+
+    @Test
+    void listAll_withSourceFilter_returnsOnlyMatchingCategory() throws Exception {
+        testimonialRepository.save(Testimonial.builder()
+                .authorName("Mensch-Bericht").text("Ein Bericht über einen Menschen.")
+                .isHuman(true).isAnimal(false)
+                .userId(owner.getId())
+                .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
+                .build());
+        testimonialRepository.save(Testimonial.builder()
+                .authorName("Tier-Bericht").text("Ein Bericht über ein Tier.")
+                .isHuman(false).isAnimal(true)
+                .userId(owner.getId())
+                .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
+                .build());
+
+        mockMvc.perform(get("/api/public/testimonials").param("source", "Tier"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].authorName").value("Tier-Bericht"));
+    }
 }

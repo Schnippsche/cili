@@ -8,6 +8,7 @@ import de.toengi.cili.service.SubtitleService;
 import de.toengi.cili.service.TestimonialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.support.ResourceRegion;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -31,11 +32,13 @@ public class PublicTestimonialController {
     private static final int MAX_PAGE_SIZE = 100;
 
     @GetMapping
-    public List<PublicTestimonialDto> listAll(
+    public Page<PublicTestimonialDto> listAll(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String source,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         int cappedSize = Math.min(size, MAX_PAGE_SIZE);
-        return testimonialService.listAllPublic(PageRequest.of(page, cappedSize));
+        return testimonialService.listAllPublic(q, source, PageRequest.of(page, cappedSize));
     }
 
     @GetMapping("/{id}")
