@@ -38,6 +38,11 @@ public class PublicTestimonialController {
         return testimonialService.listAllPublic(PageRequest.of(page, cappedSize));
     }
 
+    @GetMapping("/{id}")
+    public PublicTestimonialDto getOne(@PathVariable Long id) {
+        return testimonialService.getPublicById(id);
+    }
+
     @GetMapping("/images/{resourceId}")
     public ResponseEntity<byte[]> getImage(
             @PathVariable Long resourceId,

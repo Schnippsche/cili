@@ -47,6 +47,29 @@ class PublicTestimonialControllerTest {
     }
 
     @Test
+    void getOne_delegatesToService() {
+        PublicTestimonialDto dto = new PublicTestimonialDto(
+            1L, "Anna", null, "Super Erfahrung", true, false,
+            LocalDateTime.now(), LocalDateTime.now(), List.of());
+        when(testimonialService.getPublicById(1L)).thenReturn(dto);
+
+        PublicTestimonialDto result = controller.getOne(1L);
+
+        assertThat(result.id()).isEqualTo(1L);
+        assertThat(result.authorName()).isEqualTo("Anna");
+        verify(testimonialService).getPublicById(1L);
+    }
+
+    @Test
+    void getOne_propagatesNotFoundFromService() {
+        when(testimonialService.getPublicById(99L))
+            .thenThrow(new de.toengi.cili.exception.ResourceNotFoundException("Testimonial", 99L));
+
+        assertThatThrownBy(() -> controller.getOne(99L))
+            .isInstanceOf(de.toengi.cili.exception.ResourceNotFoundException.class);
+    }
+
+    @Test
     void getImage_returnsOkWithCacheControl() throws IOException {
         when(testimonialService.getPublicThumbnailBytes(1L, "small"))
             .thenReturn(new byte[]{1, 2, 3});
