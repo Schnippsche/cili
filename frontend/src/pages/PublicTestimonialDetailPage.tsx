@@ -7,12 +7,15 @@ import PublicTestimonialCard from '../components/testimonial/PublicTestimonialCa
 export default function PublicTestimonialDetailPage() {
   const {id} = useParams<{ id: string }>();
   const testimonialId = Number(id);
+  const isValidId = Number.isFinite(testimonialId);
 
   const {data, isLoading, error} = useQuery({
     queryKey: ['public-testimonial', testimonialId],
     queryFn: () => getPublicTestimonial(testimonialId),
-    enabled: Number.isFinite(testimonialId),
+    enabled: isValidId,
   });
+
+  const hasError = error || !isValidId;
 
   return (
       <Container maxWidth="md" sx={{py: 4}}>
@@ -26,13 +29,13 @@ export default function PublicTestimonialDetailPage() {
             </Box>
         )}
 
-        {error && (
+        {hasError && (
             <Alert severity="error" sx={{mt: 2}}>
               Erfahrungsbericht nicht gefunden oder wurde gelöscht.
             </Alert>
         )}
 
-        {!isLoading && !error && data && (
+        {!isLoading && !hasError && data && (
             <PublicTestimonialCard testimonial={data}/>
         )}
       </Container>

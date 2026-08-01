@@ -51,6 +51,12 @@ test('zeigt Fehlermeldung wenn der Bericht nicht gefunden wird', async () => {
   await waitFor(() => expect(screen.getByText(/nicht gefunden/i)).toBeInTheDocument());
 });
 
+test('zeigt Fehlermeldung wenn die ID in der Route ungültig ist', async () => {
+  renderPage('/erfahrungsberichte/abc');
+
+  await waitFor(() => expect(screen.getByText(/nicht gefunden/i)).toBeInTheDocument());
+});
+
 test('zeigt einen Link zurück zur Übersicht', async () => {
   vi.mocked(publicTestimonialsApi.getPublicTestimonial).mockResolvedValue(mockTestimonial);
 
