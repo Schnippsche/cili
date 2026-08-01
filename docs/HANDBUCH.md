@@ -415,6 +415,16 @@ Bilder werden direkt mit dem Speichern des Berichts übernommen (max. 10 MB pro 
 
 Erfahrungsberichte lassen sich zu Sammlungen hinzufügen und erscheinen dann auch auf der öffentlichen Sammlungsseite, wenn ein Freigabe-Link geteilt wird.
 
+### Öffentlichen Link zu einem Bericht teilen
+
+Jeder Erfahrungsbericht lässt sich auch einzeln über einen direkten Link teilen — unabhängig davon, ob er einer Sammlung angehört.
+
+1. Klicke in der Aktionsleiste des gewünschten Berichts auf **Öffentlichen Link generieren**
+2. Im sich öffnenden Dialog wird der fertige Link angezeigt
+3. Klicke auf das **Kopier-Symbol**, um den Link in die Zwischenablage zu kopieren
+
+> Dieser Link ist **dauerhaft gültig und kann nicht widerrufen werden** — im Unterschied zu den Datei- und Sammlungs-Freigabe-Links aus [Kapitel 9](#9-freigabe-links). Das ist beabsichtigt: Erfahrungsberichte sind ohnehin bereits öffentlich abrufbar (auch ohne Login, über eine öffentliche Erfahrungsberichte-Übersicht), der Link verweist lediglich direkt auf diesen einen Bericht.
+
 ---
 
 ## 9. Freigabe-Links
@@ -504,7 +514,7 @@ Jedes Etikett zeigt deinen Namen, deine E-Mail-Adresse, optional Mitglieds-ID un
 Der Zugriff auf Ordner wird vom Administrator über Berechtigungen gesteuert. Wende dich an deinen Administrator, wenn du Zugriff auf einen bestimmten Ordner benötigst.
 
 **Wie lange sind Freigabe-Links gültig?**
-Standardmäßig 90 Tage. Danach werden sie automatisch ungültig. Du kannst einen Link jederzeit erneuern oder widerrufen.
+Standardmäßig 90 Tage. Danach werden sie automatisch ungültig. Du kannst einen Link jederzeit erneuern oder widerrufen. Eine Ausnahme bilden die [öffentlichen Links zu einzelnen Erfahrungsberichten](#öffentlichen-link-zu-einem-bericht-teilen): Diese sind dauerhaft gültig und besitzen kein Ablaufdatum.
 
 **Kann ich Dateien in mehreren Sammlungen haben?**
 Ja. Eine Datei kann in beliebig vielen Sammlungen enthalten sein, ohne dass sie doppelt gespeichert wird.
