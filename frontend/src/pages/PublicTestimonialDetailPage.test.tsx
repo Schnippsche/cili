@@ -71,5 +71,5 @@ test('zeigt den Hinweis auf subjektive Erfahrungsberichte', async () => {
 
   renderPage();
 
-  expect(screen.getByText(/kein.*wissenschaftlichen Nachweis der Wirksamkeit/i)).toBeInTheDocument();
+  expect(screen.getByText(/keine wissenschaftlich belegten Aussagen/i)).toBeInTheDocument();
 });
