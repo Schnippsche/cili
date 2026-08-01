@@ -3,6 +3,7 @@ package de.toengi.cili.service;
 import de.toengi.cili.dto.testimonial.CreateTestimonialRequest;
 import de.toengi.cili.dto.testimonial.UpdateTestimonialRequest;
 import de.toengi.cili.dto.testimonial.TestimonialDto;
+import de.toengi.cili.dto.testimonial.PublicTestimonialDto;
 import de.toengi.cili.exception.CiliException;
 import de.toengi.cili.exception.ResourceNotFoundException;
 import de.toengi.cili.model.entity.Resource;
@@ -398,5 +399,27 @@ class TestimonialServiceTest {
 
         assertThat(result).isEmpty();
         verifyNoInteractions(repository);
+    }
+
+    @Test
+    void getPublicById_returnsMappedDto() {
+        Testimonial t = Testimonial.builder().id(1L).authorName("Anna").text("Super Erfahrung!")
+                .userId(1L).isHuman(true).isAnimal(false)
+                .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
+        when(repository.findById(1L)).thenReturn(Optional.of(t));
+
+        PublicTestimonialDto result = service.getPublicById(1L);
+
+        assertThat(result.id()).isEqualTo(1L);
+        assertThat(result.authorName()).isEqualTo("Anna");
+        assertThat(result.text()).isEqualTo("Super Erfahrung!");
+    }
+
+    @Test
+    void getPublicById_notFound_throws() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getPublicById(99L))
+            .isInstanceOf(ResourceNotFoundException.class);
     }
 }

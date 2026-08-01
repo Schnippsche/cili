@@ -347,6 +347,13 @@ public class TestimonialService {
         return repository.findAllById(ids).stream().map(this::toPublicDto).toList();
     }
 
+    @Transactional(readOnly = true)
+    public PublicTestimonialDto getPublicById(Long id) {
+        Testimonial t = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Testimonial", id));
+        return toPublicDto(t);
+    }
+
     private PublicTestimonialDto toPublicDto(Testimonial t) {
         List<Resource> resources = resourceRepository.findByTestimonialIdOrderByCreatedAtAsc(t.getId());
         Map<Long, Thumbnail> thumbsByResourceId = thumbnailsFor(resources);
