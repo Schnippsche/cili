@@ -415,15 +415,21 @@ Bilder werden direkt mit dem Speichern des Berichts übernommen (max. 10 MB pro 
 
 Erfahrungsberichte lassen sich zu Sammlungen hinzufügen und erscheinen dann auch auf der öffentlichen Sammlungsseite, wenn ein Freigabe-Link geteilt wird.
 
+### Öffentliche Erfahrungsberichte-Übersicht
+
+Alle Erfahrungsberichte — sowohl Mensch- als auch Tier-Berichte — sind unabhängig von Sammlungen und Einzel-Links **grundsätzlich öffentlich einsehbar**, über eine eigene Übersichtsseite ohne Login. Dort stehen dieselbe Mensch/Tier-Auswahl und dasselbe Suchfeld wie in der internen Übersicht zur Verfügung (siehe [Übersicht & Suche](#übersicht--suche)), sodass externe Besucher gezielt nach Autor, Text oder Tags suchen und filtern können. Die Seite eignet sich, um Interessenten pauschal auf **alle** Erfahrungsberichte zu verweisen, statt auf einen einzelnen.
+
+> Da diese Übersicht ohnehin für jeden ohne Login erreichbar ist, benötigt sie — anders als Sammlungen — keinen eigenen Freigabe-Link: Jeder neu angelegte Erfahrungsbericht erscheint automatisch dort.
+
 ### Öffentlichen Link zu einem Bericht teilen
 
-Jeder Erfahrungsbericht lässt sich auch einzeln über einen direkten Link teilen — unabhängig davon, ob er einer Sammlung angehört.
+Jeder Erfahrungsbericht lässt sich zusätzlich auch einzeln über einen direkten Link teilen — unabhängig davon, ob er einer Sammlung angehört. Das ist praktisch, wenn du gezielt auf **einen bestimmten** Bericht statt auf die gesamte Übersicht verweisen möchtest.
 
 1. Klicke in der Aktionsleiste des gewünschten Berichts auf **Öffentlichen Link generieren**
 2. Im sich öffnenden Dialog wird der fertige Link angezeigt
 3. Klicke auf das **Kopier-Symbol**, um den Link in die Zwischenablage zu kopieren
 
-> Dieser Link ist **dauerhaft gültig und kann nicht widerrufen werden** — im Unterschied zu den Datei- und Sammlungs-Freigabe-Links aus [Kapitel 9](#9-freigabe-links). Das ist beabsichtigt: Erfahrungsberichte sind ohnehin bereits öffentlich abrufbar (auch ohne Login, über eine öffentliche Erfahrungsberichte-Übersicht), der Link verweist lediglich direkt auf diesen einen Bericht.
+> Dieser Link ist **dauerhaft gültig und kann nicht widerrufen werden** — im Unterschied zu den Datei- und Sammlungs-Freigabe-Links aus [Kapitel 9](#9-freigabe-links). Das ist beabsichtigt: Erfahrungsberichte sind ohnehin bereits öffentlich abrufbar (siehe [Öffentliche Erfahrungsberichte-Übersicht](#öffentliche-erfahrungsberichte-übersicht)), der Link verweist lediglich direkt auf diesen einen Bericht.
 
 ---
 
