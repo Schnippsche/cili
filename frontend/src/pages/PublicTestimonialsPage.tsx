@@ -50,9 +50,27 @@ export default function PublicTestimonialsPage() {
             size="small"
             sx={{mb: 2}}
         >
-          <ToggleButton value="">Beide</ToggleButton>
-          <ToggleButton value="Mensch">Mensch</ToggleButton>
-          <ToggleButton value="Tier">Tier</ToggleButton>
+          <ToggleButton value="" sx={{
+            '&.Mui-selected': {
+              bgcolor: 'secondary.main',
+              color: 'secondary.contrastText',
+              '&:hover': {bgcolor: 'secondary.dark'},
+            },
+          }}>Beide</ToggleButton>
+          <ToggleButton value="Mensch" sx={{
+            '&.Mui-selected': {
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              '&:hover': {bgcolor: 'primary.dark'},
+            },
+          }}>Mensch</ToggleButton>
+          <ToggleButton value="Tier" sx={{
+            '&.Mui-selected': {
+              bgcolor: 'success.main',
+              color: 'success.contrastText',
+              '&:hover': {bgcolor: 'success.dark'},
+            },
+          }}>Tier</ToggleButton>
         </ToggleButtonGroup>
 
         <TextField
