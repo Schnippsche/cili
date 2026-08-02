@@ -123,9 +123,19 @@ def get_cili_token(cili_url: str, user: str, password: str) -> str:
     return resp.json()["accessToken"]
 
 
-def upload_file(filepath: Path, folder_id: int, token: str, cili_url: str,
+def _validate_target(folder_id: int | None, testimonial_id: int | None) -> None:
+    """Genau eines von beidem muss gesetzt sein — spiegelt die serverseitige
+    Regel in UploadService.initUpload() (de.toengi.cili.service.UploadService)."""
+    if (folder_id is None) == (testimonial_id is None):
+        raise ValueError("Entweder folder_id oder testimonial_id muss gesetzt sein")
+
+
+def upload_file(filepath: Path, *, token: str, cili_url: str,
+                folder_id: int | None = None, testimonial_id: int | None = None,
                 chunk_size: int = CHUNK_SIZE, pin_to_top: bool = False) -> dict:
-    """Lädt eine lokale Datei über die CILI Chunked-Upload-API hoch."""
+    """Lädt eine lokale Datei über die CILI Chunked-Upload-API hoch — entweder
+    in einen Ordner (folder_id) oder als Testimonial-Anhang (testimonial_id)."""
+    _validate_target(folder_id, testimonial_id)
     if not (_MIN_CHUNK_SIZE <= chunk_size <= _MAX_CHUNK_SIZE):
         raise ValueError(
             f"chunk_size {chunk_size // 1024 // 1024} MB außerhalb des erlaubten Bereichs "
@@ -146,7 +156,8 @@ def upload_file(filepath: Path, folder_id: int, token: str, cili_url: str,
                 "mimeType":  mime_type,
                 "totalSize": file_size,
                 "chunkSize": chunk_size,
-                "folderId":  folder_id,
+                **({"folderId": folder_id} if folder_id is not None else {}),
+                **({"testimonialId": testimonial_id} if testimonial_id is not None else {}),
             },
             headers=headers,
             timeout=30,
@@ -350,7 +361,8 @@ def download_and_upload(
         print(f"  Titel:  {resolved_title}")
         print(f"  Upload: {upload_name} ({size_mb} MB) → Ordner {folder_id}")
 
-        result = upload_file(final_file, folder_id, token, cili_url, chunk_size, pin_to_top=pin_to_top)
+        result = upload_file(final_file, token=token, cili_url=cili_url, folder_id=folder_id,
+                              chunk_size=chunk_size, pin_to_top=pin_to_top)
         print(f"  ✓ Hochgeladen (Resource-ID {result.get('id', '?')})")
         return result
 
