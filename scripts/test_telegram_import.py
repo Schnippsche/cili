@@ -21,8 +21,9 @@ import telegram_import
 from telegram_import import _classify_media
 
 
-def _msg(photo=None, video=None, video_note=None, audio=None):
-    return SimpleNamespace(photo=photo, video=video, video_note=video_note, audio=audio)
+def _msg(photo=None, video=None, video_note=None, audio=None, gif=None, sticker=None):
+    return SimpleNamespace(photo=photo, video=video, video_note=video_note, audio=audio,
+                            gif=gif, sticker=sticker)
 
 
 def test_classify_media_photo():
@@ -52,6 +53,18 @@ def test_classify_media_round_video_note_excluded():
     # Ausschluss-Bedingung, anders als bei audio/voice) — video_note muss
     # deshalb explizit geprüft werden.
     assert _classify_media(_msg(video=True, video_note=True)) is None
+
+
+def test_classify_media_gif_excluded():
+    # GIFs tragen DocumentAttributeAnimated zusätzlich zu DocumentAttributeVideo
+    # und sind daher ebenfalls msg.video-truthy — msg.gif muss das ausschließen.
+    assert _classify_media(_msg(video=True, gif=True)) is None
+
+
+def test_classify_media_video_sticker_excluded():
+    # Webm-Video-Sticker tragen DocumentAttributeSticker zusätzlich zu
+    # DocumentAttributeVideo — msg.sticker muss das ausschließen.
+    assert _classify_media(_msg(video=True, sticker=True)) is None
 
 
 class _FakeSegment:

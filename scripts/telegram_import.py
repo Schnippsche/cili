@@ -109,6 +109,12 @@ WHISPER_DEVICE        = os.getenv("WHISPER_DEVICE", "cuda")
 WHISPER_COMPUTE_TYPE  = os.getenv("WHISPER_COMPUTE_TYPE", "int8_float16")
 WHISPER_LANG          = os.getenv("WHISPER_LANG", "auto")
 
+# Sicherheitsobergrenze für den Transkript-Text vor dem Anhängen an die
+# Bildunterschrift — verhindert, dass ein langes Video-Transkript zusammen mit
+# CLASSIFY_PROMPT das Ollama-Kontextfenster (AI_NUM_CTX) sprengt und die
+# JSON-Formatierungsanweisungen aus dem Prompt verdrängt.
+MAX_TRANSCRIPT_CHARS = 6000
+
 TG_SOURCE   = os.getenv("TG_SOURCE", "")   # muss exakt "Mensch" oder "Tier" sein
 TG_IS_HUMAN = TG_SOURCE == "Mensch"
 TG_IS_ANIMAL = TG_SOURCE == "Tier"
@@ -575,10 +581,13 @@ def _classify_media(msg) -> str | None:
     auf ein DocumentAttributeVideo ohne jede Bedingung und ist daher auch bei
     runden Video-Notes wahr (die eigene `video_note`-Property filtert erst
     separat auf `attr.round_message`). Runde Video-Notes werden deshalb
-    explizit ausgeschlossen."""
+    explizit ausgeschlossen. Aus demselben Grund sind GIFs (tragen zusätzlich
+    DocumentAttributeAnimated, `msg.gif`) und Video-Sticker (zusätzlich
+    DocumentAttributeSticker, `msg.sticker`) ebenfalls `video`-truthy, aber
+    keine echten Video-Anhänge — beide werden deshalb ebenfalls ausgeschlossen."""
     if msg.photo:
         return "image"
-    if msg.video and not msg.video_note:
+    if msg.video and not msg.video_note and not msg.gif and not msg.sticker:
         return "video"
     if msg.audio:
         return "audio"
@@ -732,6 +741,9 @@ async def _process_message(client: TelegramClient, message, album_map: dict,
                 av_downloaded[av_msgs[0].id] = first_path
                 transcript = transcribe_for_classification(first_path)
                 if transcript:
+                    if len(transcript) > MAX_TRANSCRIPT_CHARS:
+                        print(f"  Transkript gekürzt ({len(transcript)} → {MAX_TRANSCRIPT_CHARS} Zeichen, KI-Kontextfenster)")
+                        transcript = transcript[:MAX_TRANSCRIPT_CHARS]
                     text = f"{text}\n\n{transcript}".strip() if text else transcript
 
         if len(text) < 50:
