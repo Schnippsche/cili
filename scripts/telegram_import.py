@@ -42,7 +42,7 @@ from dotenv import load_dotenv
 from telethon import TelegramClient
 
 sys.path.insert(0, str(Path(__file__).parent))
-from video_upload import download_and_upload as _download_and_upload_video
+from video_upload import download_and_upload as _download_and_upload_video, upload_file
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Telegram → CILI Erfahrungsberichte Importer")
@@ -657,8 +657,22 @@ async def _download_images(client: TelegramClient, media_msgs: list) -> list:
     return images
 
 
+def _upload_attachments(testimonial_id: int, av_paths: list) -> None:
+    """Lädt Video-/Audio-Anhänge nach erfolgreicher Testimonial-Anlage hoch.
+    Ein fehlgeschlagener Einzel-Upload bricht den Lauf nicht ab — das
+    Testimonial existiert bereits, nur der jeweilige Anhang fehlt (im
+    Admin-UI manuell nachreichbar)."""
+    for path in av_paths:
+        try:
+            upload_token = get_cili_token()  # frisches Token — Upload kann dauern
+            upload_file(path, token=upload_token, cili_url=CILI_URL, testimonial_id=testimonial_id)
+            print(f"  ✓ Anhang hochgeladen: {path.name}")
+        except Exception as exc:
+            print(f"  Video-/Audio-Upload fehlgeschlagen ({path.name}): {exc} — übersprungen")
+
+
 def _post_one(token: str, author: str, result: dict, text: str,
-              msg_utc: datetime, images: list) -> str:
+              msg_utc: datetime, images: list, av_paths: list) -> str:
     """Postet einen Erfahrungsbericht an CILI. Liefert 'imported' oder 'failed'."""
     try:
         created = post_testimonial(
@@ -669,14 +683,32 @@ def _post_one(token: str, author: str, result: dict, text: str,
             created_at=msg_utc,
             images=images,
         )
-        print(f"  ✓ Importiert als Erfahrungsbericht ID {created['id']}\n")
-        return "imported"
+        print(f"  ✓ Importiert als Erfahrungsbericht ID {created['id']}")
     except requests.HTTPError as exc:
         print(f"  CILI-Fehler {exc.response.status_code}: {exc.response.text[:200]} — übersprungen\n")
         return "failed"
     except Exception as exc:
         print(f"  CILI-Fehler: {exc} — übersprungen\n")
         return "failed"
+
+    _upload_attachments(created["id"], av_paths)
+    print()
+    return "imported"
+
+
+async def _download_media_to_dir(client: TelegramClient, msg, tmp_dir: Path) -> Path | None:
+    """Lädt einen Video-/Audio-Anhang in ein Verzeichnis (Telethon vergibt
+    Dateiname/Endung automatisch). None bei Fehler (geloggt, übersprungen)."""
+    try:
+        path_str = await client.download_media(msg, file=str(tmp_dir) + os.sep)
+        if not path_str:
+            return None
+        path = Path(path_str)
+        print(f"  Video/Audio heruntergeladen: {path.name} ({path.stat().st_size} Bytes)")
+        return path
+    except Exception as exc:
+        print(f"  Video/Audio-Download fehlgeschlagen: {exc}")
+        return None
 
 
 async def _process_message(client: TelegramClient, message, album_map: dict,
@@ -687,38 +719,65 @@ async def _process_message(client: TelegramClient, message, album_map: dict,
     text, media_msgs = _resolve_message_content(message, album_map, processed_group_ids)
     if text is None:
         return "album_dup"
-    if len(text) < 50:
-        return "skipped"
 
-    msg_utc = _to_utc_naive(message.date)
+    av_msgs = [m for m in media_msgs if _classify_media(m) in ("video", "audio")]
+    tmp_dir: Path | None = None
+    av_downloaded: dict = {}  # msg.id -> Path, vermeidet Doppel-Download
 
-    if _is_webinar(text):
-        _try_import_webinar(text, msg_utc)
-        return "skipped"
+    try:
+        if len(text) < 50 and av_msgs:
+            tmp_dir = Path(tempfile.mkdtemp(prefix="cili_tg_"))
+            first_path = await _download_media_to_dir(client, av_msgs[0], tmp_dir)
+            if first_path:
+                av_downloaded[av_msgs[0].id] = first_path
+                transcript = transcribe_for_classification(first_path)
+                if transcript:
+                    text = f"{text}\n\n{transcript}".strip() if text else transcript
 
-    sender_name = await _resolve_sender_name(message)
-    print(f"[{msg_utc.strftime('%d.%m.%Y %H:%M')}] {sender_name}: "
-          f"{text[:100].replace(chr(10), ' ')}…")
+        if len(text) < 50:
+            return "skipped"
 
-    result = _classify(sender_name, text)
-    if result is None:
-        return "skipped"
+        msg_utc = _to_utc_naive(message.date)
 
-    confidence = float(result.get("confidence", 0))
-    if not result.get("is_testimonial") or confidence < MIN_CONFIDENCE:
-        print(f"  → Kein Erfahrungsbericht (confidence={confidence:.2f})\n")
-        return "skipped"
+        if _is_webinar(text):
+            _try_import_webinar(text, msg_utc)
+            return "skipped"
 
-    print(f"  → Erfahrungsbericht erkannt (confidence={confidence:.2f})")
+        sender_name = await _resolve_sender_name(message)
+        print(f"[{msg_utc.strftime('%d.%m.%Y %H:%M')}] {sender_name}: "
+              f"{text[:100].replace(chr(10), ' ')}…")
 
-    final_text = (result.get("text") or text).strip()
-    if len(final_text.split()) < 10:
-        print(f"  → Zu kurz nach KI-Verarbeitung ({final_text!r}) — übersprungen\n")
-        return "skipped"
+        result = _classify(sender_name, text)
+        if result is None:
+            return "skipped"
 
-    images = await _download_images(client, media_msgs)
-    author = (result.get("author_name") or sender_name).strip() or sender_name
-    return _post_one(token, author, result, text, msg_utc, images)
+        confidence = float(result.get("confidence", 0))
+        if not result.get("is_testimonial") or confidence < MIN_CONFIDENCE:
+            print(f"  → Kein Erfahrungsbericht (confidence={confidence:.2f})\n")
+            return "skipped"
+
+        print(f"  → Erfahrungsbericht erkannt (confidence={confidence:.2f})")
+
+        final_text = (result.get("text") or text).strip()
+        if len(final_text.split()) < 10:
+            print(f"  → Zu kurz nach KI-Verarbeitung ({final_text!r}) — übersprungen\n")
+            return "skipped"
+
+        if av_msgs and tmp_dir is None:
+            tmp_dir = Path(tempfile.mkdtemp(prefix="cili_tg_"))
+        for m in av_msgs:
+            if m.id in av_downloaded:
+                continue
+            p = await _download_media_to_dir(client, m, tmp_dir)
+            if p:
+                av_downloaded[m.id] = p
+
+        images = await _download_images(client, media_msgs)
+        author = (result.get("author_name") or sender_name).strip() or sender_name
+        return _post_one(token, author, result, text, msg_utc, images, list(av_downloaded.values()))
+    finally:
+        if tmp_dir is not None:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 async def main():
