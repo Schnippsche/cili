@@ -524,6 +524,24 @@ def _group_albums(messages: list) -> dict:
     return album_map
 
 
+def _classify_media(msg) -> str | None:
+    """'image' | 'video' | 'audio' | None.
+
+    Telethons `audio`-Property schließt Voice-Notes bereits selbst aus
+    (Bedingung `not attr.voice`) — `video` dagegen NICHT: `video` prüft nur
+    auf ein DocumentAttributeVideo ohne jede Bedingung und ist daher auch bei
+    runden Video-Notes wahr (die eigene `video_note`-Property filtert erst
+    separat auf `attr.round_message`). Runde Video-Notes werden deshalb
+    explizit ausgeschlossen."""
+    if msg.photo:
+        return "image"
+    if msg.video and not msg.video_note:
+        return "video"
+    if msg.audio:
+        return "audio"
+    return None
+
+
 def _resolve_message_content(message, album_map: dict, processed_group_ids: set):
     """Liefert (text, media_msgs) für eine Nachricht bzw. ihr Album.
 
