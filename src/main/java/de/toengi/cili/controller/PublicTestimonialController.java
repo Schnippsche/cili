@@ -7,6 +7,7 @@ import de.toengi.cili.service.StreamService;
 import de.toengi.cili.service.SubtitleService;
 import de.toengi.cili.service.TestimonialService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/public/testimonials")
 @RequiredArgsConstructor
@@ -38,11 +40,19 @@ public class PublicTestimonialController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         int cappedSize = Math.min(size, MAX_PAGE_SIZE);
+
+        if (q == null || q.isBlank()) {
+            log.info("Public testimonial page visited: source={}", source);
+        } else {
+            log.info("Public testimonial search performed: query='{}', source={}", q, source);
+        }
+
         return testimonialService.listAllPublic(q, source, PageRequest.of(page, cappedSize));
     }
 
     @GetMapping("/{id}")
     public PublicTestimonialDto getOne(@PathVariable Long id) {
+        log.info("Public testimonial detail viewed: id={}", id);
         return testimonialService.getPublicById(id);
     }
 
