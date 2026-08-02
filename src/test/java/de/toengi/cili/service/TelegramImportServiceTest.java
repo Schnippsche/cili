@@ -37,6 +37,7 @@ class TelegramImportServiceTest {
         TelegramImportConfig.Source s = new TelegramImportConfig.Source();
         s.setName("telegram-tiere");
         s.setLabel("Tiere");
+        s.setScriptName("telegram_import_tier.py");
         s.setEnvName("telegram_import_tiere.env");
         s.setCron("0 30 1 * * *");
         return s;
@@ -103,15 +104,14 @@ class TelegramImportServiceTest {
     @SuppressWarnings("unchecked")
     void buildCommand_usesResolvedEnvPathOfGivenSource() {
         when(global.getPythonPath()).thenReturn("python3");
-        when(config.getScriptName()).thenReturn("telegram_import.py");
-        when(global.resolve("telegram_import.py")).thenReturn("/opt/cili/scripts/telegram_import.py");
+        when(global.resolve("telegram_import_tier.py")).thenReturn("/opt/cili/scripts/telegram_import_tier.py");
         when(global.resolve("telegram_import_tiere.env")).thenReturn("/opt/cili/scripts/telegram_import_tiere.env");
 
         List<String> cmd = (List<String>) ReflectionTestUtils.invokeMethod(
             service, "buildCommand", tiereSource());
 
         assertThat(cmd).containsExactly(
-            "python3", "/opt/cili/scripts/telegram_import.py",
+            "python3", "/opt/cili/scripts/telegram_import_tier.py",
             "--env", "/opt/cili/scripts/telegram_import_tiere.env");
     }
 }

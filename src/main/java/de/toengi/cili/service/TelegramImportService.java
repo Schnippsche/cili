@@ -77,7 +77,7 @@ public class TelegramImportService {
         log.info("Telegram-Import gestartet (Job {}, Quelle {})", jobId, source.getName());
 
         List<String> cmd = buildCommand(source);
-        ProcessBuilder pb = PythonProcessUtils.forScript(cmd, global.resolve(config.getScriptName()));
+        ProcessBuilder pb = PythonProcessUtils.forScript(cmd, global.resolve(source.getScriptName()));
         pb.redirectErrorStream(true);
 
         try {
@@ -138,7 +138,7 @@ public class TelegramImportService {
     private List<String> buildCommand(TelegramImportConfig.Source source) {
         List<String> cmd = new ArrayList<>();
         cmd.add(global.getPythonPath());
-        cmd.add(global.resolve(config.getScriptName()));
+        cmd.add(global.resolve(source.getScriptName()));
         String envPath = global.resolve(source.getEnvName());
         if (envPath != null) {
             cmd.add("--env");
