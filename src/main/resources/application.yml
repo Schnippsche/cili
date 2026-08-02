@@ -135,16 +135,22 @@ cili:
     timeout-minutes: 120
 
   telegram:
-    enabled: true                              # true → nächtlicher Cron läuft
-    script-name: telegram_import.py
+    enabled: true                              # true → nächtlicher/wöchentlicher Cron läuft
     timeout-minutes: 60
     cili-user: Stefan                          # Job-Token wird für diesen Benutzer generiert (CILI_TOKEN)
     sources:
       - name: telegram-menschen
         label: Menschen
+        script-name: telegram_import_mensch.py
         env-name: telegram_import_menschen.env
         cron: "0 0 1 * * *"                    # täglich 01:00 Uhr
       - name: telegram-tiere
         label: Tiere
+        script-name: telegram_import_tier.py
         env-name: telegram_import_tiere.env
         cron: "0 30 1 * * *"                   # täglich 01:30 Uhr
+      - name: telegram-webinare
+        label: Lifestyle Webinare
+        script-name: telegram_import_webinare.py
+        env-name: telegram_import_webinare.env
+        cron: "0 0 2 * * SUN"                  # wöchentlich Sonntag 02:00 Uhr
