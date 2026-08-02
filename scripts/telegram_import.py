@@ -99,6 +99,9 @@ MAX_RUNTIME_MINUTES  = float(os.getenv("MAX_RUNTIME_MINUTES", "45"))
 
 WEBINAR_FOLDER_ID  = os.getenv("WEBINAR_FOLDER_ID", "")
 WEBINAR_MAX_HEIGHT = int(os.getenv("WEBINAR_MAX_HEIGHT", "720"))
+# Für Testläufe: Webinar-Video-Download/-Upload komplett überspringen (dauert lange),
+# ohne WEBINAR_FOLDER_ID selbst anfassen zu müssen.
+SKIP_WEBINARS      = os.getenv("SKIP_WEBINARS", "false").lower() == "true"
 
 # Schlanke Transkription als Klassifikationshilfe bei Video-/Audio-Anhängen mit
 # kurzer/fehlender Bildunterschrift (siehe transcribe_for_classification()) —
@@ -620,6 +623,9 @@ def _try_import_webinar(text: str, msg_utc: datetime) -> None:
     Holt unmittelbar vor dem Upload ein frisches Token: Video-Downloads dauern oft
     länger als die 15-minütige Token-TTL, ein zu Laufbeginn geholtes Token wäre beim
     tatsächlichen Upload (POST /api/uploads/init) sonst bereits abgelaufen (401)."""
+    if SKIP_WEBINARS:
+        print("  Webinar-Video übersprungen (SKIP_WEBINARS=true)")
+        return
     video_url = extract_video_url(text)
     if not (video_url and WEBINAR_FOLDER_ID):
         return
