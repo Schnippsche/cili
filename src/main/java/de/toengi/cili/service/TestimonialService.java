@@ -62,8 +62,9 @@ public class TestimonialService {
     @PreAuthorize("isAuthenticated()")
     @Transactional(readOnly = true)
     // "source" bleibt als String-Filter-Parameter erhalten (statt auf zwei Boolean-Params
-    // umgestellt zu werden), da scripts/telegram_import.py als externer API-Client weiterhin
-    // exakt "Mensch"/"Tier" sendet. Semantik hat sich geändert: früher exakter Spaltenvergleich,
+    // umgestellt zu werden), da scripts/telegram_import_mensch.py und _tier.py als externe
+    // API-Clients weiterhin exakt "Mensch"/"Tier" senden. Semantik hat sich geändert: früher
+    // exakter Spaltenvergleich,
     // jetzt "hat dieses Flag gesetzt" (inklusiv — ein Bericht mit beiden Flags erscheint unter
     // beiden Filterwerten). Die Validierung MUSS vor der q-Verzweigung erfolgen, sonst würde ein
     // unbekannter source-Wert (z.B. veraltetes "Menschen") in Kombination mit einer Suchanfrage q
