@@ -16,8 +16,6 @@ public class TelegramImportConfig {
 
     private boolean enabled = false;
 
-    private String scriptName = "telegram_import.py";
-
     /** Timeout in Minuten; danach wird der Python-Prozess abgebrochen */
     private int timeoutMinutes = 60;
 
@@ -38,6 +36,9 @@ public class TelegramImportConfig {
 
         /** Anzeige-Label fürs Admin-Frontend */
         private String label;
+
+        /** Dateiname des Python-Einstiegsskripts im scriptsDir (z.B. telegram_import_mensch.py) */
+        private String scriptName;
 
         /** Dateiname der .env-Datei im scriptsDir */
         private String envName;

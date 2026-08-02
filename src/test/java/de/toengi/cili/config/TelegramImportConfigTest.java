@@ -17,12 +17,14 @@ class TelegramImportConfigTest {
         TelegramImportConfig.Source lifestyle = new TelegramImportConfig.Source();
         lifestyle.setName("telegram-menschen");
         lifestyle.setLabel("Menschen");
-        lifestyle.setEnvName("telegram_import.env");
+        lifestyle.setScriptName("telegram_import_mensch.py");
+        lifestyle.setEnvName("telegram_import_menschen.env");
         lifestyle.setCron("0 0 1 * * *");
 
         TelegramImportConfig.Source tiere = new TelegramImportConfig.Source();
         tiere.setName("telegram-tiere");
         tiere.setLabel("Tiere");
+        tiere.setScriptName("telegram_import_tier.py");
         tiere.setEnvName("telegram_import_tiere.env");
         tiere.setCron("0 30 1 * * *");
 
@@ -34,7 +36,10 @@ class TelegramImportConfigTest {
         assertThat(config.findSource("telegram-tiere"))
             .isPresent()
             .get()
-            .satisfies(s -> assertThat(s.getEnvName()).isEqualTo("telegram_import_tiere.env"));
+            .satisfies(s -> {
+                assertThat(s.getEnvName()).isEqualTo("telegram_import_tiere.env");
+                assertThat(s.getScriptName()).isEqualTo("telegram_import_tier.py");
+            });
     }
 
     @Test
