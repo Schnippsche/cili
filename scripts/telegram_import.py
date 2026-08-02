@@ -3,7 +3,7 @@
 Telegram → CILI Erfahrungsberichte Importer
 
 Einrichtung:
-  1. pip install telethon requests python-dotenv
+  1. pip install telethon requests python-dotenv ftfy faster-whisper
   2. Telegram API-Zugangsdaten holen: https://my.telegram.org/apps
   3. .env-Datei anlegen (Vorlage: scripts/telegram_import.env.example) —
      TG_SOURCE muss exakt "Mensch" oder "Tier" sein.
@@ -26,8 +26,10 @@ import json
 import os
 import random
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -97,6 +99,15 @@ MAX_RUNTIME_MINUTES  = float(os.getenv("MAX_RUNTIME_MINUTES", "45"))
 
 WEBINAR_FOLDER_ID  = os.getenv("WEBINAR_FOLDER_ID", "")
 WEBINAR_MAX_HEIGHT = int(os.getenv("WEBINAR_MAX_HEIGHT", "720"))
+
+# Schlanke Transkription als Klassifikationshilfe bei Video-/Audio-Anhängen mit
+# kurzer/fehlender Bildunterschrift (siehe transcribe_for_classification()) —
+# Defaults gespiegelt von application.yml: cili.whisper (gleiche Zielhardware-
+# Annahme wie die echte, hochwertige Untertitel-Pipeline im Backend).
+WHISPER_MODEL        = os.getenv("WHISPER_MODEL", "medium")
+WHISPER_DEVICE        = os.getenv("WHISPER_DEVICE", "cuda")
+WHISPER_COMPUTE_TYPE  = os.getenv("WHISPER_COMPUTE_TYPE", "int8_float16")
+WHISPER_LANG          = os.getenv("WHISPER_LANG", "auto")
 
 TG_SOURCE   = os.getenv("TG_SOURCE", "")   # muss exakt "Mensch" oder "Tier" sein
 TG_IS_HUMAN = TG_SOURCE == "Mensch"
@@ -350,6 +361,38 @@ def classify_with_ai(sender_name: str, message_text: str) -> dict:
                 f"{exc.msg} (raw response: {raw[:200]!r}, full body: {json.dumps(body)[:1000]!r})",
                 exc.doc, exc.pos
             ) from exc
+
+
+_whisper_model = None
+
+
+def _get_whisper_model():
+    """Lazy-Singleton — Modell wird höchstens einmal pro Skriptlauf geladen."""
+    global _whisper_model
+    if _whisper_model is None:
+        from faster_whisper import WhisperModel
+        _whisper_model = WhisperModel(
+            WHISPER_MODEL, device=WHISPER_DEVICE, compute_type=WHISPER_COMPUTE_TYPE,
+        )
+    return _whisper_model
+
+
+def transcribe_for_classification(path: Path) -> str | None:
+    """Grobe Klartext-Transkription eines Video-/Audio-Anhangs als Klassifikations-
+    hilfe bei kurzer/fehlender Bildunterschrift — kein Cue-Timing/Sync/Glossar wie
+    in transcribe_worker.py, nur Text. Die echten Untertitel entstehen unabhängig
+    davon automatisch nach dem Upload über die bestehende Backend-Pipeline.
+    None bei jedem Fehler (fehlende Abhängigkeit, kein GPU, Decode-Fehler, …) —
+    der Aufrufer behandelt das wie eine Nachricht ohne verwertbaren Text."""
+    try:
+        model = _get_whisper_model()
+        lang = None if WHISPER_LANG == "auto" else WHISPER_LANG
+        segments, _ = model.transcribe(str(path), language=lang, beam_size=1, vad_filter=True)
+        text = " ".join(seg.text.strip() for seg in segments).strip()
+        return text or None
+    except Exception as exc:
+        print(f"  Transkription fehlgeschlagen: {exc} — ignoriert")
+        return None
 
 
 _URL_RE = re.compile(r"https?://[^\s\)\]\>\"']+", re.IGNORECASE)

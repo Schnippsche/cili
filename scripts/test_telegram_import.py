@@ -52,3 +52,36 @@ def test_classify_media_round_video_note_excluded():
     # Ausschluss-Bedingung, anders als bei audio/voice) — video_note muss
     # deshalb explizit geprüft werden.
     assert _classify_media(_msg(video=True, video_note=True)) is None
+
+
+class _FakeSegment:
+    def __init__(self, text):
+        self.text = text
+
+
+def test_transcribe_for_classification_joins_segment_texts(monkeypatch):
+    class FakeModel:
+        def transcribe(self, path, language=None, beam_size=1, vad_filter=True):
+            return [_FakeSegment(" Hallo "), _FakeSegment("Welt ")], None
+
+    monkeypatch.setattr(telegram_import, "_whisper_model", FakeModel())
+    result = telegram_import.transcribe_for_classification(Path("dummy.mp4"))
+    assert result == "Hallo Welt"
+
+
+def test_transcribe_for_classification_returns_none_when_no_segments(monkeypatch):
+    class FakeModel:
+        def transcribe(self, path, language=None, beam_size=1, vad_filter=True):
+            return [], None
+
+    monkeypatch.setattr(telegram_import, "_whisper_model", FakeModel())
+    assert telegram_import.transcribe_for_classification(Path("dummy.mp4")) is None
+
+
+def test_transcribe_for_classification_returns_none_on_exception(monkeypatch):
+    class FakeModel:
+        def transcribe(self, *args, **kwargs):
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(telegram_import, "_whisper_model", FakeModel())
+    assert telegram_import.transcribe_for_classification(Path("dummy.mp4")) is None
