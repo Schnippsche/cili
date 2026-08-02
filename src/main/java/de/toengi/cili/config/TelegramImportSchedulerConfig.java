@@ -33,6 +33,8 @@ public class TelegramImportSchedulerConfig implements SchedulingConfigurer {
             String name = source.getName();
             Assert.hasText(source.getCron(),
                 () -> "cili.telegram.sources: cron fehlt für Quelle '" + name + "'");
+            Assert.hasText(source.getScriptName(),
+                () -> "cili.telegram.sources: script-name fehlt für Quelle '" + name + "'");
             registrar.addTriggerTask(() -> runSource(name), new CronTrigger(source.getCron()));
         }
         log.info("Telegram-Import: {} Quelle(n) für Scheduling registriert", config.getSources().size());

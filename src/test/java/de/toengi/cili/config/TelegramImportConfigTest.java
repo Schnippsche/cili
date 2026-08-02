@@ -2,10 +2,17 @@ package de.toengi.cili.config;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.scheduling.support.CronExpression;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class TelegramImportConfigTest {
 
@@ -45,5 +52,42 @@ class TelegramImportConfigTest {
     @Test
     void findSource_unknownName_returnsEmpty() {
         assertThat(config.findSource("does-not-exist")).isEmpty();
+    }
+
+    /**
+     * Lädt die echte src/main/resources/application.yml (kein hand-gebautes Source-Objekt) über
+     * Spring Boots Config-Data-Mechanismus und bindet cili.telegram gegen die reale
+     * @ConfigurationProperties-Bean. So fällt ein YAML-Tippfehler (z.B. "scriptName:" statt
+     * "script-name:") beim Binden auf, nicht erst zur Laufzeit im Scheduler.
+     */
+    @Test
+    void applicationYml_telegramSources_bindWithNonBlankFieldsAndParsableCron() {
+        new ApplicationContextRunner()
+            .withInitializer(new ConfigDataApplicationContextInitializer())
+            .withUserConfiguration(TelegramPropertiesTestConfig.class)
+            .run(ctx -> {
+                assertThat(ctx).hasNotFailed();
+
+                TelegramImportConfig bound = ctx.getBean(TelegramImportConfig.class);
+                Map<String, TelegramImportConfig.Source> byName = bound.getSources().stream()
+                    .collect(Collectors.toMap(TelegramImportConfig.Source::getName, s -> s));
+
+                assertThat(byName).containsKeys(
+                    "telegram-menschen", "telegram-tiere", "telegram-webinare");
+
+                byName.values().forEach(source -> {
+                    assertThat(source.getName()).as("name").isNotBlank();
+                    assertThat(source.getScriptName()).as("scriptName (%s)", source.getName()).isNotBlank();
+                    assertThat(source.getEnvName()).as("envName (%s)", source.getName()).isNotBlank();
+                    assertThat(source.getCron()).as("cron (%s)", source.getName()).isNotBlank();
+                    assertThatCode(() -> CronExpression.parse(source.getCron()))
+                        .as("cron parses for %s", source.getName())
+                        .doesNotThrowAnyException();
+                });
+            });
+    }
+
+    @EnableConfigurationProperties(TelegramImportConfig.class)
+    static class TelegramPropertiesTestConfig {
     }
 }

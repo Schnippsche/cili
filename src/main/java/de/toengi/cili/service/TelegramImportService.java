@@ -76,21 +76,21 @@ public class TelegramImportService {
         jobService.markRunning(job, "telegram-import");
         log.info("Telegram-Import gestartet (Job {}, Quelle {})", jobId, source.getName());
 
-        List<String> cmd = buildCommand(source);
-        ProcessBuilder pb = PythonProcessUtils.forScript(cmd, global.resolve(source.getScriptName()));
-        pb.redirectErrorStream(true);
-
         try {
-            CiliUserDetails jobUser = (CiliUserDetails) userDetailsService.loadUserByUsername(config.getCiliUser());
-            String jobToken = jwtTokenProvider.generateJobToken(jobUser, JOB_TOKEN_EXPIRY_MS);
-            pb.environment().put("CILI_TOKEN", jobToken);
-        } catch (Exception e) {
-            log.warn("Telegram-Import ({}): konnte kein Job-Token für Benutzer '{}' generieren, "
-                + "Skript fällt auf CILI_USER/CILI_PASS-Login aus der .env-Datei zurück: {}",
-                source.getName(), config.getCiliUser(), e.getMessage());
-        }
+            List<String> cmd = buildCommand(source);
+            ProcessBuilder pb = PythonProcessUtils.forScript(cmd, global.resolve(source.getScriptName()));
+            pb.redirectErrorStream(true);
 
-        try {
+            try {
+                CiliUserDetails jobUser = (CiliUserDetails) userDetailsService.loadUserByUsername(config.getCiliUser());
+                String jobToken = jwtTokenProvider.generateJobToken(jobUser, JOB_TOKEN_EXPIRY_MS);
+                pb.environment().put("CILI_TOKEN", jobToken);
+            } catch (Exception e) {
+                log.warn("Telegram-Import ({}): konnte kein Job-Token für Benutzer '{}' generieren, "
+                    + "Skript fällt auf CILI_USER/CILI_PASS-Login aus der .env-Datei zurück: {}",
+                    source.getName(), config.getCiliUser(), e.getMessage());
+            }
+
             Process process = pb.start();
 
             // Heartbeat: JobRecoveryService killt RUNNING-Jobs, deren updatedAt seit

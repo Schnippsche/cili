@@ -510,7 +510,7 @@ async def _run_async(cfg: TestimonialRunConfig) -> None:
 
         album_map = common.group_albums(new_messages)
         processed_group_ids: set = set()
-        counts = {"imported": 0, "skipped": 0}
+        counts = {"imported": 0, "skipped": 0, "failed": 0}
         run_started = time.monotonic()
         processed = 0
         limit_hit = None
@@ -537,7 +537,8 @@ async def _run_async(cfg: TestimonialRunConfig) -> None:
             print(f"Limit erreicht ({limit_hit}) — {len(new_messages) - processed} "
                   f"verbleibende Nachricht(en) folgen im nächsten Lauf.\n")
 
-        print(f"Fertig: {counts['imported']} importiert, {counts['skipped']} übersprungen.")
+        print(f"Fertig: {counts['imported']} importiert, {counts['skipped']} übersprungen, "
+              f"{counts['failed']} fehlgeschlagen.")
 
 
 def run(cfg: TestimonialRunConfig) -> None:

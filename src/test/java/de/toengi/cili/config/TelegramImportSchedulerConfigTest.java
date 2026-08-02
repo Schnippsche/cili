@@ -29,6 +29,7 @@ class TelegramImportSchedulerConfigTest {
         TelegramImportConfig.Source s = new TelegramImportConfig.Source();
         s.setName(name);
         s.setLabel(name);
+        s.setScriptName(name + ".py");
         s.setEnvName(name + ".env");
         s.setCron(cron);
         return s;
