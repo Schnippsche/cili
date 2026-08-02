@@ -1,4 +1,5 @@
-import {useDeferredValue, useState} from 'react';
+import {useState} from 'react';
+import {useDebouncedValue} from '../hooks/useDebouncedValue';
 import {useQuery} from '@tanstack/react-query';
 import {
   Alert,
@@ -19,14 +20,14 @@ import TestimonialDisclaimer from '../components/testimonial/TestimonialDisclaim
 
 export default function PublicTestimonialsPage() {
   const [q, setQ] = useState('');
-  const deferredQ = useDeferredValue(q);
+  const debouncedQ = useDebouncedValue(q, 400);
   const [sourceFilter, setSourceFilter] = useState<'Mensch' | 'Tier' | ''>('');
   const [page, setPage] = useState(0);
 
   const {data, isLoading, error} = useQuery({
-    queryKey: ['public-testimonials', deferredQ, sourceFilter, page],
+    queryKey: ['public-testimonials', debouncedQ, sourceFilter, page],
     queryFn: () => listPublicTestimonials({
-      q: deferredQ || undefined, source: sourceFilter || undefined, page, size: 25,
+      q: debouncedQ || undefined, source: sourceFilter || undefined, page, size: 25,
     }),
   });
 
