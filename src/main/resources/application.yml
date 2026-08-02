@@ -153,4 +153,4 @@ cili:
         label: Lifestyle Webinare
         script-name: telegram_import_webinare.py
         env-name: telegram_import_webinare.env
-        cron: "0 0 2 * * SUN"                  # wöchentlich Sonntag 02:00 Uhr
+        cron: "0 0 2 * * THU"                  # wöchentlich Donnerstag 02:00 Uhr
