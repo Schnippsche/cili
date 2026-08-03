@@ -59,6 +59,7 @@ const TYPE_LABEL: Record<string, string> = {
   SUBTITLE_TRANSLATE: 'Untertitel-Übersetzung',
   DOCUMENT_TRANSLATE: 'Dokument-Übersetzung',
   OLLAMA_ANALYSIS: 'Ollama Analyse',
+  TESTIMONIAL_SUMMARY: 'Testimonial-Zusammenfassung',
   TELEGRAM_IMPORT: 'Telegram Import',
   VIDEO_URL_IMPORT: 'Video-URL Import',
 };
