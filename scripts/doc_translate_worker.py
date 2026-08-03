@@ -25,6 +25,7 @@ Exit-Codes: 0 = OK, 1 = Fehler
 """
 import argparse
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -271,6 +272,8 @@ _ABBREVS = {
     'jul', 'aug', 'sep', 'okt', 'nov', 'dez',
 }
 
+_WHITESPACE_RE = re.compile(r'\s+')
+
 
 def _ends_sentence(bare: str, next_word: str) -> bool:
     """Entscheidet, ob ein Wort einen Satz beendet.
@@ -292,9 +295,8 @@ def _ends_sentence(bare: str, next_word: str) -> bool:
 
 def _split_sentences(text: str) -> list[str]:
     """Zerlegt Text in Sätze; berücksichtigt deutsche Abkürzungen und Semikola."""
-    import re
     # Whitespace normalisieren
-    text = re.sub(r'\s+', ' ', text).strip()
+    text = _WHITESPACE_RE.sub(' ', text).strip()
     if not text:
         return []
 
@@ -414,8 +416,13 @@ def main() -> int:
         traceback.print_exc()
         return 1
 
-    with open(args.output, "w", encoding="utf-8") as f:
+    # Atomar schreiben (tmp-Datei + os.replace): nach einem potenziell langen
+    # Batch-Übersetzungslauf soll ein Absturz mitten im Schreiben nicht eine
+    # unvollständige, aber vorhandene Output-Datei hinterlassen.
+    tmp_output = args.output + ".tmp"
+    with open(tmp_output, "w", encoding="utf-8") as f:
         f.write("\n\n".join(translated))
+    os.replace(tmp_output, args.output)
 
     gpu_temp_suffix = f" (GPU-Temp={gpu_temperature()}°C)" if args.device.lower() == "cuda" else ""
     print(f"Fertig → {args.output}{gpu_temp_suffix}", flush=True)

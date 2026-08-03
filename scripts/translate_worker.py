@@ -343,8 +343,13 @@ def main() -> None:
         sys.exit(1)
 
     output_vtt = write_vtt(cues, translated_texts)
-    with open(args.output, "w", encoding="utf-8") as fh:
+    # Atomar schreiben (tmp-Datei + os.replace): nach einem potenziell langen
+    # Batch-Übersetzungslauf soll ein Absturz mitten im Schreiben nicht eine
+    # unvollständige, aber vorhandene Output-Datei hinterlassen.
+    tmp_output = args.output + ".tmp"
+    with open(tmp_output, "w", encoding="utf-8") as fh:
         fh.write(output_vtt)
+    os.replace(tmp_output, args.output)
 
     gpu_temp_suffix = f" (GPU-Temp={gpu_temperature()}°C)" if args.device.lower() == "cuda" else ""
     print(f"Fertig. {len(cues)} übersetzte Cues nach {args.output} geschrieben.{gpu_temp_suffix}")

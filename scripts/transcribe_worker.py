@@ -518,6 +518,17 @@ def format_time_vtt(t):
   return f"{h:02}:{m:02}:{s:02}.{ms:03}"
 
 
+def _atomic_write_text(path: str, content: str) -> None:
+  """Schreibt über eine tmp-Datei + os.replace(), damit ein Absturz mitten im
+  Schreiben nach einem teuren GPU-Transkriptionslauf keine unvollständige,
+  aber vorhandene Output-Datei hinterlässt (ein nachgelagerter Schritt könnte
+  die sonst faelschlich als fertig behandeln)."""
+  tmp_path = path + ".tmp"
+  with open(tmp_path, "w", encoding="utf-8") as f:
+    f.write(content)
+  os.replace(tmp_path, path)
+
+
 def load_glossary(path: str) -> str:
   if not path or not os.path.exists(path):
     return ""
@@ -626,9 +637,7 @@ def main():
   print(f"[whisper] Erkannte Sprache: {detected_lang} "
         f"(Wahrscheinlichkeit: {info.language_probability:.2f})", flush=True)
   if args.lang_output:
-    import json as _json
-    with open(args.lang_output, "w", encoding="utf-8") as _lf:
-      _json.dump({"language": detected_lang}, _lf)
+    _atomic_write_text(args.lang_output, json.dumps({"language": detected_lang}))
 
   # 1. Duplikate entfernen
   segments = remove_fuzzy_duplicates(list(segments), threshold=0.90)
@@ -669,16 +678,16 @@ def main():
   # 6. Kurzen Nachlauf anhängen (geclampt auf den nächsten Cue)
   cues = add_cue_padding(cues, pad=args.cue_pad)
 
-  with open(args.output, "w", encoding="utf-8") as f:
-    f.write("WEBVTT\n\n")
-    for i, (start, end, text) in enumerate(cues, 1):
-      text = " ".join(text.split())
-      text = normalize_thousands(text)
-      text = apply_corrections(text, phrase_corrections)
-      text = apply_corrections(text, single_corrections)
-      f.write(f"{i}\n")
-      f.write(f"{format_time_vtt(start)} --> {format_time_vtt(end)}\n")
-      f.write(text + "\n\n")
+  vtt_parts = ["WEBVTT\n\n"]
+  for i, (start, end, text) in enumerate(cues, 1):
+    text = " ".join(text.split())
+    text = normalize_thousands(text)
+    text = apply_corrections(text, phrase_corrections)
+    text = apply_corrections(text, single_corrections)
+    vtt_parts.append(f"{i}\n")
+    vtt_parts.append(f"{format_time_vtt(start)} --> {format_time_vtt(end)}\n")
+    vtt_parts.append(text + "\n\n")
+  _atomic_write_text(args.output, "".join(vtt_parts))
 
   gpu_temp_suffix = f", GPU-Temp={gpu_temperature()}°C" if args.device.lower() == "cuda" else ""
   print(f"[whisper] Fertig: {len(cues)} Cues -> {args.output}{gpu_temp_suffix}", flush=True)

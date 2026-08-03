@@ -7,10 +7,22 @@ Aufruf: python analyze_worker.py --text-file <path> --prompt-file <path>
 import argparse
 import math
 import os
+import random
 import re
 import subprocess
 import sys
+import time
 import requests
+
+# Retry-Konfiguration für den Ollama-Aufruf: ohne Retry bricht ein einzelner
+# transienter Hänger (Modell lädt gerade, kurzer OOM, 502 vom Reverse-Proxy)
+# den kompletten Analyse-Lauf ab, statt sich selbst zu erholen.
+OLLAMA_MAX_RETRIES = 3
+OLLAMA_BASE_BACKOFF = 2.0
+OLLAMA_RETRYABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
+
+_SUBTITLE_INDEX_RE = re.compile(r'\d+')
+_SUBTITLE_TIMESTAMP_RE = re.compile(r'[\d:]+[\d.,]+ -->')
 
 
 def gpu_temperature() -> str:
@@ -35,9 +47,9 @@ def strip_subtitle_formatting(text: str) -> str:
             continue
         if line == 'WEBVTT':
             continue
-        if re.fullmatch(r'\d+', line):
+        if _SUBTITLE_INDEX_RE.fullmatch(line):
             continue
-        if re.match(r'[\d:]+[\d.,]+ -->', line):
+        if _SUBTITLE_TIMESTAMP_RE.match(line):
             continue
         result.append(line)
     return ' '.join(result)
@@ -136,20 +148,39 @@ def main():
         }
         if context is not None:
             payload["context"] = context
-        try:
-            resp = requests.post(f"{args.url}/api/generate", json=payload, timeout=args.timeout)
-            resp.raise_for_status()
-            return resp.json()
-        except requests.exceptions.Timeout:
-            print(f"ERROR: Ollama request timed out after {args.timeout}s", file=sys.stderr)
-            sys.exit(1)
-        except requests.exceptions.ConnectionError as e:
-            print(f"ERROR: cannot connect to Ollama at {args.url}: {e}", file=sys.stderr)
-            sys.exit(1)
-        except requests.exceptions.HTTPError as e:
-            print(f"ERROR: Ollama returned {e.response.status_code}: {e.response.text[:300]}",
-                  file=sys.stderr)
-            sys.exit(1)
+
+        for attempt in range(OLLAMA_MAX_RETRIES):
+            is_last = attempt == OLLAMA_MAX_RETRIES - 1
+            backoff = (OLLAMA_BASE_BACKOFF * (2 ** attempt)) + random.uniform(0, OLLAMA_BASE_BACKOFF)
+            try:
+                resp = requests.post(f"{args.url}/api/generate", json=payload, timeout=args.timeout)
+                if not is_last and resp.status_code in OLLAMA_RETRYABLE_STATUS_CODES:
+                    retry_after = resp.headers.get("Retry-After")
+                    wait = float(retry_after) if retry_after else backoff
+                    print(f"[analyze] Ollama-Fehler ({resp.status_code}), Retry {attempt + 1}/"
+                          f"{OLLAMA_MAX_RETRIES - 1} in {wait:.1f}s …", file=sys.stderr)
+                    time.sleep(wait)
+                    continue
+                resp.raise_for_status()
+                return resp.json()
+            except requests.exceptions.Timeout:
+                if is_last:
+                    print(f"ERROR: Ollama request timed out after {args.timeout}s", file=sys.stderr)
+                    sys.exit(1)
+                print(f"[analyze] Ollama-Timeout, Retry {attempt + 1}/{OLLAMA_MAX_RETRIES - 1} "
+                      f"in {backoff:.1f}s …", file=sys.stderr)
+                time.sleep(backoff)
+            except requests.exceptions.ConnectionError as e:
+                if is_last:
+                    print(f"ERROR: cannot connect to Ollama at {args.url}: {e}", file=sys.stderr)
+                    sys.exit(1)
+                print(f"[analyze] Ollama-Verbindungsfehler, Retry {attempt + 1}/{OLLAMA_MAX_RETRIES - 1} "
+                      f"in {backoff:.1f}s …", file=sys.stderr)
+                time.sleep(backoff)
+            except requests.exceptions.HTTPError as e:
+                print(f"ERROR: Ollama returned {e.response.status_code}: {e.response.text[:300]}",
+                      file=sys.stderr)
+                sys.exit(1)
 
     # Bricht Ollama wegen des Kontextlimits ab (done_reason=length), wird die
     # Generierung anhand des zurückgegebenen Token-Kontexts nahtlos fortgesetzt,

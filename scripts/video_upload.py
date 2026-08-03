@@ -65,22 +65,49 @@ def _cili_token_from_env() -> str | None:
 
 # ── HTTP-Retry ────────────────────────────────────────────────────────────────
 
+# Transiente Statuscodes: Retry lohnt sich (Überlastung/Wartung des Reverse-Proxys),
+# im Gegensatz zu 4xx-Fehlern wie 401/404, die bei erneutem Versuch identisch
+# fehlschlagen würden. Ohne das riss ein einzelner 502/503 mitten in einem
+# chunked Upload den kompletten (ggf. langen) Video-Upload ab.
+_RETRYABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
+
+
+def _retry_after_seconds(resp) -> float | None:
+    value = resp.headers.get("Retry-After")
+    if not value:
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return None  # HTTP-Date-Format wird nicht unterstützt — normaler Backoff greift
+
+
 def _with_retry(fn, max_retries: int = 3, label: str = ""):
-    """Führt fn() aus und wiederholt bei transienten Netzwerkfehlern mit Backoff."""
+    """Führt fn() aus und wiederholt bei transienten Netzwerkfehlern (Timeout,
+    Connection) sowie transienten HTTP-Statuscodes (_RETRYABLE_STATUS_CODES) mit
+    Backoff. Berücksichtigt den Retry-After-Header falls vorhanden."""
     for attempt in range(max_retries):
+        is_last = attempt == max_retries - 1
+        info = f" ({label})" if label else ""
         try:
             resp = fn()
+            if not is_last and resp.status_code in _RETRYABLE_STATUS_CODES:
+                wait = _retry_after_seconds(resp)
+                if wait is None:
+                    wait = (2 ** attempt) + random.uniform(0, 1)
+                print(f"  HTTP-Fehler{info}: {resp.status_code}, "
+                      f"Retry {attempt + 1}/{max_retries - 1} in {wait:.1f}s …", flush=True)
+                time.sleep(wait)
+                continue
             resp.raise_for_status()
             return resp
         except (requests.Timeout, requests.ConnectionError) as e:
-            if attempt < max_retries - 1:
-                wait = (2 ** attempt) + random.uniform(0, 1)
-                info = f" ({label})" if label else ""
-                print(f"  Netzwerkfehler{info}: {e.__class__.__name__}, "
-                      f"Retry {attempt + 1}/{max_retries - 1} in {wait:.1f}s …", flush=True)
-                time.sleep(wait)
-            else:
+            if is_last:
                 raise
+            wait = (2 ** attempt) + random.uniform(0, 1)
+            print(f"  Netzwerkfehler{info}: {e.__class__.__name__}, "
+                  f"Retry {attempt + 1}/{max_retries - 1} in {wait:.1f}s …", flush=True)
+            time.sleep(wait)
 
 
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────────
