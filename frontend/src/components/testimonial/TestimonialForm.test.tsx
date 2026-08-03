@@ -8,6 +8,20 @@ vi.mock('../../hooks/useAuthenticatedUrl', () => ({
 }));
 vi.mock('../../api/upload');
 
+// Sinnvolle Standard-Rückgabewerte (Promises!) für alle drei Funktionen — ohne
+// mockResolvedValue liefert vi.fn() beim Aufruf `undefined` statt eines Promise,
+// woran TanStack Query mit "Query data cannot be undefined" scheitert. Einzelne
+// Tests überschreiben diese Defaults gezielt per mockResolvedValue(Once).
+vi.mock('../../api/resources', async () => {
+  const actual = await vi.importActual<typeof import('../../api/resources')>('../../api/resources');
+  return {
+    ...actual,
+    getSubtitleTracks: vi.fn().mockResolvedValue([]),
+    generateTestimonialSummary: vi.fn().mockResolvedValue({jobId: 0}),
+    getActiveTestimonialSummaryJobs: vi.fn().mockResolvedValue([]),
+  };
+});
+
 function renderForm(props: Parameters<typeof TestimonialForm>[0]) {
   const qc = new QueryClient({defaultOptions: {queries: {retry: false}}});
   return render(
@@ -272,5 +286,92 @@ describe('Anhänge-Upload (vereinheitlicht)', () => {
     const tile = await waitFor(() => screen.getByLabelText(/clip\.mp4 — Upload fehlgeschlagen/));
     expect(tile).toBeInTheDocument();
     expect(tile).toHaveStyle({borderColor: 'rgb(211, 47, 47)'});
+  });
+});
+
+describe('KI-Textvorschlag aus Video/Audio', () => {
+  function videoAttachment() {
+    return {
+      id: 20,
+      originalName: 'bericht.mp4',
+      mimeType: 'video/mp4',
+      size: 100,
+      createdAt: '2026-08-03T10:00:00',
+      thumbnailStatus: 'DONE' as const,
+      storedName: 'stored.mp4',
+    };
+  }
+
+  function baseInitial(attachments: ReturnType<typeof videoAttachment>[] = []) {
+    return {
+      id: 1,
+      authorName: 'Anna',
+      tags: null,
+      text: 'Bestehender Text zum Testen',
+      userId: 1,
+      human: true,
+      animal: false,
+      createdAt: '2026-08-03T10:00:00',
+      updatedAt: '2026-08-03T10:00:00',
+      attachments,
+    };
+  }
+
+  test('zeigt keinen Vorschlag-Button, solange kein Untertitel mit Inhalt vorliegt', async () => {
+    const resourcesApi = await import('../../api/resources');
+    vi.mocked(resourcesApi.getSubtitleTracks).mockResolvedValue([]);
+    const initial = baseInitial([videoAttachment()]);
+    renderForm({open: true, initial, onSave: vi.fn().mockResolvedValue(initial), onClose: vi.fn()});
+
+    await waitFor(() => expect(resourcesApi.getSubtitleTracks).toHaveBeenCalledWith(20));
+    expect(screen.queryByRole('button', {name: /Text vorschlagen/})).not.toBeInTheDocument();
+  });
+
+  test('generiert per Klick einen Textvorschlag und übernimmt ihn ins Textfeld', async () => {
+    const resourcesApi = await import('../../api/resources');
+    vi.mocked(resourcesApi.getSubtitleTracks).mockResolvedValue([
+      {id: 1, resourceId: 20, languageCode: 'de', label: null, format: 'VTT', createdAt: '2026-08-03T10:00:00', hasTextContent: true},
+    ]);
+    vi.mocked(resourcesApi.generateTestimonialSummary).mockResolvedValue({jobId: 99});
+    vi.mocked(resourcesApi.getActiveTestimonialSummaryJobs)
+        .mockResolvedValueOnce([])
+        .mockResolvedValue([{
+          id: 99, resourceId: 20, type: 'TESTIMONIAL_SUMMARY', source: null, status: 'DONE',
+          attempts: 1, maxAttempts: 3, errorMessage: null,
+          result: JSON.stringify({text: 'Generierter Bericht-Text'}),
+          startedAt: null, finishedAt: null, createdAt: '2026-08-03T10:00:00', updatedAt: '2026-08-03T10:00:00',
+        }]);
+
+    const initial = baseInitial([videoAttachment()]);
+    renderForm({open: true, initial, onSave: vi.fn().mockResolvedValue(initial), onClose: vi.fn()});
+
+    const button = await screen.findByRole('button', {name: /Text vorschlagen/});
+    fireEvent.click(button);
+
+    await waitFor(() =>
+        expect(screen.getByLabelText('Erfahrungsbericht')).toHaveValue('Generierter Bericht-Text'));
+  });
+
+  test('zeigt einen Job, der als PENDING mit errorMessage feststeckt, als fehlgeschlagen statt als laufend', async () => {
+    // ProcessingJobService.markFailed setzt einen Job bei einem ersten Fehlschlag (attempts < maxAttempts)
+    // zurück auf PENDING statt FAILED — der automatische Retry läuft aber erst beim nächsten Server-Neustart
+    // oder Zombie-Timeout (bis zu zombie-timeout-minutes). Ohne die errorMessage-Unterscheidung würde der
+    // Button hier fälschlich unendlich "Erstelle Vorschlag…" mit deaktiviertem Klick anzeigen.
+    const resourcesApi = await import('../../api/resources');
+    vi.mocked(resourcesApi.getSubtitleTracks).mockResolvedValue([
+      {id: 1, resourceId: 20, languageCode: 'de', label: null, format: 'VTT', createdAt: '2026-08-03T10:00:00', hasTextContent: true},
+    ]);
+    vi.mocked(resourcesApi.getActiveTestimonialSummaryJobs).mockResolvedValue([{
+      id: 99, resourceId: 20, type: 'TESTIMONIAL_SUMMARY', source: null, status: 'PENDING',
+      attempts: 1, maxAttempts: 3, errorMessage: 'analyze_worker.py Exit-Code 1',
+      result: null, startedAt: null, finishedAt: null,
+      createdAt: '2026-08-03T10:00:00', updatedAt: '2026-08-03T10:00:00',
+    }]);
+
+    const initial = baseInitial([videoAttachment()]);
+    renderForm({open: true, initial, onSave: vi.fn().mockResolvedValue(initial), onClose: vi.fn()});
+
+    const button = await screen.findByRole('button', {name: 'Erneut versuchen'});
+    expect(button).toBeEnabled();
   });
 });

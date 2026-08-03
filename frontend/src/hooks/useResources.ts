@@ -137,6 +137,26 @@ export function useActiveAnalysisJobs(resourceId: number) {
   });
 }
 
+export function useGenerateTestimonialSummary() {
+  return useMutation({
+    mutationFn: (resourceId: number) => api.generateTestimonialSummary(resourceId),
+  });
+}
+
+export function useActiveTestimonialSummaryJob(resourceId: number) {
+  return useQuery({
+    queryKey: ['testimonialSummaryJobs', resourceId],
+    queryFn: () => api.getActiveTestimonialSummaryJobs(resourceId),
+    enabled: resourceId > 0,
+    staleTime: 0,
+    refetchInterval: (query) => {
+      const jobs = query.state.data;
+      if (!Array.isArray(jobs)) return false;
+      return jobs.some(j => j.status === 'PENDING' || j.status === 'RUNNING') ? 3000 : false;
+    },
+  });
+}
+
 export function useCreateMediaClip() {
   return useMutation({
     mutationFn: ({id, startMs, endMs, title}: {

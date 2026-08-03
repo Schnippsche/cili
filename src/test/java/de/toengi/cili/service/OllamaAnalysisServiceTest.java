@@ -52,10 +52,11 @@ class OllamaAnalysisServiceTest {
         CiliGlobalConfig global = new CiliGlobalConfig();
         global.setPythonPath("python3");
         global.setScriptsDir("/tmp");
+        OllamaScriptRunner runner = new OllamaScriptRunner(global);
 
         service = new OllamaAnalysisService(
                 subtitleTrackRepository, aiSummaryRepository,
-                jobRepository, jobService, config, global, syncExecutor);
+                jobRepository, jobService, config, runner, syncExecutor);
     }
 
     private ProcessingJob makeJob(String languageCode, boolean force) {

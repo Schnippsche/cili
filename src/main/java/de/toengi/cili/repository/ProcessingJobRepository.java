@@ -75,6 +75,18 @@ public interface ProcessingJobRepository extends JpaRepository<ProcessingJob, Lo
         @Param("since") LocalDateTime since);
 
     @Query("""
+        SELECT j FROM ProcessingJob j
+        WHERE j.resourceId = :resourceId
+          AND j.type = 'TESTIMONIAL_SUMMARY'
+          AND j.status IN ('PENDING', 'RUNNING', 'DONE', 'FAILED')
+          AND j.createdAt >= :since
+        ORDER BY j.createdAt DESC
+        """)
+    List<ProcessingJob> findActiveTestimonialSummaryJobs(
+        @Param("resourceId") Long resourceId,
+        @Param("since") LocalDateTime since);
+
+    @Query("""
         SELECT COUNT(j) > 0 FROM ProcessingJob j
         WHERE j.resourceId = :resourceId
           AND j.type IN ('WAV_EXTRACT', 'WHISPER_TRANSCRIBE')

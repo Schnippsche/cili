@@ -20,6 +20,8 @@ import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import CircularProgress from '@mui/material/CircularProgress';
 import {type ChangeEvent, useEffect, useRef, useState} from 'react';
 import {useQueryClient} from '@tanstack/react-query';
 import type {TestimonialAttachmentDto, TestimonialDto} from '../../types/api';
@@ -27,6 +29,11 @@ import type {TestimonialFormData} from '../../api/testimonials';
 import {getThumbnailUrl} from '../../api/resources';
 import {useAuthenticatedUrl} from '../../hooks/useAuthenticatedUrl';
 import {completeUpload, initUpload, uploadChunk} from '../../api/upload';
+import {
+  useActiveTestimonialSummaryJob,
+  useGenerateTestimonialSummary,
+  useSubtitleTracks,
+} from '../../hooks/useResources';
 
 interface ExistingAttachmentThumbProps {
   attachment: TestimonialAttachmentDto;
@@ -177,6 +184,62 @@ function NewMediaFileTile({file, state, onRemove}: Readonly<NewMediaFileTileProp
             </IconButton>
           </Tooltip>
         </Box>
+      </Tooltip>
+  );
+}
+
+interface SummarySuggestButtonProps {
+  attachment: TestimonialAttachmentDto;
+  onApply: (text: string) => void;
+}
+
+function SummarySuggestButton({attachment, onApply}: Readonly<SummarySuggestButtonProps>) {
+  const qc = useQueryClient();
+  const {data: tracks = []} = useSubtitleTracks(attachment.id);
+  const hasSubtitle = tracks.some(t => t.hasTextContent);
+  const generate = useGenerateTestimonialSummary();
+  const {data: jobs = []} = useActiveTestimonialSummaryJob(attachment.id);
+  const latestJob = jobs[0];
+  // Ein Job, der einmal fehlgeschlagen ist, bleibt PENDING (Retry-Mechanismus von
+  // ProcessingJobService.markFailed) und trägt dabei eine errorMessage — ohne diese
+  // Unterscheidung würde der Button nach einem Fehlschlag bis zum nächsten automatischen
+  // Retry (bis zu zombie-timeout-minutes) fälschlich weiter "läuft noch" anzeigen.
+  const hasStuckError = latestJob?.status === 'PENDING' && !!latestJob.errorMessage;
+  const isRunning = latestJob?.status === 'RUNNING'
+      || (latestJob?.status === 'PENDING' && !latestJob.errorMessage);
+  const isFailed = latestJob?.status === 'FAILED' || hasStuckError;
+
+  const appliedJobIdRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (latestJob?.status === 'DONE' && latestJob.id !== appliedJobIdRef.current) {
+      try {
+        const parsed = JSON.parse(latestJob.result ?? '{}') as { text?: string };
+        if (parsed.text) {
+          onApply(parsed.text);
+          appliedJobIdRef.current = latestJob.id;
+        }
+      } catch { /* ungültiges Job-Ergebnis ignorieren */ }
+    }
+  }, [latestJob, onApply]);
+
+  if (!hasSubtitle) return null;
+
+  return (
+      <Tooltip title={`Text aus „${attachment.originalName}" vorschlagen`}>
+        <span>
+          <Button
+              size="small"
+              variant="outlined"
+              color={isFailed ? 'error' : 'primary'}
+              startIcon={isRunning ? <CircularProgress size={14}/> : <AutoAwesomeIcon/>}
+              disabled={isRunning}
+              onClick={() => generate.mutate(attachment.id, {
+                onSuccess: () => void qc.invalidateQueries({queryKey: ['testimonialSummaryJobs', attachment.id]}),
+              })}
+          >
+            {isRunning ? 'Erstelle Vorschlag…' : isFailed ? 'Erneut versuchen' : 'Text vorschlagen'}
+          </Button>
+        </span>
       </Tooltip>
   );
 }
@@ -498,6 +561,20 @@ export default function TestimonialForm({open, initial, onSave, onClose}: Readon
                 </Stack>
             )}
           </Box>
+
+          {existingAttachments.some(a => a.mimeType.startsWith('video/') || a.mimeType.startsWith('audio/')) && (
+              <Stack direction="row" flexWrap="wrap" gap={1} sx={{mb: 1}}>
+                {existingAttachments
+                    .filter(a => a.mimeType.startsWith('video/') || a.mimeType.startsWith('audio/'))
+                    .map(attachment => (
+                        <SummarySuggestButton
+                            key={attachment.id}
+                            attachment={attachment}
+                            onApply={setText}
+                        />
+                    ))}
+              </Stack>
+          )}
 
           <TextField
               label="Erfahrungsbericht" value={text} onChange={e => setText(e.target.value)}

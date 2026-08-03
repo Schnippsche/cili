@@ -1,9 +1,7 @@
 package de.toengi.cili.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.toengi.cili.config.CiliGlobalConfig;
 import de.toengi.cili.config.OllamaConfig;
-import de.toengi.cili.util.PythonProcessUtils;
 import de.toengi.cili.dto.resource.AiSummaryDto;
 import de.toengi.cili.model.entity.AiSummary;
 import de.toengi.cili.model.entity.ProcessingJob;
@@ -20,22 +18,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -46,10 +33,9 @@ public class OllamaAnalysisService {
     private final ProcessingJobRepository jobRepository;
     private final ProcessingJobService jobService;
     private final OllamaConfig config;
-    private final CiliGlobalConfig global;
+    private final OllamaScriptRunner scriptRunner;
     private final Executor gpuExecutor;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final HttpClient httpClient = HttpClient.newHttpClient();
 
     public OllamaAnalysisService(
             SubtitleTrackRepository subtitleTrackRepository,
@@ -57,14 +43,14 @@ public class OllamaAnalysisService {
             ProcessingJobRepository jobRepository,
             ProcessingJobService jobService,
             OllamaConfig config,
-            CiliGlobalConfig global,
+            OllamaScriptRunner scriptRunner,
             @Qualifier("gpuExecutor") Executor gpuExecutor) {
         this.subtitleTrackRepository = subtitleTrackRepository;
         this.aiSummaryRepository = aiSummaryRepository;
         this.jobRepository = jobRepository;
         this.jobService = jobService;
         this.config = config;
-        this.global = global;
+        this.scriptRunner = scriptRunner;
         this.gpuExecutor = gpuExecutor;
     }
 
@@ -157,9 +143,9 @@ public class OllamaAnalysisService {
             log.info("Starte Ollama-Analyse: resourceId={} lang={}", resourceId, languageCode);
             String summary;
             try {
-                summary = runScript(track.getTextContent());
+                summary = scriptRunner.run(track.getTextContent(), config.getPromptName(), config);
             } finally {
-                unloadModel();
+                scriptRunner.unloadModel(config);
             }
 
             AiSummary entity = aiSummaryRepository
@@ -177,100 +163,6 @@ public class OllamaAnalysisService {
             log.error("Ollama-Job {} fehlgeschlagen: {}", job.getId(), e.getMessage(), e);
             jobService.markFailed(job, e.getMessage());
         }
-    }
-
-    private String runScript(String subtitleContent) throws IOException, InterruptedException {
-        Path textFile = Files.createTempFile("ollama-text-", ".txt");
-        try {
-            Files.writeString(textFile, subtitleContent, StandardCharsets.UTF_8);
-
-            List<String> cmd = List.of(
-                    global.getPythonPath(),
-                    global.resolve(config.getScriptName()),
-                    "--text-file",   textFile.toString(),
-                    "--prompt-file", global.resolve(config.getPromptName()),
-                    "--model",       config.getModel(),
-                    "--url",         config.getUrl(),
-                    "--timeout",     String.valueOf(config.getTimeoutMinutes() * 60),
-                    "--num-ctx",     String.valueOf(config.getNumCtx())
-            );
-
-            log.info("Starte analyze_worker: {}", cmd);
-            ProcessBuilder pb = PythonProcessUtils.forScript(cmd, global.resolve(config.getScriptName()));
-            pb.redirectErrorStream(false);
-            Process proc = pb.start();
-
-            Thread errThread = new Thread(() -> {
-                try (var r = new BufferedReader(new InputStreamReader(proc.getErrorStream(), StandardCharsets.UTF_8))) {
-                    r.lines().forEach(line -> log.info("[analyze] {}", line));
-                } catch (IOException ignored) {}
-            });
-            errThread.setDaemon(true);
-            errThread.start();
-
-            byte[][] stdoutHolder = {null};
-            Thread stdoutThread = new Thread(() -> {
-                try { stdoutHolder[0] = proc.getInputStream().readAllBytes(); }
-                catch (IOException ignored) {}
-            });
-            stdoutThread.setDaemon(true);
-            stdoutThread.start();
-
-            boolean finished = proc.waitFor(config.getTimeoutMinutes(), TimeUnit.MINUTES);
-            if (!finished) {
-                proc.destroyForcibly();
-                throw new IOException("analyze_worker.py Timeout nach " + config.getTimeoutMinutes() + " Minuten");
-            }
-            if (proc.exitValue() != 0) {
-                throw new IOException("analyze_worker.py Exit-Code " + proc.exitValue());
-            }
-            stdoutThread.join(config.getTimeoutMinutes() * 60_000L);
-            return stdoutHolder[0] != null ? new String(stdoutHolder[0], StandardCharsets.UTF_8).trim() : "";
-
-        } finally {
-            Files.deleteIfExists(textFile);
-        }
-    }
-
-    private void unloadModel() {
-        try {
-            String body = toJson(Map.of("model", config.getModel(), "keep_alive", 0));
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(config.getUrl() + "/api/generate"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(body))
-                    .timeout(java.time.Duration.ofSeconds(30))
-                    .build();
-            httpClient.send(req, HttpResponse.BodyHandlers.discarding());
-            log.info("Ollama-Modell '{}' aus VRAM entladen (keep_alive=0 gesendet)", config.getModel());
-            waitForVramReleased();
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-        } catch (Exception e) {
-            log.warn("Konnte Ollama-Modell nicht entladen: {}", e.getMessage());
-        }
-    }
-
-    private void waitForVramReleased() throws InterruptedException {
-        HttpRequest psReq = HttpRequest.newBuilder()
-                .uri(URI.create(config.getUrl() + "/api/ps"))
-                .GET()
-                .timeout(java.time.Duration.ofSeconds(5))
-                .build();
-        for (int i = 0; i < 15; i++) {
-            Thread.sleep(2_000);
-            try {
-                HttpResponse<String> resp = httpClient.send(psReq, HttpResponse.BodyHandlers.ofString());
-                if (!resp.body().contains(config.getModel())) {
-                    log.info("Ollama-Modell '{}' nach {}s aus VRAM entfernt", config.getModel(), (i + 1) * 2);
-                    return;
-                }
-            } catch (Exception e) {
-                log.debug("Ollama /api/ps nicht erreichbar: {}", e.getMessage());
-                return;
-            }
-        }
-        log.warn("Ollama-Modell '{}' nach 30s noch im VRAM — nächster Job startet trotzdem", config.getModel());
     }
 
     private String readParam(ProcessingJob job, String key) {

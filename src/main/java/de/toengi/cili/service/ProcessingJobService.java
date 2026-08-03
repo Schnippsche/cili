@@ -29,12 +29,25 @@ public class ProcessingJobService {
     @Transactional
     public ProcessingJob createJob(Long resourceId, ProcessingJobType type,
                                    Long parentJobId, String initialResult) {
+        return createJob(resourceId, type, parentJobId, initialResult, 3);
+    }
+
+    /**
+     * Wie {@link #createJob(Long, ProcessingJobType, Long, String)}, aber mit explizitem Retry-Budget.
+     * Für einmalige, nutzerausgelöste Aktionen (z.B. TESTIMONIAL_SUMMARY) maxAttempts=1 verwenden, damit
+     * ein Fehlschlag sofort FAILED wird statt still auf PENDING zu bleiben und erst beim nächsten
+     * Server-Neustart oder Zombie-Timeout automatisch erneut zu laufen (siehe markFailed).
+     */
+    @Transactional
+    public ProcessingJob createJob(Long resourceId, ProcessingJobType type,
+                                   Long parentJobId, String initialResult, int maxAttempts) {
         ProcessingJob job = ProcessingJob.builder()
             .resourceId(resourceId)
             .type(type)
             .status(ProcessingJobStatus.PENDING)
             .parentJobId(parentJobId)
             .result(initialResult)
+            .maxAttempts(maxAttempts)
             .build();
         return repo.save(job);
     }

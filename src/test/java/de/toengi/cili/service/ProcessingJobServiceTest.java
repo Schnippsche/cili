@@ -43,6 +43,26 @@ class ProcessingJobServiceTest {
     }
 
     @Test
+    void createJob_fourArgOverload_defaultsToThreeAttempts() {
+        when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ProcessingJob result = service.createJob(42L, ProcessingJobType.VIDEO_ANALYSIS, null, null);
+
+        assertThat(result.getMaxAttempts()).isEqualTo(3);
+    }
+
+    @Test
+    void createJob_withExplicitMaxAttempts_persistsGivenBudget() {
+        when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ProcessingJob result = service.createJob(
+            42L, ProcessingJobType.TESTIMONIAL_SUMMARY, null, null, 1);
+
+        assertThat(result.getMaxAttempts()).isEqualTo(1);
+        assertThat(result.getType()).isEqualTo(ProcessingJobType.TESTIMONIAL_SUMMARY);
+    }
+
+    @Test
     void markRunning_setsWorkerLockAndStartTime() {
         ProcessingJob job = ProcessingJob.builder().id(1L).attempts(0).build();
         when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));

@@ -229,3 +229,15 @@ export async function getActiveClipJobs(resourceId: number): Promise<ProcessingJ
   const {data} = await axiosClient.get<ProcessingJobDto[]>(`/resources/${resourceId}/clip-jobs/active`);
   return data;
 }
+
+export async function generateTestimonialSummary(resourceId: number): Promise<{ jobId: number }> {
+  const {data} = await axiosClient.post<{ jobId: number }>(`/resources/${resourceId}/testimonial-summary`);
+  return data;
+}
+
+export async function getActiveTestimonialSummaryJobs(resourceId: number): Promise<ProcessingJobDto[]> {
+  const {data} = await axiosClient.get<ProcessingJobDto[]>(
+      `/resources/${resourceId}/testimonial-summary-jobs/active`,
+  );
+  return data;
+}

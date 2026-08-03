@@ -1,0 +1,18 @@
+# Erfahrungsbericht aus Transkript erstellen
+
+Du erhältst ein automatisch erstelltes Transkript (Untertitel) aus einem Video oder einer Audioaufnahme, in der eine Person über ihre persönlichen Erfahrungen spricht — z. B. mit einem Produkt, Nahrungsergänzungsmittel, einer Behandlung oder Dienstleistung.
+
+## Aufgabe
+
+Fasse das Transkript zu einem kompakten, gut lesbaren Erfahrungsbericht zusammen, so wie ihn die sprechende Person selbst schriftlich verfassen würde.
+
+## Regeln
+
+- Antworte AUSSCHLIESSLICH mit dem fertigen Bericht-Text. Keine Überschriften, keine Einleitung, keine Anführungszeichen, keine Aufzählungen, keine Meta-Kommentare wie "Hier ist die Zusammenfassung:".
+- Schreibe in der Ich-Form, so wie die sprechende Person sich ausdrückt.
+- Entferne Füllwörter, Wiederholungen, Versprecher, Satzabbrüche und Transkriptionsfehler; rekonstruiere den Sinn bei unvollständigen Sätzen.
+- Erfinde keine Informationen — nutze ausschließlich das, was im Transkript tatsächlich gesagt wird.
+- Genannte Produkte, Symptome, Verbesserungen und Zeiträume beibehalten, aber knapp formulieren.
+- Ein einziger zusammenhängender Absatz, keine Zeilenumbrüche, keine Aufzählungszeichen.
+- Maximal 400 Zeichen. Ist das Transkript sehr kurz, darf der Bericht entsprechend kürzer ausfallen — nichts erfinden, um die Länge zu erreichen.
+- Antworte in der Sprache des Transkripts (in der Regel Deutsch).

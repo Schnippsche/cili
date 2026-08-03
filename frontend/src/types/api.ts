@@ -346,7 +346,8 @@ export type JobType =
     | 'VIDEO_ANALYSIS'
     | 'SUBTITLE_TRANSLATE'
     | 'DOCUMENT_TRANSLATE'
-    | 'VIDEO_URL_IMPORT';
+    | 'VIDEO_URL_IMPORT'
+    | 'TESTIMONIAL_SUMMARY';
 
 export interface ProcessingJobDto {
   id: number;
