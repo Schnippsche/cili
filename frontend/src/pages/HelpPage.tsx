@@ -139,7 +139,10 @@ export default function HelpPage() {
                         href={href}
                         onClick={href?.startsWith('#') ? (e) => {
                           e.preventDefault();
-                          document.getElementById(href.slice(1))?.scrollIntoView({behavior: 'smooth'});
+                          // react-markdown/mdast-util-to-hast percent-encodiert Nicht-ASCII-Zeichen
+                          // im href-Fragment (z.B. "ü" -> "%C3%BC"), die Heading-IDs aus headingId()
+                          // bleiben aber unkodiert -> ohne Dekodierung finden Anker mit Umlauten nie ihr Ziel.
+                          document.getElementById(decodeURIComponent(href.slice(1)))?.scrollIntoView({behavior: 'smooth'});
                         } : undefined}
                         sx={{color: 'primary.main', textDecoration: 'underline', cursor: 'pointer'}}
                     >
