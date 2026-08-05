@@ -55,7 +55,6 @@ cili:
     #         template: "welcome"          # -> templates/mail/welcome.html
     #         subject: "Willkommen!"
     #         attachment: "welcome.pdf"    # optional, aus src/main/resources/mail-attachments/
-    flows: {}
 
   share:
     token-validity-days: 90          # Gültigkeitsdauer für Freigabe-Links in Tagen
