@@ -44,6 +44,19 @@ cili:
     from: "no-reply@cili.toengi.de"
     enabled: true
 
+  mailflows:
+    # batch-cron: "0 0 2 * * *"   # einmal nachts, 02:00 Uhr — nur nötig sobald flows konfiguriert sind
+    # flows:
+    #   onboarding:
+    #     description: "Standard Onboarding Flow"
+    #     steps:
+    #       - id: "welcome"
+    #         delay-days: 0
+    #         template: "welcome"          # -> templates/mail/welcome.html
+    #         subject: "Willkommen!"
+    #         attachment: "welcome.pdf"    # optional, aus src/main/resources/mail-attachments/
+    flows: {}
+
   share:
     token-validity-days: 90          # Gültigkeitsdauer für Freigabe-Links in Tagen
     base-url: "https://cili.toengi.de"
