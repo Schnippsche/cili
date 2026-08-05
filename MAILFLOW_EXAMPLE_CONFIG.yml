@@ -1,0 +1,118 @@
+# ═════════════════════════════════════════════════════════════════════
+# MAILFLOW-AUTOMATION: BEISPIEL-KONFIGURATION
+# ═════════════════════════════════════════════════════════════════════
+#
+# Diese Datei zeigt, wie man Mailflows konfiguriert.
+# Um sie zu aktivieren, kopieren Sie die mailflows-Sektion in Ihre
+# src/main/resources/application.yml oder application-prod.yml
+#
+# ═════════════════════════════════════════════════════════════════════
+
+cili:
+  mailflows:
+    # Nacht-Batch-Scheduler: 02:00 Uhr täglich
+    # Format: Spring CronExpression (second minute hour day month day-of-week)
+    batch-cron: "0 0 2 * * *"
+
+    flows:
+      # ─────────────────────────────────────────────────────────────
+      # BEISPIEL 1: Standard Customer Welcome Flow
+      # ─────────────────────────────────────────────────────────────
+      welcome:
+        description: "Welcome Flow für neue Kunden"
+        steps:
+          # Sofort beim Start (Tag 0)
+          - id: "welcome"
+            delay-days: 0
+            template: "customer-welcome"        # → templates/mail/customer-welcome.html
+            subject: "Willkommen bei unserem Service!"
+            # Optional: attachment: "welcome-guide.pdf"
+
+          # Follow-up nach 3 Tagen
+          - id: "follow-up-3d"
+            delay-days: 3
+            template: "customer-followup"       # → templates/mail/customer-followup.html
+            subject: "Wie geht's mit unserem Service?"
+
+          # Abschluss nach 7 Tagen
+          - id: "closing"
+            delay-days: 7
+            template: "customer-closing"        # → templates/mail/customer-closing.html
+            subject: "Danke für Ihr Interesse!"
+
+      # ─────────────────────────────────────────────────────────────
+      # BEISPIEL 2: Testimonial Collection Flow
+      # ─────────────────────────────────────────────────────────────
+      testimonial-request:
+        description: "Aufforderung zur Erfahrungsberichts-Eingabe"
+        steps:
+          # Initial request nach 14 Tagen (Kunde sollte Product kennen)
+          - id: "request"
+            delay-days: 14
+            template: "testimonial-request"
+            subject: "Teilen Sie Ihre Erfahrungen mit uns!"
+
+          # Reminder nach weiteren 7 Tagen
+          - id: "reminder"
+            delay-days: 21
+            template: "testimonial-reminder"
+            subject: "Reminder: Noch kein Erfahrungsbericht?"
+
+# ═════════════════════════════════════════════════════════════════════
+# ANLEITUNG ZUM AKTIVIEREN
+# ═════════════════════════════════════════════════════════════════════
+#
+# 1. TEMPLATES ERSTELLEN:
+#    Sie müssen die Thymeleaf-Templates erstellen, die in den Flows
+#    referenziert werden. Beispiel:
+#    - src/main/resources/templates/mail/customer-welcome.html ✓ (bereits vorhanden)
+#    - src/main/resources/templates/mail/customer-followup.html (erstellen)
+#    - src/main/resources/templates/mail/customer-closing.html (erstellen)
+#
+# 2. OPTIONAL: ATTACHMENTS
+#    Wenn Sie Attachments verwenden, legen Sie diese ab:
+#    - src/main/resources/mail-attachments/welcome-guide.pdf
+#
+# 3. KONFIGURATION ÜBERNEHMEN:
+#    Kopieren Sie die mailflows-Sektion in:
+#    src/main/resources/application-prod.yml
+#
+# 4. NEU BAUEN:
+#    mvn clean package
+#
+# 5. KUNDEN ERSTELLEN:
+#    - Öffnen Sie http://localhost:8080 (nach Login)
+#    - Navigieren Sie zu "Kunden"
+#    - Erstellen Sie einen neuen Kunden
+#
+# 6. FLOW STARTEN:
+#    - Öffnen Sie die Kundendetail-Seite
+#    - Wählen Sie einen Flow aus der "Mailflows"-Sektion
+#    - Klicken Sie "Starten"
+#
+# 7. BATCH-SCHEDULER:
+#    - Der Batch läuft automatisch um 02:00 Uhr
+#    - Fällige Steps werden verarbeitet
+#    - Wenn consentGranted=false: Schritt wird übersprungen
+#    - Bei Mail-Fehler: bis zu 3 Versuche, dann FAILED status
+#
+# ═════════════════════════════════════════════════════════════════════
+# VARIABLEN IN TEMPLATES
+# ═════════════════════════════════════════════════════════════════════
+#
+# Im Thymeleaf-Template stehen folgende Variablen zur Verfügung:
+#
+# - ${customer}         # de.toengi.cili.model.entity.Customer
+#   .id, .name, .email, .consentGranted, .consentRevokedAt
+#
+# - ${sponsor}          # de.toengi.cili.model.entity.User (optional, kann null sein)
+#   .id, .username, .email, .displayName
+#
+# - ${unsubscribeUrl}   # String "/api/public/customers/unsubscribe/{token}"
+#
+# BEISPIEL im Template:
+# <a th:href="${unsubscribeUrl}">Abmelden</a>
+# <p>Liebe/r <span th:text="${customer.name}">Kunde</span>, ...</p>
+# <p th:if="${sponsor}">Ihr Betreuer: <span th:text="${sponsor.email}">...</span></p>
+#
+# ═════════════════════════════════════════════════════════════════════
