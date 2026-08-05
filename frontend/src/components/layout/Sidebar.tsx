@@ -20,6 +20,7 @@ import WorkHistoryOutlinedIcon from '@mui/icons-material/WorkHistoryOutlined';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import DriveFolderUploadOutlinedIcon from '@mui/icons-material/DriveFolderUploadOutlined';
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
+import ContactMailOutlinedIcon from '@mui/icons-material/ContactMailOutlined';
 import {type ElementType} from 'react';
 import {NavLink} from 'react-router-dom';
 import {useSelector} from 'react-redux';
@@ -90,6 +91,12 @@ export default function Sidebar({open, isMobile, onClose}: Readonly<Props>) {
               <ListItemButton component={NavLink as ElementType} to="/collections" {...navClick}>
                 <ListItemIcon sx={{minWidth: 40}}><CollectionsBookmarkIcon/></ListItemIcon>
                 {open && <ListItemText primary="Meine Sammlungen"/>}
+              </ListItemButton>
+            </Tooltip>
+            <Tooltip title={open ? '' : 'Kunden'} placement="right">
+              <ListItemButton component={NavLink as ElementType} to="/customers" {...navClick}>
+                <ListItemIcon sx={{minWidth: 40}}><ContactMailOutlinedIcon/></ListItemIcon>
+                {open && <ListItemText primary="Kunden"/>}
               </ListItemButton>
             </Tooltip>
             {user?.role === 'ADMIN' && (

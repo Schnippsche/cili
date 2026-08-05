@@ -534,3 +534,59 @@ export interface CollectionShareInfoDto {
   resources: SharedResourceItem[];
   testimonials: PublicTestimonialDto[];
 }
+
+// ── Mailflow ──────────────────────────────────────────────────────────────
+export interface CustomerDto {
+  id: number;
+  name: string;
+  firstName: string | null;
+  email: string;
+  mobilePhone: string | null;
+  birthDate: string | null;
+  memberId: number | null;
+  gender: 'MAENNLICH' | 'WEIBLICH' | null;
+  informalAddress: boolean | null;
+  sponsorUserId: number;
+  consentGranted: boolean;
+  consentGrantedAt: string;
+  consentRevokedAt: string | null;
+  createdAt: string;
+}
+
+export interface CreateCustomerRequest {
+  name: string;
+  firstName?: string;
+  email: string;
+  mobilePhone?: string;
+  birthDate?: string;
+  memberId?: number;
+  gender?: 'MAENNLICH' | 'WEIBLICH';
+  informalAddress?: boolean;
+}
+
+export interface MailflowStepDto {
+  stepId: string;
+  scheduledFor: string;
+  sentAt: string | null;
+  status: 'PENDING' | 'SENT' | 'SKIPPED' | 'ERROR' | 'FAILED';
+  attemptCount: number;
+  lastError: string | null;
+}
+
+export interface MailflowInstanceDto {
+  id: number;
+  flowName: string;
+  description: string;
+  startedAt: string;
+  status: 'RUNNING' | 'COMPLETED';
+  steps: MailflowStepDto[];
+}
+
+export interface StartMailflowRequest {
+  flowName: string;
+}
+
+export interface AvailableMailflowDto {
+  flowName: string;
+  description: string;
+}

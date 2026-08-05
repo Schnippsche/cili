@@ -23,6 +23,8 @@ const SharedCollectionPage = lazy(() => import('./pages/SharedCollectionPage'));
 const PublicTestimonialsPage = lazy(() => import('./pages/PublicTestimonialsPage'));
 const PublicTestimonialDetailPage = lazy(() => import('./pages/PublicTestimonialDetailPage'));
 const HelpPage = lazy(() => import('./pages/HelpPage'));
+const CustomersPage = lazy(() => import('./pages/CustomersPage'));
+const CustomerDetailPage = lazy(() => import('./pages/CustomerDetailPage'));
 
 const Spinner = () => <Box
     sx={{display: 'flex', justifyContent: 'center', mt: 10}}><CircularProgress/></Box>;
@@ -63,6 +65,8 @@ export default function App() {
           <Route path="/collections" element={<ProtectedRoute><CollectionsPage/></ProtectedRoute>}/>
           <Route path="/collections/:id"
                  element={<ProtectedRoute><CollectionDetailPage/></ProtectedRoute>}/>
+          <Route path="/customers" element={<ProtectedRoute><CustomersPage/></ProtectedRoute>}/>
+          <Route path="/customers/:id" element={<ProtectedRoute><CustomerDetailPage/></ProtectedRoute>}/>
           <Route path="/help" element={<ProtectedRoute><HelpPage/></ProtectedRoute>}/>
           <Route path="/share/:token" element={<SharePage/>}/>
           <Route path="/share/collection/:token" element={<SharedCollectionPage/>}/>
