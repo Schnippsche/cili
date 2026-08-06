@@ -43,7 +43,6 @@ cili:
   mail:
     from: "no-reply@cili.toengi.de"
     enabled: true
-    base-url: "https://cili.toengi.de"   # für absolute Links in Mails (z.B. Unsubscribe)
 
   mailflows:
     # batch-cron: "0 0 2 * * *"   # einmal nachts, 02:00 Uhr — nur nötig sobald flows konfiguriert sind

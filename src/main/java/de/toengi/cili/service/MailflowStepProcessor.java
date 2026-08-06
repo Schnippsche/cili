@@ -1,6 +1,5 @@
 package de.toengi.cili.service;
 
-import de.toengi.cili.config.MailConfig;
 import de.toengi.cili.config.MailflowConfig;
 import de.toengi.cili.dto.mail.MailAttachment;
 import de.toengi.cili.dto.mail.MailMessageRequest;
@@ -15,6 +14,7 @@ import de.toengi.cili.repository.MailflowInstanceRepository;
 import de.toengi.cili.repository.MailflowStepStatusRepository;
 import de.toengi.cili.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -40,16 +40,18 @@ public class MailflowStepProcessor {
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
     private final MailflowConfig config;
-    private final MailConfig mailConfig;
     private final MailService mailService;
     private final TransactionTemplate transactionTemplate;
+
+    /** Für absolute Links in Mails (z.B. Unsubscribe) — gleiche Basis-URL wie bei Share-Links. */
+    @Value("${cili.share.base-url:}")
+    private String shareBaseUrl;
 
     public MailflowStepProcessor(MailflowStepStatusRepository stepRepository,
                                   MailflowInstanceRepository instanceRepository,
                                   CustomerRepository customerRepository,
                                   UserRepository userRepository,
                                   MailflowConfig config,
-                                  MailConfig mailConfig,
                                   MailService mailService,
                                   PlatformTransactionManager transactionManager) {
         this.stepRepository = stepRepository;
@@ -57,7 +59,6 @@ public class MailflowStepProcessor {
         this.customerRepository = customerRepository;
         this.userRepository = userRepository;
         this.config = config;
-        this.mailConfig = mailConfig;
         this.mailService = mailService;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
@@ -121,7 +122,7 @@ public class MailflowStepProcessor {
                 : List.of(loadAttachment(stepDef.getAttachment()));
         // Absolute URL: ein relativer Pfad ist in E-Mail-Clients nicht auflösbar und wird von
         // Spamfiltern als Signal gewertet (kaputter/nicht funktionierender Abmelde-Link).
-        String unsubscribeUrl = mailConfig.getBaseUrl() + "/api/public/customers/unsubscribe/"
+        String unsubscribeUrl = shareBaseUrl + "/api/public/customers/unsubscribe/"
                 + customer.getUnsubscribeToken();
 
         return new MailMessageRequest(
