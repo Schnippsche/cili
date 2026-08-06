@@ -2,6 +2,7 @@ package de.toengi.cili.controller;
 
 import de.toengi.cili.dto.customer.CreateCustomerRequest;
 import de.toengi.cili.dto.customer.CustomerDto;
+import de.toengi.cili.dto.customer.UpdateCustomerRequest;
 import de.toengi.cili.model.enums.UserRole;
 import de.toengi.cili.security.CiliUserDetails;
 import de.toengi.cili.service.CustomerService;
@@ -39,5 +40,14 @@ public class CustomerController {
                                             @AuthenticationPrincipal CiliUserDetails user) {
         boolean isAdmin = user.getRole() == UserRole.ADMIN;
         return ResponseEntity.ok(customerService.getCustomer(id, user.getUserId(), isAdmin));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomerDto> update(@PathVariable Long id,
+                                               @Valid @RequestBody UpdateCustomerRequest request,
+                                               @AuthenticationPrincipal CiliUserDetails user) {
+        boolean isAdmin = user.getRole() == UserRole.ADMIN;
+        return ResponseEntity.ok(
+                customerService.updateCustomer(id, user.getUserId(), isAdmin, request));
     }
 }

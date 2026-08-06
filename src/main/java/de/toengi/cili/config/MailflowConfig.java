@@ -41,7 +41,10 @@ public class MailflowConfig {
     public static class StepDefinition {
         private String id;
         private int delayDays;
+        /** Template für die Sie-Form (Pflicht, Fallback falls keine Du-Form gepflegt ist). */
         private String template;
+        /** Template für die Du-Form (optional). Fällt auf {@link #template} zurück, wenn nicht gesetzt. */
+        private String templateInformal;
         private String subject;
         private String attachment;
     }

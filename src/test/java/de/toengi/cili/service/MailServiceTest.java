@@ -52,7 +52,7 @@ class MailServiceTest {
     void send_whenDisabled_doesNotCallMailSender() {
         mailConfig.setEnabled(false);
         MailMessageRequest request = new MailMessageRequest(
-                List.of("user@example.com"), null, null, "Betreff", "welcome", null, null, null);
+                List.of("user@example.com"), null, null, "Betreff", "welcome", null, null, null, null);
 
         mailService.send(request);
 
@@ -73,7 +73,8 @@ class MailServiceTest {
                 "welcome",
                 Map.of("name", "Alice"),
                 List.of(new MailAttachment("info.txt", "Inhalt".getBytes(StandardCharsets.UTF_8), "text/plain")),
-                null);
+                null,
+                "https://example.com/unsubscribe/abc123");
 
         mailService.send(request);
 
@@ -88,6 +89,10 @@ class MailServiceTest {
         assertThat(realMime.getSubject()).isEqualTo("Willkommen");
         assertThat(realMime.getFrom()[0].toString()).contains("no-reply@cili.toengi.de");
         assertThat(realMime.getContentType()).contains("multipart/mixed");
+        assertThat(realMime.getHeader("List-Unsubscribe", null))
+                .isEqualTo("<https://example.com/unsubscribe/abc123>");
+        assertThat(realMime.getHeader("List-Unsubscribe-Post", null))
+                .isEqualTo("List-Unsubscribe=One-Click");
     }
 
     @Test
@@ -96,7 +101,7 @@ class MailServiceTest {
                 .thenThrow(new TemplateInputException("Template nicht gefunden"));
 
         MailMessageRequest request = new MailMessageRequest(
-                List.of("to@example.com"), null, null, "Betreff", "missing-template", null, null, null);
+                List.of("to@example.com"), null, null, "Betreff", "missing-template", null, null, null, null);
 
         assertThatCode(() -> mailService.send(request)).doesNotThrowAnyException();
         verifyNoInteractions(mailSender);
@@ -110,7 +115,7 @@ class MailServiceTest {
         doThrow(new MailSendException("SMTP down")).when(mailSender).send(any(MimeMessage.class));
 
         MailMessageRequest request = new MailMessageRequest(
-                List.of("to@example.com"), null, null, "Betreff", "welcome", null, null, null);
+                List.of("to@example.com"), null, null, "Betreff", "welcome", null, null, null, null);
 
         assertThatCode(() -> mailService.send(request)).doesNotThrowAnyException();
     }

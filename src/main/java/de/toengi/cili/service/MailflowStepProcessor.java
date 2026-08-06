@@ -1,5 +1,6 @@
 package de.toengi.cili.service;
 
+import de.toengi.cili.config.MailConfig;
 import de.toengi.cili.config.MailflowConfig;
 import de.toengi.cili.dto.mail.MailAttachment;
 import de.toengi.cili.dto.mail.MailMessageRequest;
@@ -39,6 +40,7 @@ public class MailflowStepProcessor {
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
     private final MailflowConfig config;
+    private final MailConfig mailConfig;
     private final MailService mailService;
     private final TransactionTemplate transactionTemplate;
 
@@ -47,6 +49,7 @@ public class MailflowStepProcessor {
                                   CustomerRepository customerRepository,
                                   UserRepository userRepository,
                                   MailflowConfig config,
+                                  MailConfig mailConfig,
                                   MailService mailService,
                                   PlatformTransactionManager transactionManager) {
         this.stepRepository = stepRepository;
@@ -54,6 +57,7 @@ public class MailflowStepProcessor {
         this.customerRepository = customerRepository;
         this.userRepository = userRepository;
         this.config = config;
+        this.mailConfig = mailConfig;
         this.mailService = mailService;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
@@ -104,6 +108,9 @@ public class MailflowStepProcessor {
             step.setAttemptCount(attempts);
             step.setLastError(truncate(e.getMessage(), 1000));
             step.setStatus(attempts >= MAX_ATTEMPTS ? MailflowStepState.FAILED : MailflowStepState.ERROR);
+            log.error("Mailflow-Mail fehlgeschlagen: instance={} step={} customer={} attempt={}/{} -> {}",
+                    instance.getId(), step.getStepId(), customer.getId(), attempts, MAX_ATTEMPTS,
+                    step.getStatus(), e);
         }
         stepRepository.save(step);
     }
@@ -112,18 +119,35 @@ public class MailflowStepProcessor {
         List<MailAttachment> attachments = stepDef.getAttachment() == null
                 ? List.of()
                 : List.of(loadAttachment(stepDef.getAttachment()));
-        String unsubscribeUrl = "/api/public/customers/unsubscribe/" + customer.getUnsubscribeToken();
+        // Absolute URL: ein relativer Pfad ist in E-Mail-Clients nicht auflösbar und wird von
+        // Spamfiltern als Signal gewertet (kaputter/nicht funktionierender Abmelde-Link).
+        String unsubscribeUrl = mailConfig.getBaseUrl() + "/api/public/customers/unsubscribe/"
+                + customer.getUnsubscribeToken();
 
         return new MailMessageRequest(
                 List.of(customer.getEmail()),
                 null,
                 null,
                 stepDef.getSubject(),
-                stepDef.getTemplate(),
+                resolveTemplate(customer, stepDef),
                 Map.of("customer", customer, "sponsor", sponsor, "unsubscribeUrl", unsubscribeUrl),
                 attachments,
-                null
+                null,
+                unsubscribeUrl
         );
+    }
+
+    /**
+     * Wählt je nach Ansprache-Präferenz des Kunden das Du- oder Sie-Template. Fehlt eine
+     * Du-Variante (templateInformal), wird immer die Sie-Form verwendet — so muss nicht jeder
+     * Step beide Varianten pflegen.
+     */
+    String resolveTemplate(Customer customer, MailflowConfig.StepDefinition stepDef) {
+        boolean wantsInformal = Boolean.TRUE.equals(customer.getInformalAddress());
+        if (wantsInformal && stepDef.getTemplateInformal() != null) {
+            return stepDef.getTemplateInformal();
+        }
+        return stepDef.getTemplate();
     }
 
     private MailAttachment loadAttachment(String filename) {

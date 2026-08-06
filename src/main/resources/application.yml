@@ -43,6 +43,7 @@ cili:
   mail:
     from: "no-reply@cili.toengi.de"
     enabled: true
+    base-url: "https://cili.toengi.de"   # für absolute Links in Mails (z.B. Unsubscribe)
 
   mailflows:
     # batch-cron: "0 0 2 * * *"   # einmal nachts, 02:00 Uhr — nur nötig sobald flows konfiguriert sind
@@ -52,7 +53,9 @@ cili:
     #     steps:
     #       - id: "welcome"
     #         delay-days: 0
-    #         template: "welcome"          # -> templates/mail/welcome.html
+    #         template: "welcome"          # -> templates/mail/welcome.html (Sie-Form, Pflicht)
+    #         template-informal: "welcome-du"  # -> templates/mail/welcome-du.html (Du-Form, optional;
+    #                                           #    ohne Angabe wird immer die Sie-Form verwendet)
     #         subject: "Willkommen!"
     #         attachment: "welcome.pdf"    # optional, aus src/main/resources/mail-attachments/
 

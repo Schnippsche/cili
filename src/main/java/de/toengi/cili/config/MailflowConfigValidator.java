@@ -40,6 +40,12 @@ public class MailflowConfigValidator {
         Assert.isTrue(resourceLoader.getResource(templatePath).exists(),
                 () -> ctx + " (" + step.getId() + "): Template nicht gefunden: " + templatePath);
 
+        if (step.getTemplateInformal() != null) {
+            String templateInformalPath = "classpath:/templates/mail/" + step.getTemplateInformal() + ".html";
+            Assert.isTrue(resourceLoader.getResource(templateInformalPath).exists(),
+                    () -> ctx + " (" + step.getId() + "): Du-Template nicht gefunden: " + templateInformalPath);
+        }
+
         if (step.getAttachment() != null) {
             String attachmentPath = "classpath:/mail-attachments/" + step.getAttachment();
             Assert.isTrue(resourceLoader.getResource(attachmentPath).exists(),

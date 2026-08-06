@@ -30,6 +30,7 @@ public class MailflowService {
     private final MailflowStepStatusRepository stepRepository;
     private final CustomerRepository customerRepository;
     private final MailflowConfig config;
+    private final MailflowStepProcessor stepProcessor;
 
     public List<AvailableMailflowDto> listAvailableFlows() {
         return config.getFlows().entrySet().stream()
@@ -89,6 +90,53 @@ public class MailflowService {
                     return toDto(instance, description, steps);
                 })
                 .toList();
+    }
+
+    /**
+     * Löst einen einzelnen Step sofort aus — unabhängig von seinem {@code scheduledFor}-Datum.
+     * Nur für Admins zum gezielten Testen von Mailflow-Templates (Du/Sie-Form, Rendering,
+     * SMTP-Zustellung); Versand geht an die echte E-Mail-Adresse des Kunden.
+     */
+    @Transactional
+    public MailflowInstanceDto sendStepNow(Long customerId, Long instanceId, String stepId,
+                                            boolean isAdmin) {
+        if (!isAdmin) {
+            throw new CiliException("Nur Admins dürfen Mailflow-Steps sofort auslösen", HttpStatus.FORBIDDEN);
+        }
+        findCustomerOrThrow(customerId);
+
+        MailflowInstance instance = instanceRepository.findById(instanceId)
+                .orElseThrow(() -> new ResourceNotFoundException("MailflowInstance", instanceId));
+        if (!instance.getCustomerId().equals(customerId)) {
+            throw new ResourceNotFoundException("MailflowInstance", instanceId);
+        }
+
+        MailflowStepStatus step = stepRepository.findByInstanceIdAndStepId(instanceId, stepId)
+                .orElseThrow(() -> new ResourceNotFoundException("MailflowStepStatus", 0L));
+
+        stepProcessor.processStep(step.getId());
+
+        String description = config.findFlow(instance.getFlowName())
+                .map(MailflowConfig.FlowDefinition::getDescription)
+                .orElse(instance.getFlowName());
+        List<MailflowStepStatus> steps = stepRepository.findByInstanceId(instanceId);
+        return toDto(instance, description, steps);
+    }
+
+    /** Löscht eine Mailflow-Instanz samt ihrer Steps — unabhängig vom Status (auch laufend). */
+    @Transactional
+    public void deleteInstance(Long customerId, Long instanceId, Long currentUserId, boolean isAdmin) {
+        Customer customer = findCustomerOrThrow(customerId);
+        checkOwnerOrAdmin(customer, currentUserId, isAdmin);
+
+        MailflowInstance instance = instanceRepository.findById(instanceId)
+                .orElseThrow(() -> new ResourceNotFoundException("MailflowInstance", instanceId));
+        if (!instance.getCustomerId().equals(customerId)) {
+            throw new ResourceNotFoundException("MailflowInstance", instanceId);
+        }
+
+        stepRepository.deleteAll(stepRepository.findByInstanceId(instanceId));
+        instanceRepository.delete(instance);
     }
 
     private Customer findCustomerOrThrow(Long customerId) {

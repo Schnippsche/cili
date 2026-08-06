@@ -53,21 +53,50 @@ public class MailService {
         request.variables().forEach(ctx::setVariable);
         String html = templateEngine.process("mail/" + request.templateName(), ctx);
 
-        boolean hasAttachments = !request.attachments().isEmpty();
+        // multipart=true unabhängig von Attachments: erst das ermöglicht MimeMessageHelper#setText
+        // mit Plain-Text-Alternative (multipart/alternative) statt nur text/html — HTML-only-Mails
+        // ohne Text-Fallback werden von Spamfiltern spürbar schlechter bewertet.
         MimeMessage mime = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mime, hasAttachments, "UTF-8");
+        MimeMessageHelper helper = new MimeMessageHelper(mime, true, "UTF-8");
         helper.setFrom(mailConfig.getFrom());
         helper.setTo(request.to().toArray(new String[0]));
         if (!request.cc().isEmpty()) helper.setCc(request.cc().toArray(new String[0]));
         if (!request.bcc().isEmpty()) helper.setBcc(request.bcc().toArray(new String[0]));
         helper.setSubject(request.subject());
-        helper.setText(html, true);
+        helper.setText(toPlainText(html), html);
 
         for (MailAttachment att : request.attachments()) {
             helper.addAttachment(att.filename(), new ByteArrayResource(att.content()), att.contentType());
         }
 
+        // List-Unsubscribe (RFC 8058): ohne diesen Header stufen Gmail/Yahoo & Co. Massen-Mail mit
+        // Abmeldelink im Body allein zunehmend als Spam ein.
+        if (request.unsubscribeUrl() != null && !request.unsubscribeUrl().isBlank()) {
+            mime.setHeader("List-Unsubscribe", "<" + request.unsubscribeUrl() + ">");
+            mime.setHeader("List-Unsubscribe-Post", "List-Unsubscribe=One-Click");
+        }
+
         mailSender.send(mime);
         log.info("E-Mail versendet an {} (Betreff: {})", request.to(), request.subject());
+    }
+
+    /**
+     * Grobe HTML-zu-Text-Konvertierung für die Plain-Text-Alternative. Kein Anspruch auf ein
+     * hübsches Layout — dient nur als Spamfilter-Fallback für Clients, die kein HTML rendern.
+     */
+    private String toPlainText(String html) {
+        String withoutTags = html
+                .replaceAll("(?is)<(script|style)[^>]*>.*?</\\1>", "")
+                .replaceAll("(?i)<br\\s*/?>", "\n")
+                .replaceAll("(?i)</p>", "\n\n")
+                .replaceAll("<[^>]+>", "");
+        String decoded = withoutTags
+                .replace("&nbsp;", " ")
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&quot;", "\"")
+                .replace("&#39;", "'");
+        return decoded.replaceAll("[ \\t]+", " ").replaceAll("\n{3,}", "\n\n").trim();
     }
 }

@@ -106,6 +106,109 @@ class MailflowIntegrationTest {
     }
 
     @Test
+    void sendStepNow_nonAdmin_returns403() throws Exception {
+        var instance = instanceRepository.save(de.toengi.cili.model.entity.MailflowInstance.builder()
+                .customerId(customer.getId()).flowName("onboarding")
+                .startedAt(LocalDateTime.now()).createdByUserId(sponsorA.getId()).build());
+        var step = stepRepository.save(de.toengi.cili.model.entity.MailflowStepStatus.builder()
+                .instanceId(instance.getId()).stepId("welcome")
+                .scheduledFor(java.time.LocalDate.now().plusDays(30))
+                .status(de.toengi.cili.model.enums.MailflowStepState.PENDING).build());
+
+        mockMvc.perform(post("/api/customers/{customerId}/mailflows/{instanceId}/steps/{stepId}/send-now",
+                        customer.getId(), instance.getId(), step.getStepId())
+                        .header("Authorization", "Bearer " + tokenA))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void sendStepNow_asAdmin_ignoresScheduledDate() throws Exception {
+        User admin = userRepository.save(User.builder()
+                .username("admin-test").email("admin-test@test.com").passwordHash("x")
+                .role(UserRole.ADMIN).build());
+        String adminToken = jwtTokenProvider.generateAccessToken(new CiliUserDetails(admin));
+
+        customer.setConsentGranted(false);
+        customer.setConsentRevokedAt(LocalDateTime.now());
+        customerRepository.save(customer);
+
+        var instance = instanceRepository.save(de.toengi.cili.model.entity.MailflowInstance.builder()
+                .customerId(customer.getId()).flowName("onboarding")
+                .startedAt(LocalDateTime.now()).createdByUserId(sponsorA.getId()).build());
+        var step = stepRepository.save(de.toengi.cili.model.entity.MailflowStepStatus.builder()
+                .instanceId(instance.getId()).stepId("welcome")
+                .scheduledFor(java.time.LocalDate.now().plusDays(30))
+                .status(de.toengi.cili.model.enums.MailflowStepState.PENDING).build());
+
+        mockMvc.perform(post("/api/customers/{customerId}/mailflows/{instanceId}/steps/{stepId}/send-now",
+                        customer.getId(), instance.getId(), step.getStepId())
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.steps[0].status").value("SKIPPED"));
+
+        var reloaded = stepRepository.findById(step.getId()).orElseThrow();
+        assertThat(reloaded.getStatus()).isEqualTo(de.toengi.cili.model.enums.MailflowStepState.SKIPPED);
+    }
+
+    @Test
+    void deleteInstance_completedInstance_deletesInstanceAndSteps() throws Exception {
+        var instance = instanceRepository.save(de.toengi.cili.model.entity.MailflowInstance.builder()
+                .customerId(customer.getId()).flowName("onboarding")
+                .startedAt(LocalDateTime.now()).createdByUserId(sponsorA.getId()).build());
+        var step = stepRepository.save(de.toengi.cili.model.entity.MailflowStepStatus.builder()
+                .instanceId(instance.getId()).stepId("welcome")
+                .scheduledFor(java.time.LocalDate.now())
+                .status(de.toengi.cili.model.enums.MailflowStepState.SENT).build());
+
+        mockMvc.perform(delete("/api/customers/{customerId}/mailflows/{instanceId}",
+                        customer.getId(), instance.getId())
+                        .header("Authorization", "Bearer " + tokenA))
+                .andExpect(status().isNoContent());
+
+        assertThat(instanceRepository.findById(instance.getId())).isEmpty();
+        assertThat(stepRepository.findById(step.getId())).isEmpty();
+    }
+
+    @Test
+    void deleteInstance_runningInstance_deletesInstanceAndSteps() throws Exception {
+        var instance = instanceRepository.save(de.toengi.cili.model.entity.MailflowInstance.builder()
+                .customerId(customer.getId()).flowName("onboarding")
+                .startedAt(LocalDateTime.now()).createdByUserId(sponsorA.getId()).build());
+        var step = stepRepository.save(de.toengi.cili.model.entity.MailflowStepStatus.builder()
+                .instanceId(instance.getId()).stepId("welcome")
+                .scheduledFor(java.time.LocalDate.now())
+                .status(de.toengi.cili.model.enums.MailflowStepState.PENDING).build());
+
+        mockMvc.perform(delete("/api/customers/{customerId}/mailflows/{instanceId}",
+                        customer.getId(), instance.getId())
+                        .header("Authorization", "Bearer " + tokenA))
+                .andExpect(status().isNoContent());
+
+        assertThat(instanceRepository.findById(instance.getId())).isEmpty();
+        assertThat(stepRepository.findById(step.getId())).isEmpty();
+    }
+
+    @Test
+    void deleteInstance_foreignSponsor_returns403() throws Exception {
+        User sponsorB = userRepository.save(User.builder()
+                .username("sponsorC").email("sponsorc@test.com").passwordHash("x").build());
+        String tokenB = jwtTokenProvider.generateAccessToken(new CiliUserDetails(sponsorB));
+
+        var instance = instanceRepository.save(de.toengi.cili.model.entity.MailflowInstance.builder()
+                .customerId(customer.getId()).flowName("onboarding")
+                .startedAt(LocalDateTime.now()).createdByUserId(sponsorA.getId()).build());
+        stepRepository.save(de.toengi.cili.model.entity.MailflowStepStatus.builder()
+                .instanceId(instance.getId()).stepId("welcome")
+                .scheduledFor(java.time.LocalDate.now())
+                .status(de.toengi.cili.model.enums.MailflowStepState.SENT).build());
+
+        mockMvc.perform(delete("/api/customers/{customerId}/mailflows/{instanceId}",
+                        customer.getId(), instance.getId())
+                        .header("Authorization", "Bearer " + tokenB))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void processDueSteps_customerOptedOut_marksAllDueStepsSkipped() {
         customer.setConsentGranted(false);
         customer.setConsentRevokedAt(LocalDateTime.now());

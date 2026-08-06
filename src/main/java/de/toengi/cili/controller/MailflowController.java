@@ -42,4 +42,22 @@ public class MailflowController {
         boolean isAdmin = user.getRole() == UserRole.ADMIN;
         return ResponseEntity.ok(mailflowService.listInstances(customerId, user.getUserId(), isAdmin));
     }
+
+    @DeleteMapping("/api/customers/{customerId}/mailflows/{instanceId}")
+    public ResponseEntity<Void> delete(@PathVariable Long customerId,
+                                        @PathVariable Long instanceId,
+                                        @AuthenticationPrincipal CiliUserDetails user) {
+        boolean isAdmin = user.getRole() == UserRole.ADMIN;
+        mailflowService.deleteInstance(customerId, instanceId, user.getUserId(), isAdmin);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/api/customers/{customerId}/mailflows/{instanceId}/steps/{stepId}/send-now")
+    public ResponseEntity<MailflowInstanceDto> sendStepNow(@PathVariable Long customerId,
+                                                             @PathVariable Long instanceId,
+                                                             @PathVariable String stepId,
+                                                             @AuthenticationPrincipal CiliUserDetails user) {
+        boolean isAdmin = user.getRole() == UserRole.ADMIN;
+        return ResponseEntity.ok(mailflowService.sendStepNow(customerId, instanceId, stepId, isAdmin));
+    }
 }

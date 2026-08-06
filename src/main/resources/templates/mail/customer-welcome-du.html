@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Willkommen bei unserem Service!</title>
+  <link rel="stylesheet" href="../fragments/email-styles.css" th:remove="all">
+  <!-- CSS inline einfügen -->
+  <style th:insert="~{fragments/email-styles :: css}"></style>
+</head>
+
+<body>
+<div class="card">
+  <h2>Willkommen!</h2>
+  <p>
+    Liebe/r <span th:text="${customer.name}">Kunde</span>,<br/>
+    schön, dass du dich bei uns registriert haben!
+  </p>
+
+  <p>
+    Deine E‑Mail-Adresse: <strong th:text="${customer.email}">email@example.com</strong>
+  </p>
+
+  <p>
+    <span th:if="${sponsor}">
+      Dein Ansprechpartner: <strong th:text="${sponsor.email}">sponsor@example.com</strong>
+    </span>
+  </p>
+
+  <p>
+    Wir freuen uns auf die Zusammenarbeit!
+  </p>
+
+  <div class="footer">
+    Du möchtest keine E‑Mails mehr erhalten?<br/>
+    <a th:href="${unsubscribeUrl}">
+      Abmelden
+    </a>
+  </div>
+
+</div>
+</body>
+</html>

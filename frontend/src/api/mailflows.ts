@@ -15,3 +15,15 @@ export async function startMailflow(customerId: number, req: StartMailflowReques
   const {data} = await axiosClient.post<MailflowInstanceDto>(`/customers/${customerId}/mailflows`, req);
   return data;
 }
+
+export async function deleteMailflowInstance(customerId: number, instanceId: number): Promise<void> {
+  await axiosClient.delete(`/customers/${customerId}/mailflows/${instanceId}`);
+}
+
+export async function sendMailflowStepNow(
+    customerId: number, instanceId: number, stepId: string
+): Promise<MailflowInstanceDto> {
+  const {data} = await axiosClient.post<MailflowInstanceDto>(
+      `/customers/${customerId}/mailflows/${instanceId}/steps/${stepId}/send-now`);
+  return data;
+}

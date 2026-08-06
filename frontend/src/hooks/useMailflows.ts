@@ -26,3 +26,24 @@ export function useStartMailflow() {
         qc.invalidateQueries({queryKey: ['customers', customerId, 'mailflows']}),
   });
 }
+
+export function useDeleteMailflowInstance() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({customerId, instanceId}: { customerId: number; instanceId: number }) =>
+        api.deleteMailflowInstance(customerId, instanceId),
+    onSuccess: (_, {customerId}) =>
+        qc.invalidateQueries({queryKey: ['customers', customerId, 'mailflows']}),
+  });
+}
+
+export function useSendMailflowStepNow() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({customerId, instanceId, stepId}: {
+      customerId: number; instanceId: number; stepId: string
+    }) => api.sendMailflowStepNow(customerId, instanceId, stepId),
+    onSuccess: (_, {customerId}) =>
+        qc.invalidateQueries({queryKey: ['customers', customerId, 'mailflows']}),
+  });
+}

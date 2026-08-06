@@ -1,5 +1,5 @@
 import {useParams} from 'react-router-dom';
-import {Box, Divider, Paper, Typography} from '@mui/material';
+import {Alert, Box, Divider, Typography} from '@mui/material';
 import AppShell from '../components/layout/AppShell';
 import MailflowSection from '../components/customer/MailflowSection';
 import {useCustomer} from '../hooks/useCustomers';
@@ -25,12 +25,10 @@ export default function CustomerDetailPage() {
           <Typography variant="h5" fontWeight="bold" sx={{mb: 1}}>{customer.name}</Typography>
           <Typography color="text.secondary" sx={{mb: 3}}>{customer.email}</Typography>
 
-          <Paper variant="outlined" sx={{p: 2, mb: 3}}>
-            <Typography variant="body2">
-              Einwilligung: {customer.consentGranted ? 'erteilt' : 'widerrufen'}
-              {customer.consentRevokedAt && ` (seit ${customer.consentRevokedAt})`}
-            </Typography>
-          </Paper>
+          <Alert severity={customer.consentGranted ? 'success' : 'warning'} sx={{mb: 3}}>
+            Einwilligung: {customer.consentGranted ? 'erteilt' : 'widerrufen'}
+            {customer.consentRevokedAt && ` (seit ${customer.consentRevokedAt})`}
+          </Alert>
 
           <Divider sx={{mb: 3}}/>
 

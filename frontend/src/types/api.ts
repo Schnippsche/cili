@@ -564,6 +564,17 @@ export interface CreateCustomerRequest {
   informalAddress?: boolean;
 }
 
+export interface UpdateCustomerRequest {
+  name?: string;
+  firstName?: string;
+  email?: string;
+  mobilePhone?: string;
+  birthDate?: string;
+  memberId?: number;
+  gender?: 'MAENNLICH' | 'WEIBLICH';
+  informalAddress?: boolean;
+}
+
 export interface MailflowStepDto {
   stepId: string;
   scheduledFor: string;

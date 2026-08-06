@@ -7,10 +7,13 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface MailflowStepStatusRepository extends JpaRepository<MailflowStepStatus, Long> {
 
     List<MailflowStepStatus> findByInstanceId(Long instanceId);
+
+    Optional<MailflowStepStatus> findByInstanceIdAndStepId(Long instanceId, String stepId);
 
     @Query("""
         SELECT s FROM MailflowStepStatus s

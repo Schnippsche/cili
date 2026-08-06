@@ -12,7 +12,9 @@ public record MailMessageRequest(
     String templateName,
     Map<String, Object> variables,
     List<MailAttachment> attachments,
-    Locale locale
+    Locale locale,
+    /** Falls gesetzt: absolute URL für den List-Unsubscribe-Header (RFC 8058). */
+    String unsubscribeUrl
 ) {
     // Compact Constructor: erzwingt Null-Sicherheit statt sich auf Aufrufer-Disziplin zu verlassen —
     // verhindert NPEs in MailService.send() bei request.variables().forEach(...) etc.
