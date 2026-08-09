@@ -1,17 +1,22 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import {useSelector} from 'react-redux';
+import {useQuery} from '@tanstack/react-query';
 import {
   Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
   FormControlLabel, IconButton, MenuItem, Paper, Switch, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, TextField, Tooltip, Typography
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 import AppShell from '../components/layout/AppShell';
-import {useCreateCustomer, useCustomers, useUpdateCustomer} from '../hooks/useCustomers';
-import type {CreateCustomerRequest, CustomerDto, UpdateCustomerRequest} from '../types/api';
+import * as adminApi from '../api/admin';
+import {useCreateCustomer, useCustomers, useDeleteCustomer, useUpdateCustomer} from '../hooks/useCustomers';
+import type {RootState} from '../store/store';
+import type {CreateCustomerRequest, CustomerDto, UpdateCustomerRequest, UserDto} from '../types/api';
 
 const GENDER_OPTIONS: {value: '' | 'MAENNLICH' | 'WEIBLICH'; label: string}[] = [
   {value: '', label: 'Keine Angabe'},
@@ -25,7 +30,9 @@ function genderLabel(gender: CustomerDto['gender']): string {
 
 // ── Edit Customer Dialog ─────────────────────────────────────────────────────
 
-function EditCustomerDialog({customer, onClose}: Readonly<{ customer: CustomerDto; onClose: () => void }>) {
+function EditCustomerDialog({customer, isAdmin, users, onClose}: Readonly<{
+  customer: CustomerDto; isAdmin: boolean; users: UserDto[]; onClose: () => void
+}>) {
   const updateMutation = useUpdateCustomer();
   const [form, setForm] = useState({
     name: customer.name,
@@ -36,6 +43,7 @@ function EditCustomerDialog({customer, onClose}: Readonly<{ customer: CustomerDt
     memberId: customer.memberId != null ? String(customer.memberId) : '',
     gender: (customer.gender ?? '') as '' | 'MAENNLICH' | 'WEIBLICH',
     informalAddress: customer.informalAddress ?? false,
+    sponsorUserId: customer.sponsorUserId,
   });
 
   const memberIdError = form.memberId.trim() !== '' && !/^\d{6}$/.test(form.memberId.trim());
@@ -52,6 +60,7 @@ function EditCustomerDialog({customer, onClose}: Readonly<{ customer: CustomerDt
       memberId: form.memberId.trim() ? Number(form.memberId.trim()) : undefined,
       gender: form.gender || undefined,
       informalAddress: form.informalAddress,
+      sponsorUserId: isAdmin ? form.sponsorUserId : undefined,
     };
     updateMutation.mutate({id: customer.id, req: request}, {onSuccess: onClose});
   };
@@ -102,6 +111,18 @@ function EditCustomerDialog({customer, onClose}: Readonly<{ customer: CustomerDt
                 control={<Switch checked={form.informalAddress}
                                  onChange={e => setForm({...form, informalAddress: e.target.checked})}/>}
                 label="Du-Ansprache (informell)"/>
+            {isAdmin && (
+                <TextField select label="Sponsor (User)" value={form.sponsorUserId}
+                           onChange={e => setForm({...form, sponsorUserId: Number(e.target.value)})}
+                           helperText="Wem soll dieser Kunde zugeordnet werden?"
+                           sx={{flex: '1 1 100%'}}>
+                  {users.map(u => (
+                      <MenuItem key={u.id} value={u.id}>
+                        {u.displayName ? `${u.displayName} (${u.username})` : u.username}
+                      </MenuItem>
+                  ))}
+                </TextField>
+            )}
           </Box>
         </DialogContent>
         <DialogActions>
@@ -114,10 +135,49 @@ function EditCustomerDialog({customer, onClose}: Readonly<{ customer: CustomerDt
   );
 }
 
+// ── Delete Confirm Dialog ────────────────────────────────────────────────────
+
+function DeleteCustomerDialog({customer, onClose}: Readonly<{ customer: CustomerDto; onClose: () => void }>) {
+  const deleteMutation = useDeleteCustomer();
+
+  return (
+      <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
+        <DialogTitle>Kunde löschen</DialogTitle>
+        <DialogContent>
+          {deleteMutation.isError && (
+              <Alert severity="error" sx={{mb: 2}}>Kunde konnte nicht gelöscht werden.</Alert>
+          )}
+          Soll der Kunde <strong>{customer.name}</strong> wirklich gelöscht werden? Damit werden auch
+          alle zugehörigen Mailflow-Verläufe entfernt. Diese Aktion kann nicht rückgängig gemacht
+          werden.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Abbrechen</Button>
+          <Button
+              variant="contained"
+              color="error"
+              disabled={deleteMutation.isPending}
+              onClick={() => deleteMutation.mutate(customer.id, {onSuccess: onClose})}
+          >
+            Löschen
+          </Button>
+        </DialogActions>
+      </Dialog>
+  );
+}
+
 export default function CustomersPage() {
   const navigate = useNavigate();
+  const isAdmin = useSelector((s: RootState) => s.auth.user?.role === 'ADMIN');
+  const currentUserId = useSelector((s: RootState) => s.auth.user?.id);
   const {data: customers = [], isLoading} = useCustomers();
   const createMutation = useCreateCustomer();
+
+  const {data: usersPage} = useQuery({
+    queryKey: ['admin', 'users', 'all'],
+    queryFn: () => adminApi.listUsers(0, 500),
+    enabled: isAdmin,
+  });
 
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
@@ -128,7 +188,9 @@ export default function CustomersPage() {
   const [memberId, setMemberId] = useState('');
   const [gender, setGender] = useState<'' | 'MAENNLICH' | 'WEIBLICH'>('');
   const [informalAddress, setInformalAddress] = useState(false);
+  const [sponsorUserId, setSponsorUserId] = useState<number | ''>(currentUserId ?? '');
   const [editCustomer, setEditCustomer] = useState<CustomerDto | null>(null);
+  const [deleteCustomerTarget, setDeleteCustomerTarget] = useState<CustomerDto | null>(null);
 
   const memberIdError = memberId.trim() !== '' && !/^\d{6}$/.test(memberId.trim());
 
@@ -142,6 +204,7 @@ export default function CustomersPage() {
     setMemberId('');
     setGender('');
     setInformalAddress(false);
+    setSponsorUserId(currentUserId ?? '');
   };
 
   const handleCreate = () => {
@@ -156,6 +219,7 @@ export default function CustomersPage() {
       memberId: memberId.trim() ? Number(memberId.trim()) : undefined,
       gender: gender || undefined,
       informalAddress: informalAddress || undefined,
+      sponsorUserId: isAdmin && sponsorUserId !== '' ? sponsorUserId : undefined,
     };
     createMutation.mutate(request, {onSuccess: resetDialog});
   };
@@ -191,6 +255,7 @@ export default function CustomersPage() {
                       <TableCell>Geschlecht</TableCell>
                       <TableCell>Ansprache</TableCell>
                       <TableCell>Einwilligung</TableCell>
+                      {isAdmin && <TableCell>Sponsor</TableCell>}
                       <TableCell align="right">Aktionen</TableCell>
                     </TableRow>
                   </TableHead>
@@ -210,6 +275,9 @@ export default function CustomersPage() {
                                   color={c.consentGranted ? 'success' : 'default'}
                                   size="small"/>
                           </TableCell>
+                          {isAdmin && (
+                              <TableCell>{c.sponsorUsername ?? '–'}</TableCell>
+                          )}
                           <TableCell align="right">
                             <Tooltip title="Details / Mailflows">
                               <IconButton size="small" onClick={() => navigate(`/customers/${c.id}`)}>
@@ -221,6 +289,12 @@ export default function CustomersPage() {
                                 <EditOutlinedIcon fontSize="small"/>
                               </IconButton>
                             </Tooltip>
+                            <Tooltip title="Löschen">
+                              <IconButton size="small" color="error"
+                                          onClick={() => setDeleteCustomerTarget(c)}>
+                                <DeleteOutlineIcon fontSize="small"/>
+                              </IconButton>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                     ))}
@@ -230,7 +304,14 @@ export default function CustomersPage() {
           )}
 
           {editCustomer && (
-              <EditCustomerDialog customer={editCustomer} onClose={() => setEditCustomer(null)}/>
+              <EditCustomerDialog customer={editCustomer} isAdmin={isAdmin}
+                                  users={usersPage?.content ?? []}
+                                  onClose={() => setEditCustomer(null)}/>
+          )}
+
+          {deleteCustomerTarget && (
+              <DeleteCustomerDialog customer={deleteCustomerTarget}
+                                     onClose={() => setDeleteCustomerTarget(null)}/>
           )}
 
           <Dialog open={createOpen} onClose={resetDialog} maxWidth="sm" fullWidth>
@@ -275,12 +356,26 @@ export default function CustomersPage() {
                     control={<Switch checked={informalAddress}
                                      onChange={e => setInformalAddress(e.target.checked)}/>}
                     label="Du-Ansprache (informell)"/>
+                {isAdmin && (
+                    <TextField select label="Sponsor (User)" value={sponsorUserId}
+                               onChange={e => setSponsorUserId(
+                                   e.target.value === '' ? '' : Number(e.target.value))}
+                               helperText="Wem soll dieser Kunde zugeordnet werden?"
+                               sx={{flex: '1 1 100%'}}>
+                      {usersPage?.content.map(u => (
+                          <MenuItem key={u.id} value={u.id}>
+                            {u.displayName ? `${u.displayName} (${u.username})` : u.username}
+                          </MenuItem>
+                      ))}
+                    </TextField>
+                )}
               </Box>
             </DialogContent>
             <DialogActions>
               <Button onClick={resetDialog}>Abbrechen</Button>
               <Button variant="contained" onClick={handleCreate}
-                      disabled={!name.trim() || !email.trim() || memberIdError}>
+                      disabled={!name.trim() || !email.trim() || memberIdError
+                          || (isAdmin && sponsorUserId === '')}>
                 Anlegen
               </Button>
             </DialogActions>

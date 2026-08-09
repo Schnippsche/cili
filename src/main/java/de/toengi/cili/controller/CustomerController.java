@@ -25,8 +25,9 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<CustomerDto> create(@Valid @RequestBody CreateCustomerRequest request,
                                                @AuthenticationPrincipal CiliUserDetails user) {
+        boolean isAdmin = user.getRole() == UserRole.ADMIN;
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(customerService.createCustomer(user.getUserId(), request));
+                .body(customerService.createCustomer(user.getUserId(), isAdmin, request));
     }
 
     @GetMapping
@@ -49,5 +50,13 @@ public class CustomerController {
         boolean isAdmin = user.getRole() == UserRole.ADMIN;
         return ResponseEntity.ok(
                 customerService.updateCustomer(id, user.getUserId(), isAdmin, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id,
+                                        @AuthenticationPrincipal CiliUserDetails user) {
+        boolean isAdmin = user.getRole() == UserRole.ADMIN;
+        customerService.deleteCustomer(id, user.getUserId(), isAdmin);
+        return ResponseEntity.noContent().build();
     }
 }

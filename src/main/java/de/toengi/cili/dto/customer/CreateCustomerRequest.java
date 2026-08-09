@@ -18,5 +18,7 @@ public record CreateCustomerRequest(
     @Past LocalDate birthDate,
     @Min(100000) @Max(999999) Integer memberId,
     Gender gender,
-    Boolean informalAddress
+    Boolean informalAddress,
+    /** Nur von Admins nutzbar, um den Customer einem anderen User zuzuordnen. */
+    Long sponsorUserId
 ) {}

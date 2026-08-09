@@ -6,7 +6,11 @@ import de.toengi.cili.dto.customer.UpdateCustomerRequest;
 import de.toengi.cili.exception.CiliException;
 import de.toengi.cili.exception.ResourceNotFoundException;
 import de.toengi.cili.model.entity.Customer;
+import de.toengi.cili.model.entity.User;
 import de.toengi.cili.repository.CustomerRepository;
+import de.toengi.cili.repository.MailflowInstanceRepository;
+import de.toengi.cili.repository.MailflowStepStatusRepository;
+import de.toengi.cili.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,7 +21,9 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +31,19 @@ import java.util.UUID;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final MailflowInstanceRepository mailflowInstanceRepository;
+    private final MailflowStepStatusRepository mailflowStepStatusRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public CustomerDto createCustomer(Long sponsorUserId, CreateCustomerRequest request) {
+    public CustomerDto createCustomer(Long currentUserId, boolean isAdmin, CreateCustomerRequest request) {
+        Long sponsorUserId = currentUserId;
+        if (isAdmin && request.sponsorUserId() != null) {
+            sponsorUserId = request.sponsorUserId();
+            if (!userRepository.existsById(sponsorUserId)) {
+                throw new ResourceNotFoundException("User", sponsorUserId);
+            }
+        }
         try {
             Customer customer = Customer.builder()
                     .name(request.name().trim())
@@ -54,7 +70,14 @@ public class CustomerService {
         List<Customer> customers = isAdmin
                 ? customerRepository.findAll()
                 : customerRepository.findBySponsorUserId(currentUserId);
-        return customers.stream().map(this::toDto).toList();
+
+        // Batch-Auflösung statt pro Customer einzeln nachzuladen (N+1) — relevant v.a. für Admins,
+        // die potenziell viele Customer mit unterschiedlichen Sponsoren auf einmal sehen.
+        List<Long> sponsorIds = customers.stream().map(Customer::getSponsorUserId).distinct().toList();
+        Map<Long, User> sponsorsById = userRepository.findAllById(sponsorIds).stream()
+                .collect(java.util.stream.Collectors.toMap(User::getId, Function.identity()));
+
+        return customers.stream().map(c -> toDto(c, sponsorsById.get(c.getSponsorUserId()))).toList();
     }
 
     @Transactional(readOnly = true)
@@ -95,10 +118,37 @@ public class CustomerService {
             if (request.informalAddress() != null) {
                 customer.setInformalAddress(request.informalAddress());
             }
+            if (isAdmin && request.sponsorUserId() != null) {
+                if (!userRepository.existsById(request.sponsorUserId())) {
+                    throw new ResourceNotFoundException("User", request.sponsorUserId());
+                }
+                customer.setSponsorUserId(request.sponsorUserId());
+            }
             return toDto(customerRepository.save(customer));
         } catch (DataIntegrityViolationException e) {
             throw new CiliException("Kunde mit dieser E-Mail existiert bereits.", HttpStatus.CONFLICT);
         }
+    }
+
+    /**
+     * Löscht einen Customer samt seiner Mailflow-Historie (Instanzen + Steps) — nötig wegen des
+     * FK-Constraints auf mailflow_instances.customer_id, es gibt keine Kaskadierung auf DB-Ebene.
+     */
+    @Transactional
+    public void deleteCustomer(Long id, Long currentUserId, boolean isAdmin) {
+        Customer customer = findOrThrow(id);
+        checkOwnerOrAdmin(customer, currentUserId, isAdmin);
+
+        List<Long> instanceIds = mailflowInstanceRepository.findByCustomerId(id).stream()
+                .map(de.toengi.cili.model.entity.MailflowInstance::getId)
+                .toList();
+        for (Long instanceId : instanceIds) {
+            mailflowStepStatusRepository.deleteAll(mailflowStepStatusRepository.findByInstanceId(instanceId));
+        }
+        mailflowInstanceRepository.deleteAllById(instanceIds);
+
+        customerRepository.delete(customer);
+        log.info("Kunde gelöscht: id={} email={}", customer.getId(), customer.getEmail());
     }
 
     private Customer findOrThrow(Long id) {
@@ -135,8 +185,14 @@ public class CustomerService {
     }
 
     private CustomerDto toDto(Customer c) {
+        User sponsor = userRepository.findById(c.getSponsorUserId()).orElse(null);
+        return toDto(c, sponsor);
+    }
+
+    private CustomerDto toDto(Customer c, User sponsor) {
         return new CustomerDto(c.getId(), c.getName(), c.getFirstName(), c.getEmail(), c.getMobilePhone(),
                 c.getBirthDate(), c.getMemberId(), c.getGender(), c.getInformalAddress(), c.getSponsorUserId(),
+                sponsor != null ? sponsor.getUsername() : null,
                 c.isConsentGranted(), c.getConsentGrantedAt(), c.getConsentRevokedAt(), c.getCreatedAt());
     }
 }

@@ -20,3 +20,7 @@ export async function updateCustomer(id: number, req: UpdateCustomerRequest): Pr
   const {data} = await axiosClient.put<CustomerDto>(`/customers/${id}`, req);
   return data;
 }
+
+export async function deleteCustomer(id: number): Promise<void> {
+  await axiosClient.delete(`/customers/${id}`);
+}

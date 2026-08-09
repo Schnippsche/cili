@@ -13,4 +13,9 @@ public class MailConfig {
     private String from = "no-reply@cili.toengi.de";
     /** Schalter, um den tatsächlichen Versand zu deaktivieren (z.B. lokale Entwicklung ohne SMTP-Zugang). */
     private boolean enabled = true;
+    /**
+     * Verzeichnis für Mailflow-Attachments (z.B. neben der JAR) — bewusst außerhalb des Classpath,
+     * damit Dokumente ohne Neu-Deployment ausgetauscht werden können.
+     */
+    private String attachmentsDir;
 }

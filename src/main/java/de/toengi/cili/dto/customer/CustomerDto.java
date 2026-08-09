@@ -16,6 +16,7 @@ public record CustomerDto(
     Gender gender,
     Boolean informalAddress,
     Long sponsorUserId,
+    String sponsorUsername,
     boolean consentGranted,
     LocalDateTime consentGrantedAt,
     LocalDateTime consentRevokedAt,

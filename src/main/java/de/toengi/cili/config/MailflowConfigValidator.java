@@ -7,11 +7,15 @@ import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 @Component
 @RequiredArgsConstructor
 public class MailflowConfigValidator {
 
     private final MailflowConfig config;
+    private final MailConfig mailConfig;
     private final ResourceLoader resourceLoader;
 
     @PostConstruct
@@ -47,8 +51,11 @@ public class MailflowConfigValidator {
         }
 
         if (step.getAttachment() != null) {
-            String attachmentPath = "classpath:/mail-attachments/" + step.getAttachment();
-            Assert.isTrue(resourceLoader.getResource(attachmentPath).exists(),
+            Assert.hasText(mailConfig.getAttachmentsDir(),
+                    () -> ctx + " (" + step.getId() + "): Attachment referenziert, aber "
+                            + "cili.mail.attachments-dir ist nicht konfiguriert");
+            Path attachmentPath = Path.of(mailConfig.getAttachmentsDir()).resolve(step.getAttachment());
+            Assert.isTrue(Files.exists(attachmentPath),
                     () -> ctx + " (" + step.getId() + "): Attachment nicht gefunden: " + attachmentPath);
         }
     }

@@ -2,10 +2,14 @@ package de.toengi.cili.service;
 
 import de.toengi.cili.dto.customer.CreateCustomerRequest;
 import de.toengi.cili.dto.customer.CustomerDto;
+import de.toengi.cili.dto.customer.UpdateCustomerRequest;
 import de.toengi.cili.exception.CiliException;
 import de.toengi.cili.exception.ResourceNotFoundException;
 import de.toengi.cili.model.entity.Customer;
 import de.toengi.cili.repository.CustomerRepository;
+import de.toengi.cili.repository.MailflowInstanceRepository;
+import de.toengi.cili.repository.MailflowStepStatusRepository;
+import de.toengi.cili.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,20 +32,24 @@ import static org.mockito.Mockito.*;
 class CustomerServiceTest {
 
     @Mock private CustomerRepository customerRepository;
+    @Mock private MailflowInstanceRepository mailflowInstanceRepository;
+    @Mock private MailflowStepStatusRepository mailflowStepStatusRepository;
+    @Mock private UserRepository userRepository;
 
     private CustomerService customerService;
 
     @BeforeEach
     void setUp() {
-        customerService = new CustomerService(customerRepository);
+        customerService = new CustomerService(
+                customerRepository, mailflowInstanceRepository, mailflowStepStatusRepository, userRepository);
     }
 
     @Test
     void createCustomer_savesWithConsentGrantedImmediately() {
         when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        CustomerDto dto = customerService.createCustomer(10L,
-                new CreateCustomerRequest("Anna Beispiel", null, "anna@example.com", null, null, null, null, null));
+        CustomerDto dto = customerService.createCustomer(10L, false,
+                new CreateCustomerRequest("Anna Beispiel", null, "anna@example.com", null, null, null, null, null, null));
 
         ArgumentCaptor<Customer> captor = ArgumentCaptor.forClass(Customer.class);
         verify(customerRepository).save(captor.capture());
@@ -63,10 +71,45 @@ class CustomerServiceTest {
         when(customerRepository.save(any(Customer.class)))
                 .thenThrow(new DataIntegrityViolationException("duplicate"));
 
-        assertThatThrownBy(() -> customerService.createCustomer(10L,
-                new CreateCustomerRequest("Anna", null, "anna@example.com", null, null, null, null, null)))
+        assertThatThrownBy(() -> customerService.createCustomer(10L, false,
+                new CreateCustomerRequest("Anna", null, "anna@example.com", null, null, null, null, null, null)))
                 .isInstanceOf(CiliException.class)
                 .satisfies(e -> assertThat(((CiliException) e).getStatus()).isEqualTo(HttpStatus.CONFLICT));
+    }
+
+    @Test
+    void createCustomer_adminWithSponsorUserId_assignsToChosenUser() {
+        when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.existsById(42L)).thenReturn(true);
+
+        customerService.createCustomer(99L, true,
+                new CreateCustomerRequest("Anna", null, "anna@example.com", null, null, null, null, null, 42L));
+
+        ArgumentCaptor<Customer> captor = ArgumentCaptor.forClass(Customer.class);
+        verify(customerRepository).save(captor.capture());
+        assertThat(captor.getValue().getSponsorUserId()).isEqualTo(42L);
+    }
+
+    @Test
+    void createCustomer_adminWithUnknownSponsorUserId_throwsNotFound() {
+        when(userRepository.existsById(404L)).thenReturn(false);
+
+        assertThatThrownBy(() -> customerService.createCustomer(99L, true,
+                new CreateCustomerRequest("Anna", null, "anna@example.com", null, null, null, null, null, 404L)))
+                .isInstanceOf(ResourceNotFoundException.class);
+        verify(customerRepository, never()).save(any());
+    }
+
+    @Test
+    void createCustomer_nonAdminWithSponsorUserId_isIgnored() {
+        when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        customerService.createCustomer(10L, false,
+                new CreateCustomerRequest("Anna", null, "anna@example.com", null, null, null, null, null, 42L));
+
+        ArgumentCaptor<Customer> captor = ArgumentCaptor.forClass(Customer.class);
+        verify(customerRepository).save(captor.capture());
+        assertThat(captor.getValue().getSponsorUserId()).isEqualTo(10L);
     }
 
     @Test
@@ -153,6 +196,79 @@ class CustomerServiceTest {
 
         assertThatThrownBy(() -> customerService.verifyToken("unknown"))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void updateCustomer_adminWithSponsorUserId_reassignsSponsor() {
+        Customer c = customer(1L, 10L);
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(c));
+        when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.existsById(42L)).thenReturn(true);
+
+        customerService.updateCustomer(1L, 99L, true,
+                new UpdateCustomerRequest(null, null, null, null, null, null, null, null, 42L));
+
+        assertThat(c.getSponsorUserId()).isEqualTo(42L);
+    }
+
+    @Test
+    void updateCustomer_adminWithUnknownSponsorUserId_throwsNotFound() {
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer(1L, 10L)));
+        when(userRepository.existsById(404L)).thenReturn(false);
+
+        assertThatThrownBy(() -> customerService.updateCustomer(1L, 99L, true,
+                new UpdateCustomerRequest(null, null, null, null, null, null, null, null, 404L)))
+                .isInstanceOf(ResourceNotFoundException.class);
+        verify(customerRepository, never()).save(any());
+    }
+
+    @Test
+    void updateCustomer_nonAdminWithSponsorUserId_isIgnored() {
+        Customer c = customer(1L, 10L);
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(c));
+        when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        customerService.updateCustomer(1L, 10L, false,
+                new UpdateCustomerRequest(null, null, null, null, null, null, null, null, 42L));
+
+        assertThat(c.getSponsorUserId()).isEqualTo(10L);
+    }
+
+    @Test
+    void deleteCustomer_ownSponsor_deletesCascadingMailflowHistory() {
+        Customer c = customer(1L, 10L);
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(c));
+        var instance = de.toengi.cili.model.entity.MailflowInstance.builder().id(5L).customerId(1L).build();
+        when(mailflowInstanceRepository.findByCustomerId(1L)).thenReturn(List.of(instance));
+        var step = de.toengi.cili.model.entity.MailflowStepStatus.builder().id(50L).instanceId(5L).build();
+        when(mailflowStepStatusRepository.findByInstanceId(5L)).thenReturn(List.of(step));
+
+        customerService.deleteCustomer(1L, 10L, false);
+
+        verify(mailflowStepStatusRepository).deleteAll(List.of(step));
+        verify(mailflowInstanceRepository).deleteAllById(List.of(5L));
+        verify(customerRepository).delete(c);
+    }
+
+    @Test
+    void deleteCustomer_foreignSponsor_throwsForbidden() {
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer(1L, 10L)));
+
+        assertThatThrownBy(() -> customerService.deleteCustomer(1L, 20L, false))
+                .isInstanceOf(CiliException.class)
+                .satisfies(e -> assertThat(((CiliException) e).getStatus()).isEqualTo(HttpStatus.FORBIDDEN));
+        verify(customerRepository, never()).delete(any());
+    }
+
+    @Test
+    void deleteCustomer_admin_canDeleteForeignCustomer() {
+        Customer c = customer(1L, 10L);
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(c));
+        when(mailflowInstanceRepository.findByCustomerId(1L)).thenReturn(List.of());
+
+        customerService.deleteCustomer(1L, 99L, true);
+
+        verify(customerRepository).delete(c);
     }
 
     private Customer customer(Long id, Long sponsorUserId) {

@@ -1,5 +1,6 @@
 package de.toengi.cili.service;
 
+import de.toengi.cili.config.MailConfig;
 import de.toengi.cili.config.MailflowConfig;
 import de.toengi.cili.dto.mail.MailAttachment;
 import de.toengi.cili.dto.mail.MailMessageRequest;
@@ -15,15 +16,13 @@ import de.toengi.cili.repository.MailflowStepStatusRepository;
 import de.toengi.cili.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,6 +39,7 @@ public class MailflowStepProcessor {
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
     private final MailflowConfig config;
+    private final MailConfig mailConfig;
     private final MailService mailService;
     private final TransactionTemplate transactionTemplate;
 
@@ -52,6 +52,7 @@ public class MailflowStepProcessor {
                                   CustomerRepository customerRepository,
                                   UserRepository userRepository,
                                   MailflowConfig config,
+                                  MailConfig mailConfig,
                                   MailService mailService,
                                   PlatformTransactionManager transactionManager) {
         this.stepRepository = stepRepository;
@@ -59,6 +60,7 @@ public class MailflowStepProcessor {
         this.customerRepository = customerRepository;
         this.userRepository = userRepository;
         this.config = config;
+        this.mailConfig = mailConfig;
         this.mailService = mailService;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
@@ -152,13 +154,20 @@ public class MailflowStepProcessor {
     }
 
     private MailAttachment loadAttachment(String filename) {
-        Resource resource = new ClassPathResource("mail-attachments/" + filename);
-        try (InputStream in = resource.getInputStream()) {
-            byte[] content = StreamUtils.copyToByteArray(in);
+        if (mailConfig.getAttachmentsDir() == null || mailConfig.getAttachmentsDir().isBlank()) {
+            throw new IllegalStateException(
+                    "cili.mail.attachments-dir ist nicht konfiguriert, aber ein Step referenziert ein Attachment: "
+                            + filename);
+        }
+        // Bewusst außerhalb des Classpath (Dateisystem statt JAR-Inhalt): Dokumente sollen ohne
+        // Neu-Deployment austauschbar sein.
+        Path path = Path.of(mailConfig.getAttachmentsDir()).resolve(filename);
+        try {
+            byte[] content = Files.readAllBytes(path);
             String contentType = filename.endsWith(".pdf") ? "application/pdf" : "application/octet-stream";
             return new MailAttachment(filename, content, contentType);
         } catch (IOException e) {
-            throw new IllegalStateException("Attachment nicht lesbar: " + filename, e);
+            throw new IllegalStateException("Attachment nicht lesbar: " + path, e);
         }
     }
 

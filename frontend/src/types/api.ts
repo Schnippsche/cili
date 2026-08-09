@@ -547,6 +547,7 @@ export interface CustomerDto {
   gender: 'MAENNLICH' | 'WEIBLICH' | null;
   informalAddress: boolean | null;
   sponsorUserId: number;
+  sponsorUsername: string | null;
   consentGranted: boolean;
   consentGrantedAt: string;
   consentRevokedAt: string | null;
@@ -562,6 +563,8 @@ export interface CreateCustomerRequest {
   memberId?: number;
   gender?: 'MAENNLICH' | 'WEIBLICH';
   informalAddress?: boolean;
+  /** Nur von Admins nutzbar, um den Customer einem anderen User zuzuordnen. */
+  sponsorUserId?: number;
 }
 
 export interface UpdateCustomerRequest {
@@ -573,6 +576,8 @@ export interface UpdateCustomerRequest {
   memberId?: number;
   gender?: 'MAENNLICH' | 'WEIBLICH';
   informalAddress?: boolean;
+  /** Nur von Admins nutzbar, um den Customer einem anderen User zuzuordnen. */
+  sponsorUserId?: number;
 }
 
 export interface MailflowStepDto {
