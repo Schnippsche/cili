@@ -496,6 +496,9 @@ KONFIGURATION:
   ☐ application-prod.properties vorhanden
   ☐ logback-spring.xml vorhanden
   ☐ WAR-Datei deployed (/opt/cili/cili-app.war)
+  ☐ migration_gpu_metric_samples.sql vor dem Deployment auf der Produktions-DB eingespielt
+  ☐ nvidia-smi im PATH des Servers ODER cili.gpu-monitoring.nvidia-smi-path in
+    application-prod.properties/cili.env gesetzt (GPU-Monitoring-Feature)
 
 NGINX SETUP:
   ☐ Nginx läuft auf 192.168.178.110
