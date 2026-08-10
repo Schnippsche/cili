@@ -29,3 +29,5 @@ cili:
     base-path: /tmp/cili-test
   mail:
     enabled: false
+  gpu-monitoring:
+    enabled: false

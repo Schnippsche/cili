@@ -30,6 +30,7 @@ public class ProcessNvidiaSmiExecutor implements NvidiaSmiExecutor {
         try {
             ProcessBuilder pb = new ProcessBuilder(command);
             pb.redirectErrorStream(false);
+            pb.redirectError(ProcessBuilder.Redirect.DISCARD);
             Process process = pb.start();
 
             // Read stdout on a separate daemon thread so waitFor() timeout is not defeated by blocking read

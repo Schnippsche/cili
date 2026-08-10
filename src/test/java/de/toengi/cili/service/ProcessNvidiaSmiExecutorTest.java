@@ -14,15 +14,30 @@ import static org.mockito.Mockito.when;
 
 class ProcessNvidiaSmiExecutorTest {
 
+    private static final boolean IS_WINDOWS =
+        System.getProperty("os.name", "").toLowerCase().contains("win");
+
+    /**
+     * Builds an OS-appropriate shell command list so these tests behave the same way
+     * on the Linux deployment target as on a Windows dev machine.
+     */
+    private static List<String> shellCommand(String posixSnippet, String windowsSnippet) {
+        return IS_WINDOWS
+            ? List.of("cmd", "/c", windowsSnippet)
+            : List.of("sh", "-c", posixSnippet);
+    }
+
     @Test
     void execute_validCommandProducesOutput_returnsParsedLine() {
         GpuMonitoringConfig config = mock(GpuMonitoringConfig.class);
 
-        // Test executor that uses cmd.exe to echo a realistic CSV line
+        // Test executor that echoes a realistic CSV line via the platform shell
         ProcessNvidiaSmiExecutor executor = new ProcessNvidiaSmiExecutor(config) {
             @Override
             protected List<String> buildCommand() {
-                return List.of("cmd", "/c", "echo 62, 145.30, 8123, 24576, 34, 45, 1830, 9501");
+                return shellCommand(
+                    "echo '62, 145.30, 8123, 24576, 34, 45, 1830, 9501'",
+                    "echo 62, 145.30, 8123, 24576, 34, 45, 1830, 9501");
             }
         };
 
@@ -38,12 +53,11 @@ class ProcessNvidiaSmiExecutorTest {
     void execute_commandHangsWithoutOutput_timeoutAndReturnEmpty() {
         GpuMonitoringConfig config = mock(GpuMonitoringConfig.class);
 
-        // Test executor that uses cmd.exe with timeout to simulate a hanging process
-        // timeout /t 10 sleeps for 10 seconds without output, exceeding the 5s executor timeout
+        // Test executor that sleeps for 10 seconds without output, exceeding the 5s executor timeout
         ProcessNvidiaSmiExecutor executor = new ProcessNvidiaSmiExecutor(config) {
             @Override
             protected List<String> buildCommand() {
-                return List.of("cmd", "/c", "timeout /t 10 /nobreak");
+                return shellCommand("sleep 10", "timeout /t 10 /nobreak");
             }
         };
 
@@ -61,11 +75,11 @@ class ProcessNvidiaSmiExecutorTest {
     void execute_commandExitsWithNonZeroCode_returnsEmpty() {
         GpuMonitoringConfig config = mock(GpuMonitoringConfig.class);
 
-        // Test executor that uses cmd.exe with an exit code command
+        // Test executor that exits with a non-zero code via the platform shell
         ProcessNvidiaSmiExecutor executor = new ProcessNvidiaSmiExecutor(config) {
             @Override
             protected List<String> buildCommand() {
-                return List.of("cmd", "/c", "exit 1");
+                return shellCommand("exit 1", "exit 1");
             }
         };
 
@@ -78,11 +92,11 @@ class ProcessNvidiaSmiExecutorTest {
     void execute_commandProducesNoOutput_returnsEmpty() {
         GpuMonitoringConfig config = mock(GpuMonitoringConfig.class);
 
-        // Test executor that uses cmd.exe but produces no output
+        // Test executor that exits cleanly but produces no output
         ProcessNvidiaSmiExecutor executor = new ProcessNvidiaSmiExecutor(config) {
             @Override
             protected List<String> buildCommand() {
-                return List.of("cmd", "/c", "exit 0");
+                return shellCommand("exit 0", "exit 0");
             }
         };
 

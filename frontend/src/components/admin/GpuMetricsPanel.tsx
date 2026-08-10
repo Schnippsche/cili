@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Box, Card, CardContent, ToggleButton, ToggleButtonGroup, Typography} from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
@@ -10,8 +10,10 @@ const HOUR_OPTIONS = [1, 6, 24, 168] as const;
 type HourOption = typeof HOUR_OPTIONS[number];
 const HOUR_LABELS: Record<HourOption, string> = {1: '1h', 6: '6h', 24: '24h', 168: '7d'};
 
+const timeFormatter = new Intl.DateTimeFormat('de-DE', {hour: '2-digit', minute: '2-digit'});
+
 function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+  return timeFormatter.format(new Date(iso));
 }
 
 function MetricTile({label, value, unit}: Readonly<{ label: string; value: string; unit: string }>) {
@@ -43,7 +45,7 @@ export default function GpuMetricsPanel() {
     return () => clearInterval(id);
   }, [reload]);
 
-  const chartData = history.map(s => ({
+  const chartData = useMemo(() => history.map(s => ({
     time: formatTime(s.sampledAt),
     temperatureC: s.temperatureC,
     powerDrawW: s.powerDrawW,
@@ -51,26 +53,28 @@ export default function GpuMetricsPanel() {
     memoryTotalMb: s.memoryTotalMb,
     utilizationGpuPct: s.utilizationGpuPct,
     fanSpeedPct: s.fanSpeedPct,
-  }));
+  })), [history]);
+
+  const stale = !current || Date.now() - new Date(current.sampledAt).getTime() > 2 * POLL_INTERVAL_MS;
 
   return (
       <Box>
-        {!current && (
+        {stale && (
             <Typography color="text.secondary" sx={{mb: 2}}>
               Keine GPU-Daten verfügbar. Läuft nvidia-smi auf diesem Server und ist die Erfassung aktiviert
               (cili.gpu-monitoring.enabled)?
             </Typography>
         )}
         <Grid container spacing={2} sx={{mb: 3}}>
-          <MetricTile label="Temperatur" value={current ? String(current.temperatureC) : '–'} unit="°C"/>
-          <MetricTile label="Leistung" value={current ? current.powerDrawW.toFixed(1) : '–'} unit="W"/>
+          <MetricTile label="Temperatur" value={!stale ? String(current!.temperatureC) : '–'} unit="°C"/>
+          <MetricTile label="Leistung" value={!stale ? current!.powerDrawW.toFixed(1) : '–'} unit="W"/>
           <MetricTile label="VRAM"
-                      value={current ? `${current.memoryUsedMb} / ${current.memoryTotalMb}` : '–'} unit="MB"/>
-          <MetricTile label="Auslastung" value={current ? String(current.utilizationGpuPct) : '–'} unit="%"/>
-          <MetricTile label="Lüfter" value={current?.fanSpeedPct != null ? String(current.fanSpeedPct) : '–'}
+                      value={!stale ? `${current!.memoryUsedMb} / ${current!.memoryTotalMb}` : '–'} unit="MB"/>
+          <MetricTile label="Auslastung" value={!stale ? String(current!.utilizationGpuPct) : '–'} unit="%"/>
+          <MetricTile label="Lüfter" value={!stale && current!.fanSpeedPct != null ? String(current!.fanSpeedPct) : '–'}
                       unit="%"/>
           <MetricTile label="Takt (SM / Mem)"
-                      value={current ? `${current.clockSmMhz} / ${current.clockMemoryMhz}` : '–'} unit="MHz"/>
+                      value={!stale ? `${current!.clockSmMhz} / ${current!.clockMemoryMhz}` : '–'} unit="MHz"/>
         </Grid>
 
         <ToggleButtonGroup size="small" value={hours} exclusive
@@ -84,13 +88,13 @@ export default function GpuMetricsPanel() {
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3"/>
-            <XAxis dataKey="time"/>
+            <XAxis dataKey="time" interval="preserveStartEnd"/>
             <YAxis yAxisId="left" label={{value: '°C', angle: -90, position: 'insideLeft'}}/>
             <YAxis yAxisId="right" orientation="right" label={{value: 'W', angle: 90, position: 'insideRight'}}/>
             <Tooltip/>
             <Legend/>
-            <Line yAxisId="left" type="monotone" dataKey="temperatureC" name="Temperatur (°C)" stroke="#e57373" dot={false}/>
-            <Line yAxisId="right" type="monotone" dataKey="powerDrawW" name="Leistung (W)" stroke="#64b5f6" dot={false}/>
+            <Line yAxisId="left" type="monotone" dataKey="temperatureC" name="Temperatur (°C)" stroke="#e57373" dot={false} isAnimationActive={false}/>
+            <Line yAxisId="right" type="monotone" dataKey="powerDrawW" name="Leistung (W)" stroke="#64b5f6" dot={false} isAnimationActive={false}/>
           </LineChart>
         </ResponsiveContainer>
 
@@ -98,12 +102,12 @@ export default function GpuMetricsPanel() {
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3"/>
-            <XAxis dataKey="time"/>
+            <XAxis dataKey="time" interval="preserveStartEnd"/>
             <YAxis label={{value: 'MB', angle: -90, position: 'insideLeft'}}/>
             <Tooltip/>
             <Legend/>
-            <Line type="monotone" dataKey="memoryUsedMb" name="Belegt (MB)" stroke="#81c784" dot={false}/>
-            <Line type="monotone" dataKey="memoryTotalMb" name="Gesamt (MB)" stroke="#9e9e9e" strokeDasharray="4 4" dot={false}/>
+            <Line type="monotone" dataKey="memoryUsedMb" name="Belegt (MB)" stroke="#81c784" dot={false} isAnimationActive={false}/>
+            <Line type="monotone" dataKey="memoryTotalMb" name="Gesamt (MB)" stroke="#9e9e9e" strokeDasharray="4 4" dot={false} isAnimationActive={false}/>
           </LineChart>
         </ResponsiveContainer>
 
@@ -111,12 +115,12 @@ export default function GpuMetricsPanel() {
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3"/>
-            <XAxis dataKey="time"/>
+            <XAxis dataKey="time" interval="preserveStartEnd"/>
             <YAxis domain={[0, 100]} label={{value: '%', angle: -90, position: 'insideLeft'}}/>
             <Tooltip/>
             <Legend/>
-            <Line type="monotone" dataKey="utilizationGpuPct" name="Auslastung (%)" stroke="#ba68c8" dot={false}/>
-            <Line type="monotone" dataKey="fanSpeedPct" name="Lüfter (%)" stroke="#4db6ac" dot={false}/>
+            <Line type="monotone" dataKey="utilizationGpuPct" name="Auslastung (%)" stroke="#ba68c8" dot={false} isAnimationActive={false}/>
+            <Line type="monotone" dataKey="fanSpeedPct" name="Lüfter (%)" stroke="#4db6ac" dot={false} isAnimationActive={false}/>
           </LineChart>
         </ResponsiveContainer>
       </Box>
