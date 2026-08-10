@@ -478,6 +478,20 @@ export interface LogResponse {
   lastModified: string;
 }
 
+// ── GPU-Monitoring ───────────────────────────────────────────────────────
+export interface GpuMetricSampleDto {
+  id: number;
+  sampledAt: string;
+  temperatureC: number;
+  powerDrawW: number;
+  memoryUsedMb: number;
+  memoryTotalMb: number;
+  utilizationGpuPct: number;
+  fanSpeedPct: number | null;
+  clockSmMhz: number;
+  clockMemoryMhz: number;
+}
+
 // ── Collections / Sammlungen ─────────────────────────────────────────────
 export interface CollectionDto {
   id: number;
