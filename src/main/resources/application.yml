@@ -61,6 +61,12 @@ cili:
     #         subject: "Willkommen!"
     #         attachment: "welcome.pdf"    # optional, aus cili.mail.attachments-dir
 
+  gpu-monitoring:
+    enabled: true
+    nvidia-smi-path: nvidia-smi
+    sample-interval-ms: 30000
+    retention-days: 7
+
   share:
     token-validity-days: 90          # Gültigkeitsdauer für Freigabe-Links in Tagen
     base-url: "https://cili.toengi.de"
