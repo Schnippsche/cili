@@ -36,9 +36,6 @@ build/
 ### VS Code ###
 .vscode/
 
-### Frontend config (local overrides) ###
-frontend/vite.config.ts
-
 ### Git worktrees ###
 .worktrees/
 frontend/node_modules/
@@ -46,6 +43,8 @@ src/main/resources/static/assets/
 
 ### Build artifacts ###
 frontend/tsconfig.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
 
 ### Python ###
 __pycache__/
