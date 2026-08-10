@@ -62,6 +62,11 @@ public class ProcessNvidiaSmiExecutor implements NvidiaSmiExecutor {
                 return Optional.empty();
             }
 
+            // If reader thread is still alive after timeout, the pipe is likely stuck; treat as no usable output
+            if (readerThread.isAlive()) {
+                return Optional.empty();
+            }
+
             if (process.exitValue() != 0 || output.isEmpty()) {
                 return Optional.empty();
             }
