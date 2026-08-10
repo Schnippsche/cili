@@ -34,20 +34,32 @@ public class ProcessNvidiaSmiExecutor implements NvidiaSmiExecutor {
             ProcessBuilder pb = new ProcessBuilder(command);
             pb.redirectErrorStream(false);
             Process process = pb.start();
-            String firstLine;
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-                firstLine = reader.readLine();
-            }
+
+            // Read stdout on a separate daemon thread so waitFor() timeout is not defeated by blocking read
+            StringBuilder output = new StringBuilder();
+            Thread readerThread = new Thread(() -> {
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                    String line = reader.readLine();
+                    if (line != null) {
+                        output.append(line);
+                    }
+                } catch (IOException ignored) {
+                    // process was likely killed by the timeout branch below
+                }
+            });
+            readerThread.setDaemon(true);
+            readerThread.start();
+
             boolean finished = process.waitFor(5, TimeUnit.SECONDS);
             if (!finished) {
                 process.destroyForcibly();
                 return Optional.empty();
             }
-            if (process.exitValue() != 0 || firstLine == null || firstLine.isBlank()) {
+            if (process.exitValue() != 0 || output.isEmpty()) {
                 return Optional.empty();
             }
-            return Optional.of(firstLine.trim());
+            return Optional.of(output.toString().trim());
         } catch (IOException | InterruptedException e) {
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
