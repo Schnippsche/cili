@@ -21,6 +21,7 @@ import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import DriveFolderUploadOutlinedIcon from '@mui/icons-material/DriveFolderUploadOutlined';
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
 import ContactMailOutlinedIcon from '@mui/icons-material/ContactMailOutlined';
+import MemoryOutlinedIcon from '@mui/icons-material/MemoryOutlined';
 import {type ElementType} from 'react';
 import {NavLink} from 'react-router-dom';
 import {useSelector} from 'react-redux';
@@ -134,6 +135,13 @@ export default function Sidebar({open, isMobile, onClose}: Readonly<Props>) {
                                     to="/admin/logs" {...navClick}>
                       <ListItemIcon sx={{minWidth: 40}}><ArticleOutlinedIcon/></ListItemIcon>
                       {open && <ListItemText primary="Server-Log"/>}
+                    </ListItemButton>
+                  </Tooltip>
+                  <Tooltip title={open ? '' : 'GPU-Monitoring'} placement="right">
+                    <ListItemButton component={NavLink as ElementType}
+                                    to="/admin/gpu" {...navClick}>
+                      <ListItemIcon sx={{minWidth: 40}}><MemoryOutlinedIcon/></ListItemIcon>
+                      {open && <ListItemText primary="GPU-Monitoring"/>}
                     </ListItemButton>
                   </Tooltip>
                   <Tooltip title={open ? '' : 'Bulk-Ordner-Import'} placement="right">

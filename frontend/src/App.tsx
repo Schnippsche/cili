@@ -13,6 +13,7 @@ const UsersPage = lazy(() => import('./pages/admin/UsersPage'));
 const GroupsPage = lazy(() => import('./pages/admin/GroupsPage'));
 const JobsPage = lazy(() => import('./pages/admin/JobsPage'));
 const LogsPage = lazy(() => import('./pages/admin/LogsPage'));
+const GpuPage = lazy(() => import('./pages/admin/GpuPage'));
 const BulkImportPage = lazy(() => import('./pages/admin/BulkImportPage'));
 const TestimonialsPage = lazy(() => import('./pages/TestimonialsPage'));
 const TrashPage = lazy(() => import('./pages/TrashPage'));
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="/admin/groups" element={<AdminRoute><GroupsPage/></AdminRoute>}/>
           <Route path="/admin/jobs" element={<AdminRoute><JobsPage/></AdminRoute>}/>
           <Route path="/admin/logs" element={<AdminRoute><LogsPage/></AdminRoute>}/>
+          <Route path="/admin/gpu" element={<AdminRoute><GpuPage/></AdminRoute>}/>
           <Route path="/admin/bulk-import" element={<AdminRoute><BulkImportPage/></AdminRoute>}/>
           <Route path="/trash" element={<AdminRoute><TrashPage/></AdminRoute>}/>
           <Route path="/collections" element={<ProtectedRoute><CollectionsPage/></ProtectedRoute>}/>
