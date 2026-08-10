@@ -26,10 +26,7 @@ public class ProcessNvidiaSmiExecutor implements NvidiaSmiExecutor {
 
     @Override
     public Optional<String> execute() {
-        List<String> command = List.of(
-            config.getNvidiaSmiPath(),
-            "--query-gpu=" + String.join(",", QUERY_FIELDS),
-            "--format=csv,noheader,nounits");
+        List<String> command = buildCommand();
         try {
             ProcessBuilder pb = new ProcessBuilder(command);
             pb.redirectErrorStream(false);
@@ -56,6 +53,15 @@ public class ProcessNvidiaSmiExecutor implements NvidiaSmiExecutor {
                 process.destroyForcibly();
                 return Optional.empty();
             }
+
+            // Join reader thread to ensure output has been fully written before reading it
+            try {
+                readerThread.join(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return Optional.empty();
+            }
+
             if (process.exitValue() != 0 || output.isEmpty()) {
                 return Optional.empty();
             }
@@ -66,5 +72,15 @@ public class ProcessNvidiaSmiExecutor implements NvidiaSmiExecutor {
             }
             return Optional.empty();
         }
+    }
+
+    /**
+     * Builds the nvidia-smi command list. Protected to allow testing with different commands.
+     */
+    protected List<String> buildCommand() {
+        return List.of(
+            config.getNvidiaSmiPath(),
+            "--query-gpu=" + String.join(",", QUERY_FIELDS),
+            "--format=csv,noheader,nounits");
     }
 }
