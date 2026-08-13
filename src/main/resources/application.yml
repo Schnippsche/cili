@@ -29,7 +29,17 @@ spring:
 
 server:
   tomcat:
-    max-http-post-size: -1
+    max-http-form-post-size: -1
+    basedir: .   # sonst legt Tomcat eine temp-Catalina-Base an und relative accesslog-Pfade landen dort
+    accesslog:
+      enabled: true
+      directory: ${cili.logs.path:./logs}
+      prefix: access_log
+      suffix: .log
+      pattern: "%h %l %u %t \"%r\" %s %b %D \"%{Referer}i\" \"%{User-Agent}i\""
+      rotate: true
+      rename-on-rotate: true
+      request-attributes-enabled: false
 
 cili:
   version: '@project.version@'
@@ -77,6 +87,10 @@ cili:
 
   logs:
     path: ./logs
+    max-file-size: 50MB      # App-Log rotiert erst ab dieser Größe, nicht mehr täglich
+    max-index: 20            # Anzahl aufbewahrter cili.N.log.gz (=> mehrere Tage/Wochen je nach Volumen)
+    error-max-file-size: 50MB
+    error-max-index: 20
 
   jwt:
     access-token-expiry: 900000      # 15 minutes in ms
