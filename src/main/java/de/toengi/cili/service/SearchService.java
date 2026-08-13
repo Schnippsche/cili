@@ -78,7 +78,7 @@ public class SearchService {
         List<String> terms = parseTerms(q);
         Page<Resource> page = fetchPage(terms, folderId, folderFilter, pageable);
         Long userId = user != null ? user.getUserId() : null;
-        return buildResponse(page, terms, folderId, pageable, testimonialPage, userId);
+        return buildResponse(page, terms, folderId, pageable, testimonialPage, userId, isAdmin);
     }
 
     private boolean isAdmin(CiliUserDetails user) {
@@ -132,7 +132,7 @@ public class SearchService {
     }
 
     private SearchResponse buildResponse(Page<Resource> page, List<String> terms, Long folderId, Pageable pageable,
-                                          int testimonialPage, Long userId) {
+                                          int testimonialPage, Long userId, boolean isAdmin) {
         List<Long> ids = page.getContent().stream().map(Resource::getId).toList();
         Map<Long, ResourceMetadata> metaById = metadataRepository.findByResourceIdIn(ids)
                 .stream().collect(Collectors.toMap(ResourceMetadata::getResourceId, m -> m));
@@ -142,7 +142,7 @@ public class SearchService {
                 : extractSnippets(ids, terms.getFirst().toLowerCase());
         List<SearchHitDto> dtos = page.getContent().stream()
                 .map(r -> toDto(r, metaById.get(r.getId()), snippets.getOrDefault(r.getId(), List.of()),
-                        thumbStatusById.get(r.getId()), userId))
+                        thumbStatusById.get(r.getId()), userId, isAdmin))
                 .toList();
         Page<TestimonialSearchHitDto> testimonials = fetchTestimonialHits(terms, folderId, testimonialPage);
         return new SearchResponse(dtos, page.getTotalElements(), pageable.getPageNumber(), pageable.getPageSize(),
@@ -310,9 +310,9 @@ public class SearchService {
         return new PageImpl<>(dataQ.getResultList(), pageable, total);
     }
 
-    private SearchHitDto toDto(Resource resource, ResourceMetadata meta, List<SnippetDto> snippets, String thumbnailStatus, Long userId) {
-        boolean canShare = userId != null
-                && aclService.hasPermission(userId, resource.getId(), AclResourceType.RESOURCE, AclPermission.SHARE);
+    private SearchHitDto toDto(Resource resource, ResourceMetadata meta, List<SnippetDto> snippets, String thumbnailStatus, Long userId, boolean isAdmin) {
+        boolean canShare = isAdmin
+                || (userId != null && aclService.hasPermission(userId, resource.getId(), AclResourceType.RESOURCE, AclPermission.SHARE));
         return new SearchHitDto(
                 resource.getId(),
                 resource.getOriginalName(),
