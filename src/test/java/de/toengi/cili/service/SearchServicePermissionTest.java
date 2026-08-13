@@ -13,13 +13,16 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import de.toengi.cili.dto.search.SearchResponse;
+import de.toengi.cili.model.entity.Resource;
 import de.toengi.cili.model.enums.AclPermission;
 import de.toengi.cili.model.enums.AclResourceType;
+import de.toengi.cili.model.enums.StorageType;
 import de.toengi.cili.repository.ResourceMetadataRepository;
 import de.toengi.cili.repository.ResourceRepository;
 import de.toengi.cili.repository.SubtitleTrackRepository;
 import de.toengi.cili.repository.ThumbnailRepository;
 import de.toengi.cili.security.CiliUserDetails;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +33,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -120,5 +124,45 @@ class SearchServicePermissionTest {
     verify(resourceRepository).findAllInFolders(pageable);
     verify(aclService, never()).getAccessibleFolderIds(anyLong());
     verify(aclService, never()).hasPermission(anyLong(), anyLong(), any(), any());
+  }
+
+  @Test
+  void folderScopedSearch_setsCanShareTrueWhenUserHasShareRight() {
+    when(aclService.hasPermission(42L, 5L, AclResourceType.FOLDER, AclPermission.READ)).thenReturn(true);
+    Resource resource = Resource.builder()
+        .id(7L).folderId(5L).originalName("doc.pdf")
+        .storedName("uuid-7").mimeType("application/pdf")
+        .size(100L).uploaderId(1L).storageType(StorageType.LOCAL)
+        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
+        .build();
+    when(resourceRepository.searchByFolderAndNameOrMetadata(eq(5L), eq("+doc*"), eq(pageable)))
+        .thenReturn(new PageImpl<>(List.of(resource)));
+    when(metadataRepository.findByResourceIdIn(anyList())).thenReturn(List.of());
+    when(aclService.hasPermission(42L, 7L, AclResourceType.RESOURCE, AclPermission.SHARE)).thenReturn(true);
+
+    SearchResponse result = searchService.search("doc", 5L, null, pageable);
+
+    assertThat(result.hits()).hasSize(1);
+    assertThat(result.hits().get(0).canShare()).isTrue();
+  }
+
+  @Test
+  void folderScopedSearch_setsCanShareFalseWhenUserLacksShareRight() {
+    when(aclService.hasPermission(42L, 5L, AclResourceType.FOLDER, AclPermission.READ)).thenReturn(true);
+    Resource resource = Resource.builder()
+        .id(8L).folderId(5L).originalName("doc2.pdf")
+        .storedName("uuid-8").mimeType("application/pdf")
+        .size(100L).uploaderId(1L).storageType(StorageType.LOCAL)
+        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
+        .build();
+    when(resourceRepository.searchByFolderAndNameOrMetadata(eq(5L), eq("+doc*"), eq(pageable)))
+        .thenReturn(new PageImpl<>(List.of(resource)));
+    when(metadataRepository.findByResourceIdIn(anyList())).thenReturn(List.of());
+    when(aclService.hasPermission(42L, 8L, AclResourceType.RESOURCE, AclPermission.SHARE)).thenReturn(false);
+
+    SearchResponse result = searchService.search("doc", 5L, null, pageable);
+
+    assertThat(result.hits()).hasSize(1);
+    assertThat(result.hits().get(0).canShare()).isFalse();
   }
 }

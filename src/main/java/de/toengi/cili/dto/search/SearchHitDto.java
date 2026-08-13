@@ -15,5 +15,6 @@ public record SearchHitDto(
     float score,
     List<SnippetDto> snippets,
     String thumbnailStatus,
-    String storedName
+    String storedName,
+    boolean canShare
 ) {}
