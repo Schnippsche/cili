@@ -269,6 +269,8 @@ Bei Untertitel-Treffern wird der gefundene Textausschnitt angezeigt. Ein Klick �
 
 Neben jedem Treffer befindet sich ein **Lesezeichen-Symbol**, mit dem sich der Treffer direkt einer Sammlung hinzufügen lässt. Über das Symbol **Alle Treffer zur Sammlung hinzufügen** oberhalb der Trefferliste lässt sich das komplette Suchergebnis (Dateien und Erfahrungsberichte zusammen) auf einmal einer Sammlung hinzufügen (Details siehe [Suchtreffer zu einer Sammlung hinzufügen](#suchtreffer-zu-einer-sammlung-hinzufügen)).
 
+Zusätzlich steht bei jedem Treffer ein **Freigabe-Symbol** zur Verfügung, mit dem sich direkt aus der Trefferliste ein öffentlicher Link erzeugen lässt — ohne die Datei oder den Bericht erst einzeln zu öffnen. Bei Dateien erscheint das Symbol nur, wenn du das Freigabe-Recht für die jeweilige Datei besitzt (siehe [Kapitel 9](#9-freigabe-links)); bei Erfahrungsberichten ist es immer sichtbar, da deren Link ohnehin ohne besonderes Recht erzeugt werden kann (siehe [Öffentlichen Link zu einem Bericht teilen](#öffentlichen-link-zu-einem-bericht-teilen)).
+
 Liefert eine Suche mehr Treffer, als auf einer Seite Platz haben, erscheint darunter eine **Seitennavigation** — für Dateien und für Erfahrungsberichte jeweils getrennt, da beide Kategorien unabhängig voneinander blättern.
 
 ---
@@ -423,7 +425,7 @@ Alle Erfahrungsberichte — sowohl Mensch- als auch Tier-Berichte — sind unabh
 
 ### Öffentlichen Link zu einem Bericht teilen
 
-Jeder Erfahrungsbericht lässt sich zusätzlich auch einzeln über einen direkten Link teilen — unabhängig davon, ob er einer Sammlung angehört. Das ist praktisch, wenn du gezielt auf **einen bestimmten** Bericht statt auf die gesamte Übersicht verweisen möchtest.
+Jeder Erfahrungsbericht lässt sich zusätzlich auch einzeln über einen direkten Link teilen — unabhängig davon, ob er einer Sammlung angehört. Das ist praktisch, wenn du gezielt auf **einen bestimmten** Bericht statt auf die gesamte Übersicht verweisen möchtest. Diesen Link kannst du sowohl direkt beim Bericht als auch — ohne ihn vorher zu öffnen — über das Freigabe-Symbol bei einem Erfahrungsbericht-Treffer in der [globalen Suche](#61-globale-suche) erzeugen.
 
 1. Klicke in der Aktionsleiste des gewünschten Berichts auf **Öffentlichen Link generieren**
 2. Im sich öffnenden Dialog wird der fertige Link angezeigt
@@ -439,10 +441,18 @@ Mit Freigabe-Links können einzelne Dateien oder ganze Sammlungen mit Personen g
 
 ### Freigabe-Link für eine Datei erstellen
 
+**Über den Ordner:**
+
 1. Öffne einen Ordner und klicke das Menü der gewünschten Datei
 2. Wähle **Freigabe** (oder öffne das Freigabe-Panel)
 3. Klicke auf **Link generieren**
 4. Kopiere den Link über das Kopier-Symbol
+
+**Über die globale Suche:**
+
+1. Klicke bei einem Datei-Treffer auf das **Freigabe-Symbol** (nur sichtbar, wenn du das Freigabe-Recht für diese Datei besitzt)
+2. Klicke im sich öffnenden Dialog auf **Link generieren**
+3. Kopiere den Link über das Kopier-Symbol
 
 ### Freigabe-Link für eine Sammlung erstellen
 
