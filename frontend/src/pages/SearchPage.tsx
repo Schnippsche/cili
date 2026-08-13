@@ -24,6 +24,9 @@ import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
 import AudioFileOutlinedIcon from '@mui/icons-material/AudioFileOutlined';
+import ShareIcon from '@mui/icons-material/Share';
+import ShareLinkDialog from '../components/resource/ShareLinkDialog';
+import TestimonialShareDialog from '../components/testimonial/TestimonialShareDialog';
 import AppShell from '../components/layout/AppShell';
 import SearchBar from '../components/search/SearchBar';
 import AddToCollectionDialog from '../components/resource/AddToCollectionDialog';
@@ -101,6 +104,11 @@ export default function SearchPage() {
     type: 'resource' | 'testimonial'
   } | null>(null);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const [shareTarget, setShareTarget] = useState<{
+    id: number;
+    type: 'resource' | 'testimonial';
+    label: string;
+  } | null>(null);
 
   return (
       <AppShell>
@@ -145,18 +153,32 @@ export default function SearchPage() {
                           divider
                           disablePadding
                           secondaryAction={
-                            <Tooltip title="Zur Sammlung hinzufügen">
-                              <IconButton edge="end" size="small"
-                                          onClick={() => setCollectionTarget({
-                                            id: hit.resourceId,
-                                            type: 'resource'
-                                          })}>
-                                <BookmarkAddOutlinedIcon fontSize="small"/>
-                              </IconButton>
-                            </Tooltip>
+                            <Box sx={{display: 'flex', gap: 0.5}}>
+                              {hit.canShare && (
+                                  <Tooltip title="Freigabelink erzeugen">
+                                    <IconButton size="small" aria-label="Freigabelink erzeugen"
+                                                onClick={() => setShareTarget({
+                                                  id: hit.resourceId,
+                                                  type: 'resource',
+                                                  label: hit.name
+                                                })}>
+                                      <ShareIcon fontSize="small"/>
+                                    </IconButton>
+                                  </Tooltip>
+                              )}
+                              <Tooltip title="Zur Sammlung hinzufügen">
+                                <IconButton edge="end" size="small"
+                                            onClick={() => setCollectionTarget({
+                                              id: hit.resourceId,
+                                              type: 'resource'
+                                            })}>
+                                  <BookmarkAddOutlinedIcon fontSize="small"/>
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
                           }
                       >
-                        <ListItemButton sx={{pr: 6}} onClick={() => {
+                        <ListItemButton sx={{pr: hit.canShare ? 10 : 6}} onClick={() => {
                           const type = viewerType(hit.mimeType);
                           const firstSnippet = hit.snippets[0];
                           const qParam = query ? `&q=${encodeURIComponent(query)}` : '';
@@ -246,18 +268,30 @@ export default function SearchPage() {
                                 divider
                                 disablePadding
                                 secondaryAction={
-                                  <Tooltip title="Zur Sammlung hinzufügen">
-                                    <IconButton edge="end" size="small"
-                                                onClick={() => setCollectionTarget({
-                                                  id: t.id,
-                                                  type: 'testimonial'
-                                                })}>
-                                      <BookmarkAddOutlinedIcon fontSize="small"/>
-                                    </IconButton>
-                                  </Tooltip>
+                                  <Box sx={{display: 'flex', gap: 0.5}}>
+                                    <Tooltip title="Freigabelink erzeugen">
+                                      <IconButton size="small" aria-label="Freigabelink erzeugen"
+                                                  onClick={() => setShareTarget({
+                                                    id: t.id,
+                                                    type: 'testimonial',
+                                                    label: t.authorName
+                                                  })}>
+                                        <ShareIcon fontSize="small"/>
+                                      </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Zur Sammlung hinzufügen">
+                                      <IconButton edge="end" size="small"
+                                                  onClick={() => setCollectionTarget({
+                                                    id: t.id,
+                                                    type: 'testimonial'
+                                                  })}>
+                                        <BookmarkAddOutlinedIcon fontSize="small"/>
+                                      </IconButton>
+                                    </Tooltip>
+                                  </Box>
                                 }
                             >
-                              <ListItemButton sx={{pr: 6}}
+                              <ListItemButton sx={{pr: 10}}
                                               onClick={() => navigate(`/testimonials?id=${t.id}`)}>
                                 <ListItemText
                                     primary={
@@ -310,6 +344,20 @@ export default function SearchPage() {
                 itemId={collectionTarget.id}
                 itemType={collectionTarget.type}
                 onClose={() => setCollectionTarget(null)}
+            />
+        )}
+        {shareTarget?.type === 'resource' && (
+            <ShareLinkDialog
+                resourceId={shareTarget.id}
+                title={shareTarget.label}
+                onClose={() => setShareTarget(null)}
+            />
+        )}
+        {shareTarget?.type === 'testimonial' && (
+            <TestimonialShareDialog
+                testimonialId={shareTarget.id}
+                authorName={shareTarget.label}
+                onClose={() => setShareTarget(null)}
             />
         )}
         {bulkDialogOpen && results && (

@@ -290,6 +290,7 @@ export interface SearchHitDto {
   snippets: SnippetDto[];
   thumbnailStatus: string | null;
   storedName: string;
+  canShare: boolean;
 }
 
 export interface SearchResponse {
