@@ -39,8 +39,10 @@ class SearchIntegrationTest {
     @Autowired UploadJobRepository uploadJobRepository;
 
     private User adminUser;
+    private User regularUser;
     private Folder testFolder;
     private String adminToken;
+    private String userToken;
 
     @BeforeEach
     void setUp() {
@@ -65,6 +67,11 @@ class SearchIntegrationTest {
         testFolder = folderRepository.save(testFolder);
 
         adminToken = jwtTokenProvider.generateAccessToken(new CiliUserDetails(adminUser));
+
+        regularUser = userRepository.save(User.builder()
+                .username("user").email("user@test.com")
+                .passwordHash("$2a$12$x").role(UserRole.USER).build());
+        userToken = jwtTokenProvider.generateAccessToken(new CiliUserDetails(regularUser));
     }
 
     private Resource saveResource(String name, String mimeType) {
@@ -231,5 +238,50 @@ class SearchIntegrationTest {
                         .param("q", "lecture"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalHits").value(1));
+    }
+
+    @Test
+    void search_adminAlwaysSeesCanShareTrue() throws Exception {
+        saveResource("shareable.pdf", "application/pdf");
+
+        mockMvc.perform(get("/api/search")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .param("q", "shareable"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hits[0].canShare").value(true));
+    }
+
+    @Test
+    void search_regularUserWithoutShareRight_seesCanShareFalse() throws Exception {
+        aclEntryRepository.save(AclEntry.builder()
+                .subjectType(AclSubjectType.USER).subjectId(regularUser.getId())
+                .resourceType(AclResourceType.FOLDER).resourceId(testFolder.getId())
+                .permission(AclPermission.READ).grantType(AclGrantType.ALLOW).inheritable(true)
+                .build());
+        saveResource("secret.pdf", "application/pdf");
+
+        mockMvc.perform(get("/api/search")
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("q", "secret"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hits[0].canShare").value(false));
+    }
+
+    @Test
+    void search_regularUserWithShareRight_seesCanShareTrue() throws Exception {
+        for (AclPermission p : new AclPermission[]{AclPermission.READ, AclPermission.SHARE}) {
+            aclEntryRepository.save(AclEntry.builder()
+                    .subjectType(AclSubjectType.USER).subjectId(regularUser.getId())
+                    .resourceType(AclResourceType.FOLDER).resourceId(testFolder.getId())
+                    .permission(p).grantType(AclGrantType.ALLOW).inheritable(true)
+                    .build());
+        }
+        saveResource("shareable-doc.pdf", "application/pdf");
+
+        mockMvc.perform(get("/api/search")
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("q", "shareable-doc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hits[0].canShare").value(true));
     }
 }
