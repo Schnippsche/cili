@@ -28,6 +28,7 @@ spring:
         size: 4
 
 server:
+  forward-headers-strategy: native   # X-Forwarded-For/-Proto von NPM übernehmen (echte Client-IP im Access-Log statt Proxy-IP)
   tomcat:
     max-http-form-post-size: -1
     basedir: .   # sonst legt Tomcat eine temp-Catalina-Base an und relative accesslog-Pfade landen dort
