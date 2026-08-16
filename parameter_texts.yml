@@ -1,0 +1,2973 @@
+Absorptionsfunktion des Dünndarms:
+  default: 'Die maximale Kapazität für die Stoffaufnahme über das gastrointestinale System liegt meist
+    um etwa eine Zehnerpotenz über den durchschnittlich auftretenden Werten, zum Beispiel: Die Resorptionskapazität
+    für Wasser im…'
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Absorptionsfunktion des Magens:
+  default: Die Magendrüsen in der Magenschleimhaut sondern eine Art von farblosen und transparenten, sauren
+    Magensaft ab; die Magendrüse eines Erwachsenen kann 1,5-2,5 Liter Magensaft pro Tag abgeben.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Abweichender Koeffizient des Nucleus des Hypothalamus:
+  default: An der Regulation der Nahrungsaufnahme sind mehrere Kerne beteiligt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Abweichender Koeffizient des braunen Fettgewebes:
+  default: Braunes Fettgewebe hat eine thermogenetische Organfunktion bei Nahrungsaufnahme oder Stimulation
+    durch Kälte.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Abweichender Lipid-Metabolismus-Koeffizient:
+  default: Gestörter Lipidmetabolismus ist angeboren oder erworben.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Abweichender Triglycerid-Gehalt-Koeffizient:
+  default: Der tägliche Konsum von Kalorien über den Energiebedarf hinausgehend wird über die Leber und
+    die Muskeln in Form von Glykogen aufgenommen und beinahe vollständig in Fett umgewandelt und als Körperfett
+    gespeichert.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Aktivität der Augenzellen:
+  default: Die Zellaktivität ist der physiologische Status der Zelle in ihrer Funktion.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Alkalische Phosphatase (ALP):
+  default: Die Aktivität der knochenspezifischen Alkalischen Phosphatase (APKN) kann im Blut gemessen
+    werden.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Alkalische Phosphatase (APKN):
+  default: Die Aktivität der knochenspezifischen Alkalischen Phosphatase (APKN) kann im Blut gemessen
+    werden.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Alkohol-Allergie-Index:
+  default: Bei der Allergie gegen Alkohol kann es ich um eine Allergie gegen Acetaldehyd und gegen Essigsäure
+    handeln.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Aluminium:
+  default: Aluminium ist von der Menge das drittgrößte Element der Erdoberfläche.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Androgen:
+  default: Androgen wird auch Testosteron genannt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Angeborener Immunzellindex:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Angeborener immunmolekularer Index:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Angst:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Anregende Getränke:
+  default: Anregende Fertiggetränke wie z.B.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Antimon:
+  default: Antimon ist ein natürliches silbrig-weißes Metall.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Anzahl der Spermien:
+  default: Ehe das Sperma bei der Ejakulation abgegeben wird, reifen die Spermien in den Hoden des Mannes
+    heran.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Arachidonsäure:
+  default: Arachidonsäure ist eine wichtige Substanz im menschlichen Gehirn.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Arginin:
+  default: Arginin ist eine der wichtigsten Aminosäuren , vor allem für Kinder, bei denen sie sogar essentiell
+    und somit lebenswichtig ist.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Arsen:
+  default: Der Anteil von Arsen, der nicht über den Urin ausgeschieden wird, gelangt über den Speichel
+    in Magen und Darm und akkumuliert sich dann in Leber, Nieren, Milz, Muskeln, Haaren, Nägeln und anderswo.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Arterieller Sauerstoffgehalt PO2 (a):
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Arzneimittel-Allergie-Index:
+  default: Arzneimittelallergien sind anormale (entweder zu starke oder zu schwache) Antworten des Immunsystems.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Atemwegswiderstand RAW:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Atemzugvolumen(VT):
+  default: Der Tidalvolumenwert bezieht sich auf das Luftvolumen, das jedes Mal eingeatmet oder ausgeatmet
+    wird, wenn ruhig geatmet wird.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Aufklärung:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Augen:
+  default: 'Ein Mangel an Kollagen kann zu Symptomen führen wie: Trockene Augen, Müdigkeit, spontan tränende
+    Augen, Linsentrübung (Grauer Star, Katarakt) und anderen Augenerkrankungen führen.'
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Augenfalten:
+  default: Die wichtigsten chemischen Bestandteile der Kollagenfasern sind Kollagene, d.h.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Beschämt:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Bilirubin (DBIL):
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Biotin:
+  default: Es ist ein notwendiges Coenzym bei der Synthese von Vitamin C.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Blasen-Meridian:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Blei:
+  default: Man geht davon aus, dass der Bleigehalt im Blut nicht den Sicherheitsbereich von 10 bis 14
+    Mikrogramm / Liter übersteigen sollte.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Blut-Harnstoff-Stickstoff (BUN):
+  default: Harnstoff ist das Endprodukt des Eiweißstoffwechsels.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Blutversorgung des Hirngewebes:
+  default: Zerebrale Mikrozirkulation bezieht sich in der Regel auf die kleinen Blutgefäße einschließlich
+    der kleinen Arterien, Kapillaren und kleinen Venen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Blutviskosität:
+  default: Die Blutviskosität entspricht der Zähflüssigkeit des Bluts, die von Parametern wie der Blutzusammensetzung
+    und der Temperatur abhängt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Blutzucker-Koeffizient:
+  default: Blutzucker bezieht sich auf Glukose im Blut.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Bor:
+  default: Bor existiert in Obst und Gemüse und ist ein wichtiges Element um die Gesundheit der Knochen
+    und den Metabolismus von Kalzium, Phosphor und Magnesium zu erhalten.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Cephalin-Index:
+  default: Cerephalin ist ein ausgezeichneter natürlicher Wirkstoff mit einzigartiger biologischer Aktivität
+    und physiologischer Funktion.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Chemische Produkte:
+  default: Die Rohstoffe von chemischen Produkten sind Kohle, Öl, Gas und andere molekulare Verbindungen
+    oder Stickstoffverbindungen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Cholesterin:
+  default: Cholesterin ist ein wichtiger Bestandteil der Zellmembran und sorgt für deren Stabilität.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Chrom:
+  default: Chrom ist in der Natur hauptsächlich in der dreiwertigen Form von Chrom und Chrom VI vorhanden.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Coenzym Q10:
+  default: Coenzym Q10 ist ein fettlösliches Antioxidanz.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Darmbakterien-Koeffizient:
+  default: Veränderungen der Darmflora können in einer Unter- oder Überbesiedelung und in einer Veränderung
+    ihrer Zusammensetzung bestehen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Dichte der Knochenmineralien:
+  default: Die Dichte zeigt vor allem die Festigkeit der Knochen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Dickdarm-Absorption:
+  default: Die Dickdarm-Absorption hat die Aufgabe dem Darminhalt Wasser zu entziehen damit dieses dem
+    Körper nicht verloren geht.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Dickdarm-Meridian:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Dickdarm-Peristaltik:
+  default: Die Muskelkontraktionen in der Dickdarmwand vermischen den Stuhl und drücken ihn bis zum Enddarm
+    .
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Dreifach Erwärmer:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Drüsensekret-Index:
+  default: Bezieht sich hauptsächlich auf die männlichen Hoden und die Eierstöcke bei Frauen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Dunkle Augenringe:
+  default: Durch langes Wachbleiben, emotionale Instabilität, Müdigkeit der Augen, Alterung , verlangsamte
+    Blutflussgeschwindigkeit in den Venen, Sauerstoffmangel in den roten Blutkörperchen und Ansammlung
+    von metabolischen…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Durchfluss-System:
+  default: Der Kollagenmangel beeinträchtigt die Elastizität der Gefäßwand.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Dünndarm-Meridian:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Dünndarmperistaltik Funktion:
+  default: Im Dünndarm erfolgt die Aufnahme von Speisebrei und Verdauungssäften über die riesige Oberfläche
+    der Dünndarmschleimhaut.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Eisen:
+  default: Für die meisten Lebewesen ist Eisen essentiell wichtig.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Elastizität der Haut:
+  default: Starke UV-Strahlung verursacht Hautkeratose und führt dazu, dass die Haut an Elastizität verliert,
+    wodurch eine vorzeitige Alterung auftritt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Elastizität der Kranzgefäße:
+  default: Die häufigste Ursache für die koronare Herzerkrankung in Industrieländern ist die Atherosklerose
+    (sog.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Elastizität der zerebralen Gefäße:
+  default: Wenn die Arterie des Gehirns oder die Halsschlagader die zum Hirn führt beschädigt ist, führt
+    dies zu einer intrakraniellen Durchblutung und Schädigung vom Hirngewebe.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Elektromagnetische Strahlung:
+  default: 1. Die interaktiven Veränderungen der elektrischen und magnetischen Felder erzeugen elektromagnetische
+    Wellen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Endokrines System:
+  default: Mangel an Kollagen kann bei der Frau zu Amenorrhoe (Ausbleiben der Regelblutung), Menstruationsbeschwerden,
+    der frühe Beginn der Wechseljahre, Dysplasie, Hängebusen, Brust-Hyperplasie und erhöhtem Brustkrebsrisiko…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Entgiftung und Stoffwechsel:
+  default: Ein Mangel an Kollagen bewirkt die Anhäufung von Toxinen im Körper, raue Haut, Verstopfung,
+    Übergewicht, eine Vielzahl von viszeralen Rezessionen, Stoffwechselstörungen von Niere und Milz, Anfälligkeit
+    für Nephritis,…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Entgiftungsfunktion:
+  default: Unnütze oder schädliche Stoffe werden unschädlich gemacht.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Ephiphysenfugen:
+  default: Die Epiphysenfuge oder Wachstumsfuge ist eine schmale knorpelhaltige Schicht zwischen dem Schaft
+    (Diaphyse) eines Röhrenknochens und seinem gelenkzugewandten Abschluss (Epiphyse).
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Epiphysen-Sekretions-Index:
+  default: Die Epiphyse auch bekannt als Zirbeldrüse, lat.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Erektions-Transmitter:
+  default: Die Erektion ist das Resultat aus einem komplexen Zusammenspiel von nervalen, psychischen,
+    hormonellen und vaskulären (die Gefäße betreffenden) Faktoren.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Essentieller Fettsäureindex:
+  default: Essentielle Fettsäuren sind mehrfach ungesättigte Fettsäuren, die für die Lebensaktivitäten
+    des Körpers essentiell sind, aber der Körper kann nicht selbst synthetisieren und muss über die Nahrung
+    zugeführt werden.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Fettstoffwechsel:
+  default: Der Kollagenmangel verlangsamt den Stoffwechsel, führt zu Fettansammlung, Ermüdungserscheinungen,
+    Anfälligkeit für Diabetes, hohem Blutdruck und kann auch zu Leber- und Nierenversagen führen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Feuchtigkeitsgehalt:
+  default: Trockene Haut ist ein wichtiges Thema bei Frauen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Feuchtigkeitsverlust:
+  default: Normale Haut braucht nur 10% -30% an Feuchtigkeit um die Elastizität, die Pflege und die Weichheit
+    der Haut aufrecht erhalten zu können.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Fluor:
+  default: Spielt eine wichtige Rolle für die Zähne.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Follikelstimulierendes Hormon(FSH):
+  default: Follikelstimulierendes Hormon (FSH), auch als follikelstimulierendes Hormon bekannt, wird von
+    der Hypophyse ausgeschieden.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Folsäure:
+  default: Folsäure ist ein notwendiger Bestandteil für die Verwertung von Zucker und Aminosäuren.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Freie Radikale:
+  default: Freie Radikale sind auch als Quelle aller Krankheiten bekannt und die Hauptursache für das
+    Altern und die Krankheiten des Menschen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Freies Thyroxin (Ft4):
+  default: Thyroxin ist ein Schilddrüsenhormon das verantwortlich ist zur Stimmulation verschiedener Stoffwechselvorgänge.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Freies Trijodthyronin (Ft3):
+  default: Trijodthyronin ist ein Schilddrüsenhormon das verantwortlich ist zur Stimmulation verschiedener
+    Stoffwechselvorgänge.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Freude:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Frieden:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Funktion der Hirnnerven:
+  default: Das Hirnnervensystem kann in drei Teile je nach Funktionen unterteilt werden.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Funktionale Restkapazität(FRC):
+  default: Das Luftvolumen, das nach einem ruhigen Ausatmen in der Lunge verbleibt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gallenblasen-Meridian:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gallensaftsekretion:
+  default: Die Leber ist die größte menschliche Verdauungsdrüse und produziert ca.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gedächtnis Index(ZS):
+  default: Er spiegelt die Stärke des menschlichen Gedächtnisses wieder.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gefäßelastizität TVR:
+  default: Mit dem Begriff wird beschrieben, dass die Schlagadern und die Venen eine Wandspannung besitzen,
+    die dem Blutauswurf des Herzens einen gewissen variablen Widerstand entgegensetzen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gefäßwiderstand TPR:
+  default: Als Gefäß- oder Kreislaufwiderstand bezeichnet man den Strömungswiderstand, den ein Gefäß dem
+    Herzen entgegensetzt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Geisteskraft:
+  default: Die Anomalie zeigt sich in schwächerer Hirnfunktion, Depression, Schlaflosigkeit, Verschlechterung
+    von Denkleistung und Gedächtnisschwäche.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gesamt- Gallensäure (TBA):
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gesamt-Bilirubin (TBIL):
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gesamtcholesterin (TC):
+  default: Cholesterin ist eine fettähnliche Substanz, die mit der Nahrung aufgenommen, aber auch überall
+    im Körper (vor allem in der Leber) gebildet wird.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gesättigter Fettsäureindex:
+  default: Und Fettsäuren sind Fettsäuren mit gesättigten Bindungen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Glucagon:
+  default: Es ist ein Hormon der Bauchspeicheldrüse, das in den Alpha-Zellen der Langerhans-Inseln gebildet
+    wird.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Glutathion:
+  default: Glutathion besteht aus drei Aminosäure-Peptiden und ist in fast jeder Zelle des Körpers vorhanden.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gonadotropin:
+  default: Die Aufgabe des Gonadotropin ist es in erster Linie die Geschlechtsorgane wie Hoden und Eierstöcke
+    zu fördern.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gouverneurs-Meridian:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Grad der Halswirbelsäulen-Verkalkung:
+  default: Manche Krankheiten schreiten voran ohne unbedingt Beschwerden zu verursachen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Grad der Knochen-Hyperplasie:
+  default: Dies bezeichnet den Zustand der Knochen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Grad der Lendenwirbelsäulen-Verkalkung:
+  default: Manche Krankheiten schreiten voran ohne unbedingt Beschwerden zu verursachen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Grad der Osteoporose:
+  default: Dies ist ein Phänomen der Reduktion von Knochensubstanz im ganzen Körper.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Grad der Prostata-Hyperplasie:
+  default: Die Prostatahyperplasie ist auch als Prostatahypertrophie bekannt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Grad der Prostata-Verkalkung:
+  default: Fibrose ist eine Folge der Prostata-Entzündung und eine Vorstufe von Prostatasteinen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Gürtelgefäß:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Haare und Haut:
+  default: Der Mangel an Kollagen führt zu trockenem, brüchigem Haar, Haarausfall (bis hin zur Glatze),
+    Bifurkation, erhöhter Schuppenbildung.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Haarfärbemittel-Allergie-Index:
+  default: Bedingt durch Haarfärbemittel und Kosmetika werden Allergien hervorgerufen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Harnsäure:
+  default: Im Organismus des Menschen, entsteht Harnsäure als Abbauprodukt der Purinbasen und ist damit
+    das Endprodukt des Purinstoffwechsels.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Hausstaub-Allergie-Index:
+  default: Das Einatmen von Staub kann eine allergische Reaktion hervorrufen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Hautfettgehalt:
+  default: Fettige Haut entsteht, wenn die Talgdrüsen der Haut zu viel Talg produzieren.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Hautimmunitäts-Index:
+  default: Das Immunsystem des ganzen Körpers sollte zuerst stablisiert werden, um die Hautimmunität zu
+    verbessern und einen Befall durch Mikroorganismen wie Viren, Bakterien, Pilze und dergleichen zu verhindern
+    und Probleme mit…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Hautmelanin Index:
+  default: Melanin ist in der menschlichen Haut weit verbreitet.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Heilungszustand der kurzen Knochen sowie Knorpel:
+  default: Sie sind wie Säulen oder Quader geformt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Heilungszustand der langen Knochen:
+  default: Die langen Knochen sind hauptsächlich in den Gliedern vorhanden, sie ähneln einer länglichen
+    Röhre.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Herz peripherer Widerstand (TPR):
+  default: Der (totale) periphere Widerstand (englisch total peripheral resistance, TPR) ist eine Grösse
+    aus der Physiologie des Herzkreislaufsystems.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Herz-Meridian:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Histidin:
+  default: Hierbei handelt es sich um eine der medizinisch noch weniger bekannte Aminosäure, die derzeit
+    noch weiter untersucht wird.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Homocystein:
+  default: Homocystein ist eine Aminosäure, die im Kohlenstoffwechsel des Menschen als Abbauprodukt entsteht.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Hornhautbildung:
+  default: Die Haut wird in Epidermis, Dermis und das subkutane Gewebe unterteilt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Humoraler Immunitätsindex:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Hyperinsulinämie-Koeffizient:
+  default: Adipositas tritt meist zusammen mit Hyperinsulinämie auf, wobei man nicht davon ausgeht, dass
+    Hyperinsulinämie durch Fettleibigkeit ausgelöst wird.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Hyperlipoproteinämie (HLP):
+  default: Bei der Abweichung der Blutfette wird zwischen primärer Abweichung und sekundärer Abweichung
+    unterschieden.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Hyperostose:
+  default: Als Hyperostose bezeichnet man eine krankhafte Vermehrung der Knochensubstanz, die sowohl nach
+    innen (endostale Hyperostose) als auch nach außen (Exostose, kortikale Hyperostose) gerichtet sein
+    kann.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Hypophysen-Sekretions-Index:
+  default: Die Hypophyse ist eine kirschgroße Drüse im Gehirn.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Hypoxie:
+  default: Die Anomalie zeigt sich als Sauerstoffmangel im arteriellen Blut.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Hämatokrit:
+  default: Der Hämatokritwert ist ein Maß dafür, wie viele rote Blutkörperchen im Blut sind.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Immunfunktion der Atemwege:
+  default: Die Atemwege sind die wichtigste Verbindung mit der Außenwelt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Immunfunktion der Schleimhaut:
+  default: Das Immunsystem der Schleimhaut ist relativ unabhängig vom systemischen Immunsystem und trotzdem
+    untrennbar mit ihm verbunden.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Immunfunktion der Tonsillen:
+  default: Die Tonsillen sind das größte Lymphgewebe im pharyngalen Bereich.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Immunfunktion des Magen-Darm-Trakts:
+  default: Die Magen-Darm-Immunität umfasst den kompletten Verdauungstrakt vom Mund bis zum Enddarm, alle
+    abbauenden Enzyme, Galle, Leber sowie Magen und Darm-Peristaltik und deren natürliche Flora.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Immunglobulin-Index:
+  default: Immunglobulin ist ein Protein mit Antikörperwirkung.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Immunindex der Gewebebarriere:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Immunsystem:
+  default: Eine verlangsamte Lymph-Zirkulation führt zu verminderter Immunität.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Infarkt-Index:
+  default: Ein Herzinfarkt äussert sich in starken Brustschmerzen und Begleitbeschwerden wie Atemnot,
+    Schweissausbruch, Todesangst und Bewusstlosigkeit.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Initiative:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Injektions-Allergie-Index:
+  default: 'Am häufigisten werden Allergien von folgenden Injektionen verursacht: Penicillin, Streptomycin
+    und andere heterogene Seren.'
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Inspirationsvolumen(TI):
+  default: Es bezieht sich auf die maximale Luftmenge, die nach einem ruhigen Ausatmen eingeatmet werden
+    kann.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Insulin:
+  default: Insulin ist ein Protein mit einem niedrigen Molekulargewicht.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Insulinsekretion:
+  default: Insulin ist eine Art von Proteinhormon.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Intraluminal-Druck:
+  default: 1) Fermentation von der Nahrung wird unter normalen Umständen durch eine große Anzahl von Bakterien
+    im unteren Ileum und Darm durchgeführt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Isoleucin:
+  default: Isoleucin ist für den Muskelaufbau sehr wichtig.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Jod:
+  default: Als Bestandteil des Schilddrüsenhormons befinden sich etwa zwei Drittel des Jods in der Schilddrüse.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Kadmium:
+  default: Kadmium führt zu einer Reizung der Atemwege.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Kalium:
+  default: Kalium ist unverzcihtbar für das osmotische Gleichgewicht, die Übertragung von Nervenimpulsen,
+    die Aktivierung von Enzymen sowie der Muskelkontraktion und dem Aufbau von Eiweiß und Glykogen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Kalt:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Kalzium:
+  default: Calzium ist der Mineralstoff, der im menschlichen Körper am meisten vorhanden ist.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Kalzium-Verlust:
+  default: Eingehende Studien über die Pathogenese von Osteoporose haben gezeigt, dass die Ergänzung von
+    Kalzium und Vitamin D, sowie die Wirkung von Hormonen und anderen nicht-mechanischen Faktoren, nicht
+    alleinentscheidend für…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Knochenmark-Index:
+  default: Menschliches hämatopoetisches Knochenmark befindet sich innerhalb der Knochen des Körpers.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Kobalt:
+  default: Kobalt ist ein Mineralstoff, der ein Teil des Vitamins B12 ist und eine Rolle bei der Bildung
+    der roten Blutkörperchen spielt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Kohlenhydratstoffwechsel:
+  default: Kohlenhydrate werden im Darm zu Glucose zerlegt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Kollagen-Index:
+  default: Kollagen ist ein biologisches, hochpolymeres Material.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Konorarperfusion:
+  default: Die Konorarperfusion oder Durchblutung der Koronararterien und somit die O2-Versorgung des
+    Myokards hängt von verschiedenen, im folgenden genauer betrachteten Faktoren ab.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Kupfer:
+  default: Das Mikroelement Kupfer ist unerlässlich, um das Eisen im Körper in Hämoglobin umzuwandeln.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Lack-Allergie-Index:
+  default: Farbe und andere chemischen Produkte verursachen leicht Allergien.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Leber-Meridian:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Leberfettgehalt:
+  default: Normalerweise liegt der Fettanteil der Leber unter 5 Prozent.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Lecithin-Index:
+  default: Lecithin, auch bekannt als Lecithin, ist neben Protein und Vitaminen als dritter Nährstoff
+    bekannt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Lenker-Gefäß:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Leucin:
+  default: Diese Aminosäure ist für den Aufbau und den Erhalt von Muskeln unverzichtbar.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Liebe:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Linksventrikuläre Auswurffraktion:
+  default: bezieht sich auf die Indikatoren des Widerstand-Zustandes des linksventrikulären Ablaufkanals.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Linksventrikuläre effektive Pumpleistung:
+  default: bezieht sich auf die Kontraktionsstärke des effektiven Blutstroms des linken Ventrikels.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Linolsäure:
+  default: Linolsäure ist eine essentielle Fettsäure.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Lipoprotein mit hoher Dichte (HDL-C):
+  default: HDL übernimmt eine zentrale Rolle im Rahmen des Cholesterinstoffwechsels im menschlichen Körper.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Lipoprotein mit niedriger Dichte (LDL-C):
+  default: LDL transportiert vom Körper selbst gebildetes Cholesterin von der Leber zu den Geweben und
+    zirkuliert im Blut für circa fünf Tage.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Liposomenindex:
+  default: Liposomen sind Liposomen aus Lecithin und Ceramid.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Lungen-Meridian:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Luteinisierendes Hormon(LH):
+  default: Luteinisierendes Hormon (LH) ist ein Glykoprotein-Gonadotropin, das von Hypophysenzellen ausgeschieden
+    wird und die Umwandlung von Cholesterin in Sexualhormone in Gonadenzellen fördern kann.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Lymphblockade:
+  default: Eine Lymphblockade der Augen kann durch viele Ursachen entstehen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Lymphknoten-Index:
+  default: Wenn z.B. Bakterien über eine Wunde in unseren Körper eindringen, produzieren die Lymphozyten
+    Antikörper und Lymphokine um die Bakterien effektiv zu töten.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Lysin:
+  default: Lysin dient im Körper als Basis für die Synthese von Carnitin und verstärkt die Wirkung von
+    Arginin.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Magen-Meridian:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Magenperistalktik Koeffizient:
+  default: Die Magenperistalktik sind knetende und rollende Bewegungen der Magenmuskulatur.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Magnesium:
+  default: Es ist für den Stoffwechsel anderer Vitalstoffe wichtig.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Mangan:
+  default: Als wichtiger Faktor für die Bildung von Thyroxin, einem Haupthormon der Schilddrüse und für
+    die Verwertung von Nahrungsmitteln, spielt Mangan auch eine Rolle bei der Fortpflanzung und in der
+    normalen Funktion unseres…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Meeresfrüchte-Allergie-Index:
+  default: Meeresfrüchte- Allergien sind Allergien auf Schalentiere und Krustentiere.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Metallschmuck-Allergie-Index:
+  default: Metallschmuck wird meistens mit einer bestimmten Menge an Nickel, Kupfer, Chrom und anderen
+    allergenen Metallen versetzt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Methionin:
+  default: Diese Aminosäure ist für die Leber äußerst wichtig.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Milch-Allergie-Index:
+  default: Milch-Allergie ist eine allergische Reaktion auf Milcheiweiß, die zu Ekzemen, Erbrechen, Durchfall
+    oder Bauchschmerzen und weiteren Symptomen führen kann.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Milz-Index:
+  default: Die Milz ist ein in den Blutkreislauf eingeschaltetes Organ des lymphatischen Systems und liegt
+    in der Bauchhöhle nahe dem Magen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Milz-Pankreas-Meridian:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Molybdän:
+  default: Molybdän ist ein Spurenelement, das beim Stoffwechsel von Fetten und Kohlenhydraten hilfreich
+    wirkt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Motorisches System:
+  default: Gelenkschmerzen, Sensibilisierung gegenüber Rheuma, Beeinträchtigung der Knochen- und Gelenk-Flexibilität,
+    Gelenksteife, Knochenhyperplasie, meridiane Verstopfung, schlechter Stoffwechsel, Fettansammlung,
+    generalisierte…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Muskelgewebe:
+  default: Ein Kollagenmangel erhöht den Fettanteil, kann zur Verhärtung der Halsmuskulatur, zervikaler
+    Spondylose, Rückenschmerzen, Schulterkribbeln, konnektiver Muskelblockierung, Milchsäure- Akkumulation
+    im Nervensystem,…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Mut:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Myokardperfusion:
+  default: Die Blutversorgung des Herzmuskels erfolgt über die Herzkranzgefäße (Koronararterien), die
+    aus der Hauptschlagader (Aorta) abgehen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Nebennieren-Index:
+  default: Das Nebennierenmark ist ein Teil der lebenswichtigen hormonproduzierenden Nebennieren, die
+    sich im Bauchraum direkt oben auf den.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Nervensystem:
+  default: Der Mangel an Kollagen kann leicht zum Verfall des Uterus, Inkontinenz, Eierstock-Atrophie,
+    zu vaginaler Trockenheit, geringer Immunität, männlicher Impotenz, Erschlaffung des Bindegewebes am
+    Bauch, zum Phänomen der…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Nickel:
+  default: Nickel ist ein lebenswichtiges Element.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Nicotinamid:
+  default: Nicotinamid ist ein essentielles Koenzym und spielt eine Rolle bei der biologischen Oxidation
+    von Wasserstoff-Transfer.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Nieren-Meridian:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Osteokalzin:
+  default: Dieses Vitamin-K-abhängige Protein bindet Kalzium, wird von reifen Osteoblasten gebildet und
+    in die Knochenmatrix eingelagert.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Osteoklasten:
+  default: Die Osteoklasten stammen von den gleichen Vorläuferzellen wie die Monozyten ab.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+PH:
+  default: Ist der pH-Wert höher als der Normbereich wird Basizität (Alkalität) gefördert und der Körper
+    kann schmerzen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Pankreatisches Polypeptit (PP):
+  default: Es wird in den PP-Zellen der Langerhans´schen-Inseln der Bauchspeicheldrüse gebildet.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Pantothensäure:
+  default: Sie ist an der Herstellung von Energie im Körper beteiligt und kann den Fettstoffwechsel kontrollieren.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Parathormon-Sekretions-Index:
+  default: Das Parathormon, auch Parathyrin (PTH), ist ein Peptidhormon, bestehend aus 84 Aminosäuren,
+    welches in den Nebenschilddrüsen (Epithelkörperchen) gebildet wird.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Pepsinsekretions Koeffizient:
+  default: Pepsin gehört zu den wichtigen proteolytischen Enzymen im Verdauungssystem.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Perikard:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Phenylalanin:
+  default: Der Organismus benötigt Phenylalanin zur Bildung von Proteinen wie Insulin, Melatonin oder
+    Papain.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Phospholipid Index:
+  default: Phospholipide sind Lipidverbindungen, die Phospholipidwurzeln enthalten und die Grundsubstanz
+    des Lebens sind.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Phosphor:
+  default: Er kommt in jeder Körperzelle vor und ist ein Baustein der menschlichen Erbsubstanz.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Pollen-Allergie-Index:
+  default: Der Durchmesser von Pollen liegt im allgemeinen bei etwa 30 bis 50 Mycrometer.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Progesteron(P):
+  default: Normale Männer haben eine geringe Menge Progesteron (Progesteron), und diese Östrogene und
+    Progesterone sind unverzichtbar.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Prolactin(PRL):
+  default: Prolaktin ist ein Polypeptidhormon, auch Prolaktin (PRL) genannt, eines der Hormone, die von
+    der Hypophyse ausgeschüttet werden.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Prostatitis:
+  default: Die Prostatitis ist eine häufige Erkrankung bei erwachsenen Männern, die 25% bis 30% aller
+    urologischen Krankheiten bei Männern ausmacht.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Protein-Stoffwechsel:
+  default: Proteine aus der Nahrung oder geschädigte Proteine werden in Darm und Leber abgebaut und zu
+    körpereigenen Proteinen umgebaut.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Proteinurie:
+  default: Von einer Proteinurie spricht man, wenn Eiweiß (Protein) im Urin nachgewiesen wird.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Pulswelle K:
+  default: Das Herz wirft nicht kontinuierlich Blut in die Aorta aus, sondern in rhythmischen Abständen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Quecksilber:
+  default: Quecksilber wird kontinuierlich in winzigen Mengen z.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Rauch-Allergie-Index:
+  default: Beinhaltet allergische Reaktionen auf das Einatmen von Rauch.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Reaktionsfähigkeit:
+  default: Im Normbereich wird die Funktion der Nebennieren durch gute Stimmung und Willenskraft ausgedrückt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Reproduktiv-System:
+  default: Der Mangel an Kollagen kann leicht zum Vorfall des Uterus, Inkontinenz, Eierstock-Atrophie,
+    zu vaginaler Trockenheit, geringer Immunität, männlicher Impotenz, Erschlaffung des Bindegewebes am
+    Bauch, Dehnungsstreifen,…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Restluftvolumen(RV):
+  default: Bezieht sich auf das Restgas in der Lunge nach dem maximalen Ausatmen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Rheuma-Koeffizient:
+  default: Rheuma wird unterteilt in Haupt- und Untergruppen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Rote Blutflecken:
+  default: Teleangiektasien sind gut erkennbare erweiterte Kapillargefässe der Hautoberfläche.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Ruhe:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Rückstände von Pestiziden:
+  default: Pestizide, toxische Metaboliten (Stoffwechselzwischenprodukte), Abbau-Produkte und Verunreinigungen
+    werden als Pestizidrückstände bezeichnet.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Samenvolumen:
+  default: Niedrige Samen Volumen eine gemeinsame sexuelle Beschwerde für Männer.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Sauerstoffverbrauch des Herzmuskels:
+  default: Der Sauerstoffverbrauch des Herzens (HOV) beträgt in einer Minute ca.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Schilddrüsen-Sekretions-Index:
+  default: Schilddrüsenhormone werden die in den Follikelepithelzellen der Schilddrüse (Thyreozyten) gebildeten.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Schlaffheit:
+  default: Da sich das Gewebe zwischen den Zellen mit der Zeit abbaut, verliert die Haut ihre Elastizität.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Schlagvolumen:
+  default: die Menge des Blutvolumens des Herzens bei jedem Schlag.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Schlagvolumen (SV):
+  default: die Menge des Blutvolumens des Herzens bei jedem Schlag.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Schuldig:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Selen:
+  default: In Zusammenarbeit mit Vitamin E wirken beide Stoffe als Antioxidantien und spielen somit eine
+    wichtige Rolle beim Schutz der Zellmembranen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Serumglobin (A/G):
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Silizium:
+  default: Es erhält die Flexibilität und Elastizität des Körpers und sorgt für eine weiche Haut und harte
+    Knochen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Skelett:
+  default: 80% der organischen Knochen bestehen aus Kollagen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Sperma-Motilität:
+  default: Die Motilität der Spermien sollte am besten direkt nach der Verflüssigung des Spermas beurteilt
+    werden.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Sphingolipid-Index:
+  default: Sphingolipide kommen im Allgemeinen in pflanzlichen und tierischen Membranen vor, insbesondere
+    in den Geweben des Zentralnervensystems.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Sphingomyelin-Index:
+  default: Sphingomyelin ist der Hauptbestandteil von tierischen Zellmembranen und verschiedenen anderen
+    biologischen Membranen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Status der Blutversorgung des Hirngewebes:
+  default: Die Blutversorgung des Hirngewebes hängt hauptsächlich von der Hirnarterie oder der Halsschlagader,
+    die zum Gehirn führt ab.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Stimmungsindex:
+  default: Sentiment (Stimmung) ist die Erfahrung der Haltung gegenüber objektiver Dinge, und die Reflektion,
+    ob die Bedürfnisse des Menschen erfüllt sind.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Stolz:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Strontium:
+  default: Strontium ist ein lebenswichtiges Element im menschlichen Körper, welches Wachstum und Entwicklung
+    von Knochen fördert.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+TSH Basal:
+  default: TSH ist ein von der Hirnanhangsdrüse freigesetztes Hormon, das die Schilddrüse stimuliert.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Testosteron:
+  default: Testosteron ist das wichtigste männliche Hormon (Androgen), das in den Hoden gebildet wird.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Thallium:
+  default: Thallium ist ein starkes Nervengift das auch über die Haut und den Atem aufgenommen wird.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Threonin:
+  default: Neben der Produktion von Antikörpern und Immunglobulin, was für das Immunsystem äußerst wichtig
+    ist, hat das Threonin ebenso Einwirkungen auf den Fetthaushalt wie das bereits beschriebene Methionin.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Thymusdrüsen-Index:
+  default: Der Thymus (Bries) liegt hinter dem Brustbein über dem Herzbeutel (Perikard).
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Thymusdrüsen-Sekretions-Index:
+  default: Der Thymus ist ein lymphoides Organ mit endokriner Funktion.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Thyreoglobulin:
+  default: Thyreoglobulin (TG) ist ein Eiweiß, das in der Schilddrüse gebildet wird.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Tierhaar-Allergie-Index:
+  default: Tierhaare können nach Kontakt mit der Haut zu Allergien führen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Tolerant:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Totale Lungenkapazität TLC:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Traurig:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Triglycerid (TG):
+  default: Im medizinischen Bereich werden bei der Erstellung einer Blutanalyse die Triglyceridwerte im
+    Blut gemessen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Triglyceridindex:
+  default: Triglyceride sind Fettmoleküle, die aus langkettigen Fettsäuren und Glycerin gebildet werden
+    und die am häufigsten vorkommenden Lipide im menschlichen Körper sind.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Tryptophan:
+  default: Tryptophan ist zuständig für die Ausschüttung des Botenstoffes Serotonin in der Zirbeldrüse
+    (Epiphyse).
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Tränensäcke:
+  default: Tränensäcke unter den Augen bilden sich durch die Haut des unteren Augenlids, die Unterhaut,
+    Muskeln und des Septum orbitale.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Ungesättigter Fettsäureindex:
+  default: Ungesättigte Fettsäure ist eine Art Fettsäure, die Körperfett ausmacht und für den menschlichen
+    Körper unverzichtbar ist.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Urinzucker-Koeffizient:
+  default: Der Harnzuckerwert bezieht sich auf Zucker im Urin, vor allem Glukose im Urin.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Urobilinogen:
+  default: Urubilinogen ist ein beim Abbau des roten Blutfarbstoffs (Hämoglobin) entstehender Stoff, der
+    normalerweise in geringen Mengen im Harn ausgeschieden wird.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Valin:
+  default: 'Wirkt zusammen mit den Aminosäuren Isoleucin und Leucin und verfügt über ähnliche Eigenschaften:
+    Serotoninhemmer und Energielieferant für die Muskelzellen.'
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vanadium:
+  default: Vanadium ist ein lebenswichtiges Element.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Verdauungssystem:
+  default: Der Kollagenmangel verändert den optimalen Bauchinnendruck, wodurch sich die Organe senken
+    können.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Verlangen:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Visuelle Müdigkeit:
+  default: Visuelle Müdigkeit entsteht bei hoher Arbeitsbelastung, langem Studieren oder bei langen Autofahrten,
+    vor allem auch durch Dauernutzung von elektronischenen Geräten mit blauem Licht (Computer und Smartphone).
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vital Kapazität VC:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vitamin A:
+  default: Vitamin A ist Bestandteil des Sehpurpurs im Auge und für das Farbensehen und für die Unterscheidung
+    von hell und dunkel mitverantwortlich.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vitamin B1:
+  default: Nur durch Vitamin B1 kann der Körper die aus der Nahrung gewonnenen Kohlenhydrate verbrennen
+    und in Energie umwandeln.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vitamin B12:
+  default: Vitamin B12 dient der Förderung der hämatopoetischen Funktion des Knochenmarks.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vitamin B2:
+  default: Vitamin B2 ist für den Stoffwechsel von Kohlenhydraten, Fetten und Eiweiß unerlässlich.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vitamin B3:
+  default: Vitamin B3 ist auch als Nikotinsäure und Nikotinamid bekannt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vitamin B6:
+  default: Vitamin B6 hängt mit dem Aminosäure-Stoffwechsel zusammen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vitamin C:
+  default: 'Die wichtigsten Funktionen: Stärkung des Immunsystems, Schutz der Kapillaren, Schutz vor Skorbut
+    und Förderung der Wundheilung.'
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vitamin D3:
+  default: Die wichtigste physiologische Funktion ist die Kalziumaufnahme im Darm zu fördern, in den Knochen
+    die Kalzium-Phosphor Anreicherung zu ermöglichen und Rachitis zu verhindern.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vitamin E:
+  default: Die Hauptaufgabe besteht darin, die innere Struktur der Zellen zu schützen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Vitamin K:
+  default: Vitamin K ist ein wichtiges Vitamin zur Förderung der normalen Blutgerinnung und des Knochenwachstums.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Volumen der Myokardperfusion:
+  default: Damit wird die tatsächliche Blutleistung der koronaren Arteriendurchblutung des Herzens bezeichnet.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Wassermangel:
+  default: Die Anomalie zeigt sich dadurch, dass der Wassergehalt im Körper zu niedrig ist.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Weise:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zeit der Verflüssigung:
+  default: Unmittelbar nach der Ejakulation hat der Samen i.d.R.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zellulärer Immunitätsindex:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zentralgefäß:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zerebrale Arteriosklerose:
+  default: Aufgrund von Atheriosklerose, einer Vielzahl arterieller Entzündungen, Traumata und lokalen
+    Gefäßerkrankungen, die durch andere physikalische Faktoren verursacht wurden, sowie Bluterkrankungen,
+    ist der Widerstand des…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zerebrovaskuläre Sauerstoffsättigung des Blutes (Sa):
+  default: Den Sauerstoffgehalt im Blut bezeichnen die Mediziner auch die Sauerstoffsättigung, kurz SO2.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zerebrovaskulärer Sauerstoffgehalt im Blut Volumen (CaCO2):
+  default: Der Sauerstoffgehalt des Blutes (cO2) wird üblicherweise in der Einheit ml/dl angegeben und
+    entspricht dann dem Gasvolumen Sauerstoff in ml, das in 100 ml Blut enthalten ist.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zerebrovaskulärer Sauerstoffgehalt im Blutdruck(PaO2):
+  default: Der arterielle Sauerstoff-Partialdruck (paO2) ist der Teildruck (Partialdruck) des im Blut
+    gelösten Sauerstoffs als Anteil am Gesamtdruck aller im Blut gelösten Gase.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zink:
+  default: Zink zählt zu den wichtigsten Mineralstoffen überhaupt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zinn:
+  default: Zinn ist ein lebenswichtiges Element und wurde schon ganz früh im menschlichen Körper entdeckt.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zirkulierender Immunkomplex (CIC):
+  default: Bei Antigenüberschuss (oder Antikörperüberschuss) entstehende kleine, noch lösliche Immunkomplexe
+    Übersteigt die Menge der gebildeten Immunkomplexe die Aufnahmefähigkeit der Phagozyten, können Immunkomplexe
+    sich in…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zorn:
+  default: ''
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Zähne:
+  default: Kollagenmangel kann z.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Ödem:
+  default: Als Ödem bezeichnet man den Austritt von Flüssigkeit aus dem Gefäßsystem und dessen Ansammlung
+    im interstitiellen Raum.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+Östrogen:
+  default: Es gibt auch Östrogen bei Männern.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+α-Linolensäure:
+  default: Sobald sie dem Körper fehlt, wird der Lipid-Stoffwechsel des Körpers gehemmt, was zu einer
+    verringerten Immunität, Vergesslichkeit, Müdigkeit, Verlust der Sehkraft, das Auftreten von Arteriosklerose
+    und anderen…
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+γ-Linolensäure:
+  default: γ-Linolensäure ist Strukturmaterial von menschlichen Geweben und biologischen Membranen.
+  unter:
+    leicht: ''
+    mäßig: ''
+    stark: ''
+  über:
+    leicht: ''
+    mäßig: ''
+    stark: ''
