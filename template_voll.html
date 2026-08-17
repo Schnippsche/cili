@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Vollbericht {{PATIENT_NAME}}</title>
+<style>
+  body { font-family: Calibri, Arial, sans-serif; max-width: 1000px; margin: 2em auto; padding: 0 1.5em; color: #222; box-sizing: border-box; }
+  h1 { margin-bottom: 0.2em; }
+  .meta { color: #666; margin-bottom: 1.5em; }
+  .full-section { margin-top: 2.5em; }
+  .full-section h2 { border-bottom: 2px solid #555; padding-bottom: 4px; color: #333; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 0.5em; }
+  th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; }
+  tr.sev-stark td:last-child { color: #d9534f; font-weight: bold; }
+  tr.sev-maessig td:last-child { color: #f0ad4e; font-weight: bold; }
+  tr.sev-leicht td:last-child { color: #5bc0de; font-weight: bold; }
+  tr.sev-normal td:last-child { color: #888; }
+  .full-descriptions { margin-top: 0.8em; }
+  .full-desc { margin: 0.6em 0; }
+  .full-desc h4 { margin: 0 0 0.2em; color: #555; }
+  .full-desc p { margin: 0; }
+  .summary-block { margin-top: 2.5em; }
+  .summary-group { margin: 1em 0; }
+  .summary-group h4 { margin: 0.5em 0 0.3em; color: #555; }
+  .summary-tip { background: #f7f7f0; border-left: 3px solid #cbbf7a; padding: 0.6em 0.8em; margin-top: 0.3em; }
+  @media print {
+    body { padding: 0; margin: 0; max-width: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Vollbericht: {{PATIENT_NAME}}</h1>
+<p class="meta">Testdatum: {{TEST_DATE}} | Auff&auml;llige Werte insgesamt: {{TOTAL}}
+  (stark: {{COUNT_STARK}}, m&auml;&szlig;ig: {{COUNT_MAESSIG}}, leicht: {{COUNT_LEICHT}})</p>
+
+{{SECTIONS}}
+
+{{SUM_BLOCKS}}
+
+<!--
+  Ab hier folgen die Bausteine, aus denen die Platzhalter oben zusammengesetzt
+  werden. Das Skript schneidet diese Bl&ouml;cke heraus, wiederholt sie mit
+  echten Daten und setzt das Ergebnis an der jeweiligen Stelle oben ein.
+  Struktur, CSS-Klassen und Text hier frei anpassen - nur die doppelt
+  geschweiften Platzhalter und die TPL-Marker-Kommentare m&uuml;ssen
+  erhalten bleiben (nicht umbenennen/entfernen).
+
+  SECTIONS (originalgetreu: je K&ouml;rpersystem ALLE Parameter - nicht nur
+  auff&auml;llige -, danach die vollst&auml;ndigen Original-Beschreibungstexte
+  derselben Parameter):
+-->
+
+<!-- TPL:FULLSECTION -->
+<div class="full-section">
+  <h2>{{SECTION_NAME}}</h2>
+  <table>
+    <tr><th>Parameter</th><th>Wert</th><th>Normbereich</th><th>Bewertung</th></tr>
+    {{FULLITEMS}}
+  </table>
+  <div class="full-descriptions">
+    {{FULLDESCS}}
+  </div>
+</div>
+<!-- /TPL:FULLSECTION -->
+
+<!-- TPL:FULLITEM -->
+<tr class="sev-{{SEVERITY_CLASS}}">
+  <td>{{PARAMETER}}</td>
+  <td>{{VALUE}}</td>
+  <td>{{RANGE}}</td>
+  <td>{{LABEL}}</td>
+</tr>
+<!-- /TPL:FULLITEM -->
+
+<!-- TPL:FULLDESC -->
+<div class="full-desc">
+  <h4>{{PARAMETER}}</h4>
+  <p>{{TEXT}}</p>
+</div>
+<!-- /TPL:FULLDESC -->
+
+<!--
+  SUM_BLOCKS (Original-Abschnitt "Zusammenfassender Bericht", verschachtelt:
+  Unterkapitel > K&ouml;rpersystem-Gruppe > Messwert. Der Wellness-Tipp-Text
+  ist 1:1 aus dem Original &uuml;bernommen, patientenspezifisch, nur die am
+  Ende angeh&auml;ngte Produktliste wurde entfernt):
+-->
+
+<!-- TPL:SUMBLOCK -->
+<div class="summary-block">
+  <h2>{{SUM_TITLE}}</h2>
+  {{SUM_GROUPS}}
+</div>
+<!-- /TPL:SUMBLOCK -->
+
+<!-- TPL:SUMGROUP -->
+<div class="summary-group">
+  <h4>{{SUM_SYSTEM}}</h4>
+  <table>
+    <tr><th>Eigenschaft</th><th>Wert</th><th>Normbereich</th></tr>
+    {{SUM_ITEMS}}
+  </table>
+  <p class="summary-tip">{{SUM_TIP}}</p>
+</div>
+<!-- /TPL:SUMGROUP -->
+
+<!-- TPL:SUMITEM -->
+<tr>
+  <td>{{SUM_PARAMETER}}</td>
+  <td>{{SUM_VALUE}}</td>
+  <td>{{SUM_RANGE}}</td>
+</tr>
+<!-- /TPL:SUMITEM -->
+
+</body>
+</html>

@@ -862,10 +862,19 @@ def main():
                      help="Zieldatei für den Fazit-Report (Default: zusammenfassung_<Name>_fazit.html). "
                           "Optisch identisches Template, aber ohne die Einzelwert-Auflistung - nur der "
                           "Zusammenfassungsabschnitt (Original 'Zusammenfassender Bericht' inkl. Wellness-Tipps).")
+    ap.add_argument("--voll-out", default=None,
+                     help="Zieldatei für den Vollbericht (Default: zusammenfassung_<Name>_voll.html). "
+                          "Originalgetreue Struktur: ALLE Parameter je Körpersystem (nicht nur "
+                          "auffällige) mit vollständigem Original-Beschreibungstext, plus derselbe "
+                          "Zusammenfassungsabschnitt wie beim Haupt-/Fazit-Report.")
     ap.add_argument("--template", default="template.html",
                      help="HTML-Vorlage mit {{PLATZHALTER}}n für Layout/Design (Default: template.html). "
                           "Wird beim ersten Lauf automatisch mit einem editierbaren Grundgerüst angelegt, "
                           "falls nicht vorhanden.")
+    ap.add_argument("--template-voll", default="template_voll.html",
+                     help="HTML-Vorlage für den Vollbericht (Default: template_voll.html). "
+                          "Wird beim ersten Lauf automatisch mit einem editierbaren Grundgerüst "
+                          "angelegt, falls nicht vorhanden.")
     ap.add_argument("--texts", default="parameter_texts.yml",
                      help="YAML-Datei mit vordefinierten, abweichungsspezifischen Erklärtexten "
                           "(Default: parameter_texts.yml). Wird beim ersten Lauf automatisch aus "
@@ -876,6 +885,7 @@ def main():
     name_part = safe_filename_part(patient_name)
     html_out = args.html_out or f"zusammenfassung_{name_part}.html"
     fazit_out = args.fazit_out or f"zusammenfassung_{name_part}_fazit.html"
+    voll_out = args.voll_out or f"zusammenfassung_{name_part}_voll.html"
 
     print(f"Patient: {patient_name}  |  Testdatum: {test_date}")
     print(f"Gelesene Parameter gesamt: {len(findings)}")
@@ -917,6 +927,20 @@ def main():
     with open(fazit_out, "w", encoding="utf-8") as f:
         f.write(fazit_report)
     print(f"Fazit-Report gespeichert: {fazit_out}")
+
+    if ensure_template(args.template_voll, DEFAULT_TEMPLATE_VOLL):
+        print(f"Hinweis: '{args.template_voll}' existierte noch nicht und wurde mit einem "
+              "Grundgerüst angelegt. Layout/CSS dort frei anpassen (nur die {{PLATZHALTER}} und "
+              "<!-- TPL:... --> Marker müssen erhalten bleiben).\n")
+
+    with open(args.template_voll, encoding="utf-8") as f:
+        template_voll_str = f.read()
+
+    voll_report = build_full_report_html(template_voll_str, patient_name, test_date, findings,
+                                          summary_blocks, custom_texts)
+    with open(voll_out, "w", encoding="utf-8") as f:
+        f.write(voll_report)
+    print(f"Vollbericht gespeichert: {voll_out}")
 
 
 if __name__ == "__main__":
