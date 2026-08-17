@@ -90,6 +90,18 @@ def resolve_text(f: dict, custom_texts: dict):
     return f["description"]
 
 
+def resolve_full_text(f: dict, custom_texts: dict):
+    """Wie resolve_text(), aber ohne Schweregrad/Richtungs-Verzweigung: liefert den
+    vollständigen (ungekürzten) Original-Beschreibungstext für den Vollbericht, mit
+    optionalem Nutzer-Override 'default_full' aus der YAML. Die Original-Parameter-
+    beschreibung ist generisch und variiert - anders als die kurzen, selbst verfassten
+    über/unter-Texte - nicht nach Ausprägung des Patientenwerts."""
+    entry = custom_texts.get(f["parameter"])
+    if entry and entry.get("default_full"):
+        return entry["default_full"]
+    return f["description_full"]
+
+
 def write_texts_template(findings: list, path: str):
     """Erzeugt/aktualisiert eine YAML-Vorlage mit einem Eintrag pro Parameter,
     vorbefüllt mit dem Originaltext als 'default'. leicht/mäßig/stark je
@@ -101,6 +113,7 @@ def write_texts_template(findings: list, path: str):
             continue
         seen[f["parameter"]] = {
             "default": f["description"] or "",
+            "default_full": f["description_full"] or "",
             "über": {"leicht": "", "mäßig": "", "stark": ""},
             "unter": {"leicht": "", "mäßig": "", "stark": ""},
         }
@@ -451,7 +464,7 @@ def extract_block(template: str, name: str):
     return m.group(1), pattern.sub("", template, count=1)
 
 
-SEVERITY_CLASS = {"+++": "stark", "++": "maessig", "+": "leicht"}
+SEVERITY_CLASS = {"+++": "stark", "++": "maessig", "+": "leicht", "-": "normal"}
 
 DEFAULT_TEMPLATE = """<!DOCTYPE html>
 <html>
