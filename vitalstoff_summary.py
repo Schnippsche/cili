@@ -796,6 +796,55 @@ def build_html_report(template_str: str, patient_name, test_date, abnormal, cust
     })
 
 
+def build_full_report_html(template_str: str, patient_name, test_date, findings, summary_blocks,
+                            custom_texts) -> str:
+    """Originalgetreuer Vollbericht: je Körpersystem ALLE Parameter (nicht nur auffällige) in
+    Original-Reihenfolge, mit vollständigem Original-Beschreibungstext, gefolgt vom selben
+    Zusammenfassungsabschnitt wie build_html_report()."""
+    fulldesc_tpl, template_str = extract_block(template_str, "FULLDESC")
+    fullitem_tpl, template_str = extract_block(template_str, "FULLITEM")
+    fullsection_tpl, template_str = extract_block(template_str, "FULLSECTION")
+    sum_blocks_html, template_str = build_summary_blocks_html(template_str, summary_blocks or [])
+
+    by_section = group_by_section_ordered(findings)
+    section_parts = []
+    for section, items in by_section.items():
+        item_parts = [render(fullitem_tpl, {
+            "PARAMETER": esc(f["parameter"]),
+            "VALUE": f"{f['value']:g}",
+            "RANGE": f"{f['low']:g} - {f['high']:g}",
+            "LABEL": esc(f["label"]),
+            "SEVERITY_CLASS": SEVERITY_CLASS.get(f["symbol"], "normal"),
+        }) for f in items]
+
+        seen_params, desc_parts = set(), []
+        for f in items:
+            if f["parameter"] in seen_params:
+                continue
+            seen_params.add(f["parameter"])
+            desc_parts.append(render(fulldesc_tpl, {
+                "PARAMETER": esc(f["parameter"]),
+                "TEXT": esc(resolve_full_text(f, custom_texts)),
+            }))
+
+        section_parts.append(render(fullsection_tpl, {
+            "SECTION_NAME": esc(section),
+            "FULLITEMS": "".join(item_parts),
+            "FULLDESCS": "".join(desc_parts),
+        }))
+
+    return render(template_str, {
+        "PATIENT_NAME": esc(patient_name),
+        "TEST_DATE": esc(test_date),
+        "TOTAL": sum(1 for f in findings if f["symbol"] != "-"),
+        "COUNT_STARK": sum(1 for f in findings if f["symbol"] == "+++"),
+        "COUNT_MAESSIG": sum(1 for f in findings if f["symbol"] == "++"),
+        "COUNT_LEICHT": sum(1 for f in findings if f["symbol"] == "+"),
+        "SECTIONS": "".join(section_parts),
+        "SUM_BLOCKS": sum_blocks_html,
+    })
+
+
 def safe_filename_part(name: str) -> str:
     """Macht einen Patientennamen dateisystemtauglich (Windows-verbotene
     Zeichen entfernen), für die Verwendung im Ausgabedateinamen."""
