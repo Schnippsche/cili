@@ -392,6 +392,16 @@ def group_by_severity_and_section(abnormal: list) -> dict:
     return result
 
 
+def group_by_section_ordered(findings: list) -> dict:
+    """{section: [findings]} - Sections in der Reihenfolge ihres ersten Auftretens im
+    Original-Bericht, Items je Section in Original-Zeilenreihenfolge (kein
+    Schweregrad-Sort, im Gegensatz zu group_by_severity_and_section)."""
+    result = {}
+    for f in findings:
+        result.setdefault(f["section"], []).append(f)
+    return result
+
+
 def build_text_report(patient_name, test_date, abnormal, custom_texts) -> str:
     lines = [
         f"Patient: {patient_name}  |  Testdatum: {test_date}",
