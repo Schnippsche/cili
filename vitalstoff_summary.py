@@ -369,9 +369,11 @@ def extract_findings(html_path: str):
             pct = 0.0
 
         desc = descriptions.get(norm_key(r["parameter"]))
+        desc_full = re.sub(r"\s+", " ", desc).strip() if desc else None
         findings.append({
             **r, "symbol": symbol, "direction": direction, "label": label,
             "deviation_pct": pct, "description": first_sentence(desc) if desc else None,
+            "description_full": desc_full,
         })
 
     abnormal = [f for f in findings if f["symbol"] not in ("-",)]
