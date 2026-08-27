@@ -139,6 +139,68 @@ class ResourceIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    // --- Recent ---
+
+    @Test
+    void listRecent_returnsResourcesNewestFirst_withFolderName() throws Exception {
+        // testResource + textResource exist from setUp; add a strictly newer one
+        Thread.sleep(10);
+        byte[] data = "newest".getBytes(StandardCharsets.UTF_8);
+        String sn = storageService.store(new ByteArrayInputStream(data), data.length);
+        Resource newest = resourceRepository.save(Resource.builder()
+                .folderId(testFolder.getId()).originalName("newest.txt")
+                .storedName(sn).mimeType("text/plain").size((long) data.length)
+                .uploaderId(adminUser.getId()).storageType(StorageType.LOCAL).build());
+
+        mockMvc.perform(get("/api/resources/recent")
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].resource.id").value(newest.getId()))
+                .andExpect(jsonPath("$[0].resource.originalName").value("newest.txt"))
+                .andExpect(jsonPath("$[0].folderName").value("TestFolder"));
+    }
+
+    @Test
+    void listRecent_respectsLimitParameter() throws Exception {
+        mockMvc.perform(get("/api/resources/recent").param("limit", "1")
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void listRecent_excludesResourcesFromInaccessibleFolders() throws Exception {
+        Folder other = folderRepository.save(
+                Folder.builder().name("Other").createdBy(adminUser.getId()).build());
+        other.setPath("/" + other.getId() + "/");
+        folderRepository.save(other);
+
+        byte[] data = "secret".getBytes(StandardCharsets.UTF_8);
+        String sn = storageService.store(new ByteArrayInputStream(data), data.length);
+        resourceRepository.save(Resource.builder()
+                .folderId(other.getId()).originalName("secret.txt")
+                .storedName(sn).mimeType("text/plain").size(6L)
+                .uploaderId(adminUser.getId()).storageType(StorageType.LOCAL).build());
+
+        mockMvc.perform(get("/api/resources/recent")
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[?(@.resource.originalName == 'secret.txt')]").isEmpty());
+
+        mockMvc.perform(get("/api/resources/recent")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.resource.originalName == 'secret.txt')]").isNotEmpty());
+    }
+
+    @Test
+    void listRecent_unauthenticated_returns401() throws Exception {
+        mockMvc.perform(get("/api/resources/recent"))
+                .andExpect(status().isUnauthorized());
+    }
+
     // --- Get resource ---
 
     @Test

@@ -9,6 +9,9 @@ import de.toengi.cili.repository.*;
 import de.toengi.cili.service.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,15 +35,54 @@ public class ResourceService {
     private final ThumbnailRepository thumbnailRepository;
     private final SubtitleTrackRepository subtitleTrackRepository;
     private final ResourceFavoriteRepository favoriteRepository;
+    private final FolderRepository folderRepository;
+    private final AclService aclService;
     private final StorageService storageService;
     private final FileStorageConfig storageConfig;
     private final ResourceMapper resourceMapper;
+
+    /** Max. Anzahl Einträge, die {@link #listRecent} zurückgibt. */
+    static final int RECENT_MAX_LIMIT = 50;
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasPermission(#folderId, 'FOLDER', 'READ')")
     public List<ResourceDto> listByFolder(Long folderId, Long userId) {
         List<Resource> resources = resourceRepository.findByFolderId(folderId);
         return getResourceDtos(resources);
+    }
+
+    /**
+     * Die zuletzt hochgeladenen Ressourcen über alle für den User lesbaren Ordner hinweg,
+     * neueste zuerst (nach {@code createdAt}). Admins sehen alle Ordner.
+     *
+     * @param limit gewünschte Anzahl; wird auf 1..{@value #RECENT_MAX_LIMIT} begrenzt
+     */
+    @Transactional(readOnly = true)
+    public List<RecentResourceDto> listRecent(int limit, Long userId) {
+        int safeLimit = Math.clamp(limit, 1, RECENT_MAX_LIMIT);
+        Pageable pageable = PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Optional<List<Long>> accessibleFolderIds = aclService.getAccessibleFolderIds(userId);
+        List<Resource> resources;
+        if (accessibleFolderIds.isEmpty()) {
+            resources = resourceRepository.findAllInFolders(pageable).getContent();
+        } else if (accessibleFolderIds.get().equals(List.of(-1L))) {
+            return List.of();
+        } else {
+            resources = resourceRepository.findByFolderIdIn(accessibleFolderIds.get(), pageable).getContent();
+        }
+        if (resources.isEmpty()) {
+            return List.of();
+        }
+
+        List<ResourceDto> dtos = getResourceDtos(resources);
+        List<Long> folderIds = dtos.stream()
+                .map(ResourceDto::folderId).filter(Objects::nonNull).distinct().toList();
+        Map<Long, String> folderNames = folderRepository.findAllById(folderIds).stream()
+                .collect(Collectors.toMap(Folder::getId, Folder::getName));
+        return dtos.stream()
+                .map(d -> new RecentResourceDto(d, folderNames.get(d.folderId())))
+                .toList();
     }
 
     private List<ResourceDto> getResourceDtos(List<Resource> resources) {

@@ -177,6 +177,11 @@ export interface ResourceDto {
   hasAnalyzableSubtitles: boolean;
 }
 
+export interface RecentResourceDto {
+  resource: ResourceDto;
+  folderName: string | null;
+}
+
 export interface UpdateResourceRequest {
   originalName: string;
 }

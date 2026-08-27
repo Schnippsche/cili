@@ -34,6 +34,12 @@ public class ResourceController {
         return resourceService.listByFolder(folderId, user.getUserId());
     }
 
+    @GetMapping("/api/resources/recent")
+    public List<RecentResourceDto> listRecent(@RequestParam(defaultValue = "12") int limit,
+                                              @AuthenticationPrincipal CiliUserDetails user) {
+        return resourceService.listRecent(limit, user.getUserId());
+    }
+
     @PatchMapping("/api/folders/{folderId}/resources/reorder")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void reorder(@PathVariable Long folderId,

@@ -4,6 +4,7 @@ import type {
   AiSummaryDto,
   MetadataDto,
   ProcessingJobDto,
+  RecentResourceDto,
   ResourceDto,
   SubtitleTrackDto,
   UpdateMetadataRequest
@@ -11,6 +12,11 @@ import type {
 
 export async function getResourcesByFolder(folderId: number): Promise<ResourceDto[]> {
   const {data} = await axiosClient.get<ResourceDto[]>(`/folders/${folderId}/resources`);
+  return data;
+}
+
+export async function getRecentResources(limit = 12): Promise<RecentResourceDto[]> {
+  const {data} = await axiosClient.get<RecentResourceDto[]>('/resources/recent', {params: {limit}});
   return data;
 }
 

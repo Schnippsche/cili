@@ -15,13 +15,6 @@ import {
   Tooltip,
   Typography
 } from '@mui/material';
-import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
-import VideoFileOutlinedIcon from '@mui/icons-material/VideoFileOutlined';
-import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
-import AudioFileOutlinedIcon from '@mui/icons-material/AudioFileOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
@@ -35,29 +28,7 @@ import SubtitlePanel from './SubtitlePanel';
 import AnalysisPanel from './AnalysisPanel';
 import SharePanel from './SharePanel';
 import AddToCollectionDialog from './AddToCollectionDialog';
-
-const isVideo = (m: string) => m.startsWith('video/');
-const isAudio = (m: string) => m.startsWith('audio/');
-const isImage = (m: string) => m.startsWith('image/');
-const isText = (m: string) => m.startsWith('text/') || m === 'application/json' || m === 'application/x-subrip';
-const isPdf = (m: string) => m === 'application/pdf';
-const isDocument = (m: string) =>
-    m === 'application/pdf' ||
-    m.startsWith('application/vnd.openxmlformats') ||
-    m.startsWith('application/vnd.ms-') ||
-    m === 'application/msword' ||
-    m.startsWith('application/vnd.oasis.opendocument');
-
-function MimeIcon({mimeType}: Readonly<{ mimeType: string }>) {
-  const sx = {fontSize: 40, color: 'text.disabled'};
-  if (isVideo(mimeType)) return <VideoFileOutlinedIcon sx={sx}/>;
-  if (isAudio(mimeType)) return <AudioFileOutlinedIcon sx={sx}/>;
-  if (isImage(mimeType)) return <ImageOutlinedIcon sx={sx}/>;
-  if (isPdf(mimeType)) return <PictureAsPdfOutlinedIcon sx={sx}/>;
-  if (isDocument(mimeType)) return <DescriptionOutlinedIcon sx={sx}/>;
-  if (isText(mimeType)) return <CodeOutlinedIcon sx={sx}/>;
-  return <InsertDriveFileOutlinedIcon sx={sx}/>;
-}
+import {hasViewer as canView, isAudio, isImage, isVideo, MimeIcon, openResource} from './resourceView';
 
 function FileName({title, originalName}: Readonly<{ title: string | null; originalName: string }>) {
   const extMatch = originalName.match(/(\.[^.]+)$/);
@@ -125,18 +96,10 @@ export default function ResourceCard({
       ? getThumbnailUrl(resource.id, 'small', thumbnailStatus === 'DONE' ? resource.storedName : undefined)
       : null;
   const thumbUrl = useAuthenticatedUrl(thumbSrc, isImage(mimeType) ? 3 : 0);
-  const hasViewer = isVideo(mimeType) || isAudio(mimeType) || isImage(mimeType) || isDocument(mimeType) || isText(mimeType);
-  const canOpen = hasViewer || canDownload;
+  const canOpen = canView(mimeType) || canDownload;
   const isMediaType = isVideo(mimeType) || isAudio(mimeType);
 
-  const handleOpen = () => {
-    if (isVideo(mimeType)) navigate(`/folders/${folderId}?view=${id}&type=video`);
-    else if (isAudio(mimeType)) navigate(`/folders/${folderId}?view=${id}&type=audio`);
-    else if (isImage(mimeType)) navigate(`/folders/${folderId}?view=${id}&type=image`);
-    else if (isDocument(mimeType)) navigate(`/folders/${folderId}?view=${id}&type=pdf`);
-    else if (isText(mimeType)) navigate(`/resources/${id}/edit`);
-    else globalThis.open(getDownloadUrl(id), '_blank');
-  };
+  const handleOpen = () => openResource(navigate, {...resource, folderId: resource.folderId ?? folderId});
 
   return (
       <>

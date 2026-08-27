@@ -10,9 +10,13 @@ import de.toengi.cili.repository.*;
 import de.toengi.cili.service.storage.StorageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -20,6 +24,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,6 +35,8 @@ class ResourceServiceTest {
     @Mock ThumbnailRepository thumbnailRepository;
     @Mock SubtitleTrackRepository subtitleTrackRepository;
     @Mock ResourceFavoriteRepository favoriteRepository;
+    @Mock FolderRepository folderRepository;
+    @Mock AclService aclService;
     @Mock StorageService storageService;
     @Mock FileStorageConfig storageConfig;
     @Mock ResourceMapper resourceMapper;
@@ -50,6 +57,64 @@ class ResourceServiceTest {
         List<ResourceDto> result = resourceService.listByFolder(10L, 1L);
 
         assertThat(result).hasSize(2);
+    }
+
+    // --- listRecent ---
+
+    @Test
+    void listRecent_adminSeesResourcesFromAllFolders_withFolderName() {
+        Resource r1 = resource(1L, 10L);
+        Resource r2 = resource(2L, 10L);
+        when(aclService.getAccessibleFolderIds(1L)).thenReturn(Optional.empty());
+        when(resourceRepository.findAllInFolders(any()))
+                .thenReturn(new PageImpl<>(List.of(r1, r2)));
+        when(resourceMapper.toDto(any(), any(), any(), anyBoolean())).thenReturn(dto(1L), dto(2L));
+        when(folderRepository.findAllById(any())).thenReturn(List.of(folder(10L, "Projekte")));
+
+        List<RecentResourceDto> result = resourceService.listRecent(12, 1L);
+
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(rr -> rr.resource().id()).containsExactly(1L, 2L);
+        assertThat(result).allSatisfy(rr -> assertThat(rr.folderName()).isEqualTo("Projekte"));
+        verify(resourceRepository, never()).findByFolderIdIn(any(), any());
+    }
+
+    @Test
+    void listRecent_restrictedUser_onlyQueriesAccessibleFolders() {
+        when(aclService.getAccessibleFolderIds(7L)).thenReturn(Optional.of(List.of(10L)));
+        when(resourceRepository.findByFolderIdIn(eq(List.of(10L)), any()))
+                .thenReturn(new PageImpl<>(List.of(resource(1L, 10L))));
+        when(resourceMapper.toDto(any(), any(), any(), anyBoolean())).thenReturn(dto(1L));
+        when(folderRepository.findAllById(any())).thenReturn(List.of(folder(10L, "Projekte")));
+
+        List<RecentResourceDto> result = resourceService.listRecent(12, 7L);
+
+        assertThat(result).hasSize(1);
+        verify(resourceRepository, never()).findAllInFolders(any());
+    }
+
+    @Test
+    void listRecent_userWithoutAnyFolderAccess_returnsEmptyList() {
+        when(aclService.getAccessibleFolderIds(7L)).thenReturn(Optional.of(List.of(-1L)));
+
+        List<RecentResourceDto> result = resourceService.listRecent(12, 7L);
+
+        assertThat(result).isEmpty();
+        verify(resourceRepository, never()).findByFolderIdIn(any(), any());
+        verify(resourceRepository, never()).findAllInFolders(any());
+    }
+
+    @Test
+    void listRecent_clampsLimitAndSortsByCreatedAtDescending() {
+        when(aclService.getAccessibleFolderIds(1L)).thenReturn(Optional.empty());
+        when(resourceRepository.findAllInFolders(any())).thenReturn(new PageImpl<>(List.of()));
+
+        resourceService.listRecent(999, 1L);
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(resourceRepository).findAllInFolders(captor.capture());
+        assertThat(captor.getValue().getPageSize()).isEqualTo(50);
+        assertThat(captor.getValue().getSort()).isEqualTo(Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 
     // --- getById ---
@@ -261,6 +326,10 @@ class ResourceServiceTest {
                 .size(100L).uploaderId(99L).storageType(StorageType.LOCAL)
                 .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
                 .build();
+    }
+
+    private Folder folder(Long id, String name) {
+        return Folder.builder().id(id).name(name).createdBy(1L).build();
     }
 
     private ResourceMetadata metadata(Long resourceId) {

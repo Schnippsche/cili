@@ -6,8 +6,9 @@ import AppShell from '../components/layout/AppShell';
 import FolderGrid from '../components/folder/FolderGrid';
 import FolderActions from '../components/folder/FolderActions';
 import ResourceGrid from '../components/resource/ResourceGrid';
+import RecentResourceList from '../components/resource/RecentResourceList';
 import {useFolderChildren} from '../hooks/useFolders';
-import {getResourceFavorites} from '../api/resources';
+import {getRecentResources, getResourceFavorites} from '../api/resources';
 import type {RootState} from '../store/store';
 import type {FolderDto} from '../types/api';
 
@@ -18,11 +19,15 @@ export default function DashboardPage() {
     queryKey: ['resources', 'favorites'],
     queryFn: getResourceFavorites,
   });
+  const {data: recent = [], isLoading: recentLoading} = useQuery({
+    queryKey: ['resources', 'recent'],
+    queryFn: () => getRecentResources(),
+  });
 
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [contextFolder, setContextFolder] = useState<FolderDto | null>(null);
 
-  if (foldersLoading || favLoading) {
+  if (foldersLoading || favLoading || recentLoading) {
     return <AppShell><Box sx={{
       display: 'flex',
       justifyContent: 'center',
@@ -62,7 +67,16 @@ export default function DashboardPage() {
             </>
         )}
 
-        {rootFolders.length === 0 && favorites.length === 0 && (
+        {recent.length > 0 && (
+            <>
+              {(rootFolders.length > 0 || favorites.length > 0) && <Divider sx={{my: 3}}/>}
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>Aktuellste
+                Dateien</Typography>
+              <RecentResourceList items={recent}/>
+            </>
+        )}
+
+        {rootFolders.length === 0 && favorites.length === 0 && recent.length === 0 && (
             <Typography color="text.secondary">Noch keine Ordner. Klicke auf „Neuer Ordner" um zu
               beginnen.</Typography>
         )}
