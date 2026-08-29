@@ -25,9 +25,9 @@ export default defineConfig(({mode}) => {
         },
         includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon.png'],
         manifest: {
-          name: 'CILI',
-          short_name: 'CILI',
-          description: 'CILI Datei- und Medienverwaltung',
+          name: 'Cili Academy',
+          short_name: 'Cili Academy',
+          description: 'Cili Academy von Andrea Meixner',
           start_url: base,
           scope: base,
           display: 'standalone',

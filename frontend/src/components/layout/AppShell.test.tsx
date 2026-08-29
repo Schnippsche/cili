@@ -29,9 +29,9 @@ describe('AppShell', () => {
     expect(screen.getByText('Page Content')).toBeInTheDocument();
   });
 
-  it('renders CILI title in the app bar', () => {
+  it('renders Cili Academy title in the app bar', () => {
     renderShell();
-    expect(screen.getByText('CILI')).toBeInTheDocument();
+    expect(screen.getByText('Cili Academy')).toBeInTheDocument();
   });
 
   it('shows Home and Search nav links in sidebar', () => {
@@ -48,7 +48,7 @@ describe('AppShell', () => {
   it('toggles sidebar on menu icon click without crashing', async () => {
     renderShell();
     await userEvent.click(screen.getByRole('button', {name: /menu/i}));
-    expect(screen.getByText('CILI')).toBeInTheDocument();
+    expect(screen.getByText('Cili Academy')).toBeInTheDocument();
   });
 
   it('starts with sidebar closed on mobile (matchMedia matches)', () => {

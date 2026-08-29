@@ -68,7 +68,7 @@ export default function TopBar({onMenuClick}: Readonly<{ onMenuClick: () => void
             </IconButton>
           </Tooltip>
           <Box sx={{flexGrow: 1, display: 'flex', alignItems: 'baseline', gap: 1}}>
-            <Typography variant="h6">CILI</Typography>
+            <Typography variant="h6">Cili Academy</Typography>
             {versionInfo?.version && (
                 <Typography variant="caption"
                             sx={{opacity: 0.7}}>v{versionInfo.version}</Typography>

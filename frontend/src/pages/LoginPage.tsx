@@ -34,7 +34,7 @@ export default function LoginPage() {
         bgcolor: 'background.default'
       }}>
         <Paper elevation={4} sx={{p: 4, width: '100%', maxWidth: 400}}>
-          <Typography variant="h5" align="center" gutterBottom>CILI</Typography>
+          <Typography variant="h5" align="center" gutterBottom>Cili Academy</Typography>
           <Typography variant="body2" align="center" color="text.secondary" sx={{mb: 2}}>Bitte
             anmelden</Typography>
           {error && <Alert severity="error" sx={{mb: 2}} role="alert">{error}</Alert>}

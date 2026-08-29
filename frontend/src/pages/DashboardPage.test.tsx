@@ -51,9 +51,9 @@ describe('DashboardPage', () => {
     await waitFor(() => expect(screen.getByText('Startseite')).toBeInTheDocument());
   });
 
-  it('renders CILI in the app bar', () => {
+  it('renders Cili Academy in the app bar', () => {
     renderPage();
-    expect(screen.getByText('CILI')).toBeInTheDocument();
+    expect(screen.getByText('Cili Academy')).toBeInTheDocument();
   });
 
   it('shows the most recent resources under a "Aktuellste Dateien" heading', async () => {
