@@ -29,6 +29,7 @@ export interface UserDto {
   phone: string | null;
   active: boolean;
   role: string;
+  lastLoginAt: string | null;
   createdAt: string;
 }
 

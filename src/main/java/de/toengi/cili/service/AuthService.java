@@ -54,6 +54,7 @@ public class AuthService {
                 throw new CiliException("Invalid credentials", HttpStatus.UNAUTHORIZED);
             }
             loginAttemptService.loginSucceeded(clientIp, username);
+            recordLastLogin(userDetails.getUser().getId());
             log.info("Login: user='{}' (id={}) ip={}", userDetails.getUsername(), userDetails.getUser().getId(), clientIp);
             return buildLoginResponse(userDetails);
         } catch (AuthenticationException e) {
@@ -99,6 +100,14 @@ public class AuthService {
             t.setRevokedAt(LocalDateTime.now());
             refreshTokenRepository.save(t);
             log.info("Logout: user='{}' (id={})", t.getUser().getUsername(), t.getUser().getId());
+        });
+    }
+
+    /** Merkt sich den Zeitpunkt des erfolgreichen Logins (Serverzeit) — nur beim echten Login, nicht beim Token-Refresh. */
+    private void recordLastLogin(Long userId) {
+        userRepository.findById(userId).ifPresent(user -> {
+            user.setLastLoginAt(LocalDateTime.now());
+            userRepository.save(user);
         });
     }
 

@@ -12,5 +12,6 @@ public record UserDto(
     String phone,
     boolean active,
     String role,
+    LocalDateTime lastLoginAt,
     LocalDateTime createdAt
 ) {}

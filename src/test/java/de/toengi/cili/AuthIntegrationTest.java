@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -55,6 +56,19 @@ class AuthIntegrationTest {
                 .andExpect(jsonPath("$.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.refreshToken").isNotEmpty())
                 .andExpect(jsonPath("$.user.username").value("testuser"));
+    }
+
+    @Test
+    void login_recordsLastLoginTimestamp() throws Exception {
+        assertThat(userRepository.findByUsername("testuser").orElseThrow().getLastLoginAt()).isNull();
+
+        var request = new LoginRequest("testuser", "password123");
+        mvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        assertThat(userRepository.findByUsername("testuser").orElseThrow().getLastLoginAt()).isNotNull();
     }
 
     @Test

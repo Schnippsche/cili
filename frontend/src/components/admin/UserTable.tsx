@@ -42,6 +42,11 @@ import type {CreateUserRequest, GroupDto, UpdateUserRequest, UserDto} from '../.
 import {useIsMobile} from '../../hooks/useIsMobile';
 import {extractBlobErrorMessage} from '../../utils/blobError';
 
+function formatLastLogin(iso: string | null): string {
+  if (!iso) return '–';
+  return new Date(iso).toLocaleString('de-DE', {dateStyle: 'short', timeStyle: 'short'});
+}
+
 function extractErrorMessage(err: unknown): string {
   if (err && typeof err === 'object' && 'response' in err) {
     const resp = (err as { response?: { data?: { message?: string } } }).response;
@@ -353,12 +358,13 @@ export default function UserTable() {
               <TableRow>
                 <TableCell>Benutzername</TableCell><TableCell>E-Mail</TableCell>
                 <TableCell>Mitglieds-ID</TableCell><TableCell>URL</TableCell><TableCell>Telefon</TableCell>
-                <TableCell>Rolle</TableCell><TableCell>Status</TableCell><TableCell
+                <TableCell>Rolle</TableCell><TableCell>Status</TableCell>
+                <TableCell>Letzter Login</TableCell><TableCell
                   align="right">Aktionen</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {isLoading && <TableRow><TableCell colSpan={8}>Lade…</TableCell></TableRow>}
+              {isLoading && <TableRow><TableCell colSpan={9}>Lade…</TableCell></TableRow>}
               {data?.content.map(u => (
                   <TableRow key={u.id} hover>
                     <TableCell>{u.username}</TableCell>
@@ -370,6 +376,7 @@ export default function UserTable() {
                     <TableCell><Chip label={u.active ? 'Aktiv' : 'Inaktiv'}
                                      color={u.active ? 'success' : 'default'}
                                      size="small"/></TableCell>
+                    <TableCell>{formatLastLogin(u.lastLoginAt)}</TableCell>
                     <TableCell align="right">
                       <Tooltip title="Bearbeiten">
                         <IconButton size="small" onClick={() => setEditUser(u)}>

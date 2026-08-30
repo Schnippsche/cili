@@ -1,4 +1,4 @@
-import {render, screen, waitFor} from '@testing-library/react';
+import {render, screen, waitFor, within} from '@testing-library/react';
 import {Provider} from 'react-redux';
 import {MemoryRouter} from 'react-router-dom';
 import {configureStore} from '@reduxjs/toolkit';
@@ -16,14 +16,28 @@ vi.mocked(adminApi.listUsers).mockResolvedValue({
       username: 'bob',
       email: 'bob@test.com',
       displayName: 'Bob',
+      memberId: 42,
+      url: 'https://bob.example',
+      phone: '0123',
+      active: true,
+      role: 'USER',
+      lastLoginAt: null,
+      createdAt: ''
+    },
+    {
+      id: 3,
+      username: 'carol',
+      email: 'carol@test.com',
+      displayName: 'Carol',
       memberId: null,
       url: null,
       phone: null,
       active: true,
       role: 'USER',
+      lastLoginAt: '2026-08-29T14:30:00',
       createdAt: ''
     }
-  ], page: 0, size: 20, totalElements: 1, totalPages: 1
+  ], page: 0, size: 20, totalElements: 2, totalPages: 1
 });
 
 function renderPage() {
@@ -52,5 +66,14 @@ describe('UsersPage', () => {
   it('shows loaded users', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('bob')).toBeInTheDocument());
+  });
+
+  it('shows last login date, or a dash when the user never logged in', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByText('carol')).toBeInTheDocument());
+    const bobRow = screen.getByText('bob').closest('tr')!;
+    const carolRow = screen.getByText('carol').closest('tr')!;
+    expect(within(bobRow).getByText('–')).toBeInTheDocument();
+    expect(within(carolRow).getByText(/29\.08\.26,?\s+14:30/)).toBeInTheDocument();
   });
 });
