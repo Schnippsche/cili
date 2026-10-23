@@ -248,6 +248,41 @@ def _pp_progress_hook(d: dict) -> None:
         print(f"FFmpeg: {label} fehlgeschlagen", flush=True)
 
 
+def _make_download_progress_hook(step_percent: int = 10, min_interval_s: float = 30.0):
+    """Gedrosselter Download-Fortschritt statt yt-dlps Fortschrittsbalken.
+
+    yt-dlps eigene Ausgabe erzeugt pro Fragment eine Zeile (\\r wird im Server-Log
+    zum Zeilenumbruch) — hier nur alle step_percent Prozent bzw. min_interval_s Sekunden."""
+    state = {"last_bucket": -1, "last_time": 0.0}
+
+    def hook(d: dict) -> None:
+        status = d.get("status")
+        if status == "finished":
+            size = d.get("total_bytes") or d.get("downloaded_bytes") or 0
+            print(f"  Download fertig ({size // 1024 // 1024} MB)", flush=True)
+            state["last_bucket"], state["last_time"] = -1, 0.0
+            return
+        if status != "downloading":
+            return
+        total = d.get("total_bytes") or d.get("total_bytes_estimate")
+        downloaded = d.get("downloaded_bytes") or 0
+        now = time.monotonic()
+        bucket = int(downloaded * 100 / total) // step_percent if total else -1
+        if bucket <= state["last_bucket"] and now - state["last_time"] < min_interval_s:
+            return
+        state["last_bucket"] = max(bucket, state["last_bucket"])
+        state["last_time"] = now
+        speed = d.get("speed")
+        speed_txt = f" @ {speed / 1024 / 1024:.1f} MiB/s" if speed else ""
+        if total:
+            print(f"  Download: {downloaded * 100 / total:.0f}% von "
+                  f"{total // 1024 // 1024} MB{speed_txt}", flush=True)
+        else:
+            print(f"  Download: {downloaded // 1024 // 1024} MB{speed_txt}", flush=True)
+
+    return hook
+
+
 def _locate_downloaded_file(ydl, info: dict, tmp_dir: Path) -> Path:
     """Ermittelt die von yt-dlp geschriebene Datei (mit Glob-Fallback)."""
     tmp_file = Path(ydl.prepare_filename(info))
@@ -324,6 +359,9 @@ def download_and_upload(
             "extractor_retries": 5,
             "quiet": True,
             "no_warnings": True,
+            # yt-dlps Fortschrittsbalken ausschalten (sonst eine Log-Zeile pro Fragment)
+            "noprogress": True,
+            "progress_hooks": [_make_download_progress_hook()],
             "postprocessor_hooks": [_pp_progress_hook],
             # JS-Challenge-Solver aktivieren, wenn Deno vorhanden ist → volle Formate
             # auch mit Cookies / Web-Client. Ohne Deno werden die Optionen weggelassen.
