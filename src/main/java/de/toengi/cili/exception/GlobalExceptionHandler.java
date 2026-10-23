@@ -1,9 +1,13 @@
 package de.toengi.cili.exception;
 
 import de.toengi.cili.dto.common.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.InvalidMediaTypeException;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
@@ -57,16 +61,43 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
-        log.warn("Method not supported: {} {}", ex.getMethod(), ex.getMessage());
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(ErrorResponse.of(405, "Method Not Allowed", ex.getMessage()));
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex,
+                                                                  HttpServletRequest request) {
+        log.warn("Method not supported: {} {} (Accept: {}, UA: {})", ex.getMethod(), request.getRequestURI(),
+                request.getHeader(HttpHeaders.ACCEPT), request.getHeader(HttpHeaders.USER_AGENT));
+        return errorResponse(request, HttpStatus.METHOD_NOT_ALLOWED,
+                ErrorResponse.of(405, "Method Not Allowed", ex.getMessage()));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ErrorResponse.of(404, "Not Found", ex.getMessage()));
+    public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException ex, HttpServletRequest request) {
+        return errorResponse(request, HttpStatus.NOT_FOUND, ErrorResponse.of(404, "Not Found", ex.getMessage()));
+    }
+
+    /**
+     * Liefert den JSON-Body nur, wenn der Client JSON akzeptiert. Sonst (z.B. Bots oder
+     * Browser-Formulare mit Accept: text/html) scheitert die Serialisierung mit
+     * HttpMediaTypeNotAcceptableException und erzeugt einen Stacktrace im Log.
+     */
+    private ResponseEntity<ErrorResponse> errorResponse(HttpServletRequest request, HttpStatus status,
+                                                        ErrorResponse body) {
+        if (acceptsJson(request)) {
+            return ResponseEntity.status(status).body(body);
+        }
+        return ResponseEntity.status(status).build();
+    }
+
+    private static boolean acceptsJson(HttpServletRequest request) {
+        String accept = request.getHeader(HttpHeaders.ACCEPT);
+        if (accept == null || accept.isBlank()) {
+            return true;
+        }
+        try {
+            return MediaType.parseMediaTypes(accept).stream()
+                    .anyMatch(mt -> mt.isCompatibleWith(MediaType.APPLICATION_JSON));
+        } catch (InvalidMediaTypeException e) {
+            return false;
+        }
     }
 
     @ExceptionHandler({ClientAbortException.class, AsyncRequestNotUsableException.class})
