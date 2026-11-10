@@ -181,6 +181,45 @@ public class ThumbnailService {
         }
     }
 
+    /**
+     * Setzt ein manuell hochgeladenes Vorschaubild (z. B. Instagram-Cover zu einem Video)
+     * als Thumbnail der Ressource und ersetzt ein vorhandenes (z. B. FFmpeg-Frame).
+     * Die Datei wird wie bei automatisch erzeugten Thumbnails auf small/large skaliert.
+     *
+     * @throws IllegalArgumentException wenn die Daten kein dekodierbares Bild sind
+     */
+    @PreAuthorize("hasPermission(#resourceId, 'RESOURCE', 'WRITE')")
+    public void setCustomThumbnail(Long resourceId, byte[] imageBytes) throws IOException {
+        if (!resourceRepository.existsById(resourceId)) {
+            throw new ResourceNotFoundException("Resource", resourceId);
+        }
+        BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageBytes));
+        if (img == null) {
+            throw new IllegalArgumentException("Datei ist kein unterstütztes Bild (JPEG/PNG/GIF)");
+        }
+        Optional<Thumbnail> old = thumbnailRepository.findByResourceId(resourceId);
+        String oldSmall = old.map(Thumbnail::getSmallPath).orElse(null);
+        String oldLarge = old.map(Thumbnail::getLargePath).orElse(null);
+
+        Thumbnail thumbnail = initThumbnail(resourceId);
+        if (thumbnail == null) {
+            throw new IOException("Thumbnail-Datensatz konnte nicht angelegt werden");
+        }
+        writeAllSizes(img, thumbnail);
+        log.info("[THUMBNAIL] Custom thumbnail gesetzt für resource {}", resourceId);
+
+        Path base = Paths.get(config.getBasePath());
+        for (String rel : new String[]{oldSmall, oldLarge}) {
+            if (rel != null) {
+                try {
+                    Files.deleteIfExists(base.resolve(rel));
+                } catch (IOException e) {
+                    log.warn("[THUMBNAIL] Altes Thumbnail nicht löschbar: {} ({})", rel, e.getMessage());
+                }
+            }
+        }
+    }
+
     private void processImageThumbnail(Long resourceId) {
         log.info("[THUMBNAIL] processImageThumbnail started for resource {}", resourceId);
         Resource resource = resourceRepository.findById(resourceId).orElse(null);

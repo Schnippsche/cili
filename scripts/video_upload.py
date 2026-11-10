@@ -159,7 +159,8 @@ def _validate_target(folder_id: int | None, testimonial_id: int | None) -> None:
 
 def upload_file(filepath: Path, *, token: str, cili_url: str,
                 folder_id: int | None = None, testimonial_id: int | None = None,
-                chunk_size: int = CHUNK_SIZE, pin_to_top: bool = False) -> dict:
+                chunk_size: int = CHUNK_SIZE, pin_to_top: bool = False,
+                file_last_modified: int | None = None) -> dict:
     """Lädt eine lokale Datei über die CILI Chunked-Upload-API hoch — entweder
     in einen Ordner (folder_id) oder als Testimonial-Anhang (testimonial_id)."""
     _validate_target(folder_id, testimonial_id)
@@ -185,6 +186,8 @@ def upload_file(filepath: Path, *, token: str, cili_url: str,
                 "chunkSize": chunk_size,
                 **({"folderId": folder_id} if folder_id is not None else {}),
                 **({"testimonialId": testimonial_id} if testimonial_id is not None else {}),
+                # Originaldatum (epoch ms) → CILI setzt damit das Datum der Ressource
+                **({"fileLastModified": file_last_modified} if file_last_modified is not None else {}),
             },
             headers=headers,
             timeout=30,
@@ -255,11 +258,24 @@ def _make_download_progress_hook(step_percent: int = 10, min_interval_s: float =
     zum Zeilenumbruch) — hier nur alle step_percent Prozent bzw. min_interval_s Sekunden."""
     state = {"last_bucket": -1, "last_time": 0.0}
 
+    def stream_label(d: dict) -> str:
+        info = d.get("info_dict") or {}
+        has_video = info.get("vcodec") not in (None, "none")
+        has_audio = info.get("acodec") not in (None, "none")
+        if has_video and has_audio:
+            return "Video+Audio"
+        if has_video:
+            return "Video"
+        if has_audio:
+            return "Audio"
+        return "Download"
+
     def hook(d: dict) -> None:
         status = d.get("status")
+        label = stream_label(d)
         if status == "finished":
             size = d.get("total_bytes") or d.get("downloaded_bytes") or 0
-            print(f"  Download fertig ({size // 1024 // 1024} MB)", flush=True)
+            print(f"  {label} fertig ({size // 1024 // 1024} MB)", flush=True)
             state["last_bucket"], state["last_time"] = -1, 0.0
             return
         if status != "downloading":
@@ -275,10 +291,10 @@ def _make_download_progress_hook(step_percent: int = 10, min_interval_s: float =
         speed = d.get("speed")
         speed_txt = f" @ {speed / 1024 / 1024:.1f} MiB/s" if speed else ""
         if total:
-            print(f"  Download: {downloaded * 100 / total:.0f}% von "
+            print(f"  {label}: {downloaded * 100 / total:.0f}% von "
                   f"{total // 1024 // 1024} MB{speed_txt}", flush=True)
         else:
-            print(f"  Download: {downloaded // 1024 // 1024} MB{speed_txt}", flush=True)
+            print(f"  {label}: {downloaded // 1024 // 1024} MB{speed_txt}", flush=True)
 
     return hook
 

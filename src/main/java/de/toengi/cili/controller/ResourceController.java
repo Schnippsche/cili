@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -81,7 +82,7 @@ public class ResourceController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         ContentDisposition.attachment()
-                                .filename(resource.getOriginalName())
+                                .filename(resource.getOriginalName(), StandardCharsets.UTF_8)
                                 .build().toString())
                 .contentType(MediaType.parseMediaType(resource.getMimeType()))
                 .contentLength(resource.getSize())

@@ -17,7 +17,10 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
             "r.size, r.checksum, r.uploader_id, r.storage_type, r.file_date, r.sort_order, r.created_at, r.updated_at";
 
     @Query("SELECT r FROM Resource r WHERE r.folderId = :folderId " +
-           "ORDER BY CASE WHEN r.sortOrder IS NULL THEN 1 ELSE 0 END, r.sortOrder ASC, r.createdAt ASC")
+           "ORDER BY CASE WHEN r.sortOrder IS NULL THEN 1 ELSE 0 END, r.sortOrder ASC, " +
+           // Ohne manuelle Sortierung: neueste zuerst nach Dateidatum (Fallback Upload-Zeitpunkt);
+           // id ASC hält Dateien mit gleichem Datum (z. B. Karussell-Bilder) in Upload-Reihenfolge
+           "COALESCE(r.fileDate, r.createdAt) DESC, r.id ASC")
     List<Resource> findByFolderId(@Param("folderId") Long folderId);
 
     List<Resource> findByTestimonialIdOrderByCreatedAtAsc(Long testimonialId);

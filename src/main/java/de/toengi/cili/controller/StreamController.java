@@ -8,10 +8,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
@@ -48,6 +51,19 @@ public class StreamController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "max-age=604800")
                 .body(bytes);
+    }
+
+    @PutMapping(value = "/api/resources/{id}/thumbnail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setThumbnail(@PathVariable Long id,
+                             @RequestParam("file") MultipartFile file,
+                             @AuthenticationPrincipal CiliUserDetails user) throws IOException {
+        try {
+            thumbnailService.setCustomThumbnail(id, file.getBytes());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+        log.info("[user:{}] Vorschaubild gesetzt: id={}", user.getUsername(), id);
     }
 
     @GetMapping("/api/resources/{id}/preview")
