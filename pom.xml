@@ -10,7 +10,7 @@
     </parent>
     <groupId>de.toengi</groupId>
     <artifactId>cili</artifactId>
-    <version>1.24</version>
+    <version>1.25</version>
     <packaging>war</packaging>
     <name>cili</name>
     <description>cili</description>
@@ -132,6 +132,12 @@
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
             <version>3.0.8</version>
+        </dependency>
+        <!-- JPEG2000 (JPX) Support für PDFBox: eingebettete JPX-Bilder in PDFs sonst nicht renderbar -->
+        <dependency>
+            <groupId>com.github.jai-imageio</groupId>
+            <artifactId>jai-imageio-jpeg2000</artifactId>
+            <version>1.4.0</version>
         </dependency>
 
         <!-- Spring Boot Actuator -->
