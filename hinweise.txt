@@ -576,7 +576,7 @@ Tomcat Port:            8080
 MySQL Port:             3306 (nur lokal)
 
 Intern erreichbar unter:
-  HTTP: http://192.168.178.110
+  HTTP: http://192.168.178.155
   HTTP: http://cili.local
   HTTP: http://cili
 
@@ -595,3 +595,11 @@ Extern erreichbar unter:
 
     Cloudflare:
     - SSL/TLS-Modus: Full (nicht Flexible, nicht Full strict)
+ ---------------------------
+ Schriftarten installieren:
+ apt install fonts-liberation2 fonts-dejavu-core fonts-crosextra-carlito fonts-crosextra-caladea fonts-noto-core fonts-noto-cjk fonts-noto-color-emoji
+ fc-cache -f
+ Kontrolle:
+ fc-list | wc -l          # Anzahl installierter Schriften
+ fc-match "Calibri"       # sollte Carlito liefern
+ fc-match "Arial"         # sollte Liberation Sans liefern

@@ -139,6 +139,12 @@
             <artifactId>jai-imageio-jpeg2000</artifactId>
             <version>1.4.0</version>
         </dependency>
+        <!-- JBIG2 Support für PDFBox: gescannte S/W-PDFs -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>jbig2-imageio</artifactId>
+            <version>3.0.4</version>
+        </dependency>
 
         <!-- Spring Boot Actuator -->
 
